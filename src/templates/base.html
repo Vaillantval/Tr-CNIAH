@@ -1,0 +1,94 @@
+{% comment %} src\templates\base.html {% endcomment %}
+
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}CNIAH - Collège National des Ingénieurs et Architectes Haïtiens{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"/>
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+    
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class", 
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: "oklch(37.9% 0.146 265.522)",
+                            50: "oklch(95% 0.03 265.522)",
+                            100: "oklch(90% 0.05 265.522)",
+                            200: "oklch(80% 0.08 265.522)",
+                            300: "oklch(70% 0.10 265.522)",
+                            400: "oklch(55% 0.12 265.522)",
+                            500: "oklch(37.9% 0.146 265.522)",
+                            600: "oklch(32% 0.15 265.522)",
+                            700: "oklch(27% 0.14 265.522)",
+                            800: "oklch(22% 0.12 265.522)",
+                            900: "oklch(17% 0.10 265.522)",
+                        },
+                        "background-light": "#f8f9fb", 
+                        "background-dark": "#0f0e13"
+                    }, 
+                    fontFamily: {
+                        display: "Space Grotesk"
+                    }, 
+                    borderRadius: {
+                        DEFAULT: "0.5rem", 
+                        lg: "1rem", 
+                        xl: "1.5rem", 
+                        full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-[#121117] dark:text-white">
+    <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+        <!-- Header -->
+        {% include 'components/header.html' %}
+        
+        <!-- Messages Flash -->
+        {% if messages %}
+        <div class="container mx-auto px-4 mt-4">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg mb-2 {% if message.tags == 'success' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200{% else %}bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Main Content -->
+        <main class="flex-grow">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <!-- Footer -->
+        {% include 'components/footer.html' %}
+    </div>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

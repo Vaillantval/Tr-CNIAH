@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src\templates\pages\public\index.html {% endcomment %}
+{% block title %}Au service du public - CNIAH{% endblock %}
+
+{% block content %}
+<main class="flex flex-1 justify-center py-5 sm:py-10 px-4 sm:px-10">
+    <div class="layout-content-container flex flex-col w-full max-w-6xl flex-1">
+        <div class="flex flex-wrap justify-between gap-3 p-4">
+            <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">
+                Au service du public
+            </h1>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8 mt-6">
+            <div class="flex-grow lg:w-2/3">
+                <div class="flex flex-col p-4 gap-3">
+                    <details class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-[15px] py-[7px] group" open>
+                        <summary class="flex cursor-pointer items-center justify-between gap-6 py-2">
+                            <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">
+                                Pourquoi engager un Ingénieur ?
+                            </p>
+                            <span class="material-symbols-outlined text-gray-800 dark:text-gray-300 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+                        </summary>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal pb-2 pt-1">
+                            Au sein d'un cabinet d'études, d'un cabinet d'architecte ou d'une entreprise de construction, l'ingénieur est un professionnel chargé d'effectuer des études préalablement à la conclusion du contrat de construction. Son rôle est donc primordial pour son employeur, puisque c'est à partir de ses études qu'il saura si oui ou non un projet est réalisable. 
+                        </p>
+                    </details>
+
+                    <details class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-[15px] py-[7px] group">
+                        <summary class="flex cursor-pointer items-center justify-between gap-6 py-2">
+                            <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">
+                                Pourquoi engager un Architecte ?
+                            </p>
+                            <span class="material-symbols-outlined text-gray-800 dark:text-gray-300 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+                        </summary>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal pb-2 pt-1">
+                            Parce que vous avez votre façon de vivre et vos goûts personnels. Le rôle de l’architecte est avant tout de vous écouter ; à partir de vos besoins, de vos goûts, de votre mode de vie, de l’évolution possible de votre famille, l’architecte vous aide à définir votre projet : disposition des lieux, utilisation judicieuse des surfaces, organisation des volumes intérieurs, aspect extérieur.
+                        </p>
+                    </details>
+
+                    <details class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-[15px] py-[7px] group">
+                        <summary class="flex cursor-pointer items-center justify-between gap-6 py-2">
+                            <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">
+                                Le CNIAH, pourquoi ?
+                            </p>
+                            <span class="material-symbols-outlined text-gray-800 dark:text-gray-300 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+                        </summary>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal pb-2 pt-1">
+                            Le CNIAH a pour mission première de promouvoir et réguler, d'assurer la qualité des services et ouvrages bâtis au service de la population. Crée par Décret-loi en date du 25 mars 1974, regroupe les professionnels qui ont l’autorisation légale d’exercer dans les diverses branches du Génie et de l’Architecture en Haïti suivant les modalités au Décret-loi.
+                        </p>
+                    </details>
+                </div>
+            </div>
+
+            <div class="flex-shrink-0 lg:w-1/3">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 sticky top-24">
+                    <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-1">
+                        Trouvez le professionnel
+                    </h2>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-6">
+                        Dites nous ce que vous recherchez et nous vous ferons nos recommandations en vous faisant parvenir une liste de professionnels qualifié pour le travail.
+                    </p>
+
+                    <form method="POST" action="{% url 'contact:professional_request' %}" class="flex flex-col gap-4">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom</label>
+                            <input class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary text-sm" 
+                                   name="name" placeholder="Votre nom" type="text" required/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                            <input class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary text-sm" 
+                                   name="email" placeholder="votre.email@example.com" type="email" required/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type de professionnel</label>
+                            <select class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary text-sm" 
+                                    name="professional_type" required>
+                                <option value="">Sélectionnez...</option>
+                                <option value="engineer">Ingénieur</option>
+                                <option value="architect">Architecte</option>
+                                <option value="both">Les deux</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description du projet</label>
+                            <textarea class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary text-sm" 
+                                      name="description" placeholder="Décrivez brièvement..." rows="4" required></textarea>
+                        </div>
+                        <button class="w-full rounded-lg bg-primary px-4 py-2 text-white text-sm font-bold hover:bg-primary/90" type="submit">
+                            Soumettre
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,460 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Le CNIAH - À Propos{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-64 lg:flex-shrink-0">
+            <div class="sticky top-24">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                    <div class="flex items-center gap-3 px-3 mb-4">
+                        <div class="bg-primary/20 rounded-full size-10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary">account_balance</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <h2 class="text-gray-900 dark:text-white text-base font-medium leading-normal">Le CNIAH</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Navigation</p>
+                        </div>
+                    </div>
+                    <nav class="flex flex-col gap-1">
+                        <a href="#historique" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="material-symbols-outlined text-gray-700 dark:text-gray-300 text-xl">history</span>
+                            <p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Historique</p>
+                        </a>
+                        <a href="#mission" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="material-symbols-outlined text-gray-700 dark:text-gray-300 text-xl">flag</span>
+                            <p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Mission</p>
+                        </a>
+                        <a href="#comite" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="material-symbols-outlined text-gray-700 dark:text-gray-300 text-xl">groups</span>
+                            <p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Comité de Direction</p>
+                        </a>
+                        <a href="#commission" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="material-symbols-outlined text-gray-700 dark:text-gray-300 text-xl">account_balance</span>
+                            <p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Commission d'Apurement</p>
+                        </a>
+                        <a href="#conseil" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="material-symbols-outlined text-gray-700 dark:text-gray-300 text-xl">gavel</span>
+                            <p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Conseil de Discipline</p>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 min-w-0">
+            <!-- Breadcrumbs -->
+            <div class="flex flex-wrap items-center gap-2 mb-6">
+                <a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary" href="{% url 'core:home' %}">Accueil</a>
+                <span class="text-gray-400 dark:text-gray-500 text-sm font-medium leading-normal">/</span>
+                <span class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Le CNIAH</span>
+            </div>
+
+            <!-- Page Heading -->
+            <div class="mb-10">
+                <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] mb-3">
+                    Le Collège National des Ingénieurs et Architectes Haïtiens
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">
+                    Découvrez notre histoire, notre mission et notre organisation.
+                </p>
+            </div>
+
+            <!-- Section: Historique -->
+            <section class="scroll-mt-24 mb-12" id="historique">
+                <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 border-b border-gray-200 dark:border-gray-800 mb-6">
+                    Historique du CNIAH
+                </h2>
+                
+                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 mb-6">
+                    <p>
+                        Le Collège National des Ingénieurs et Architectes Haïtiens, créé par <strong>Décret-loi en date du 25 mars 1974</strong>, regroupe les professionnels qui ont l'autorisation légale d'exercer dans les diverses branches du Génie et de l'Architecture en Haïti suivant les modalités au Décret-loi, Chapitre 2, Articles 5 à 8.
+                    </p>
+                    <p>
+                        Vu le vote des Assemblées Générales en date des 7-14-28 Novembre 1976, 1er Décembre 1976, 13 et 20 Janvier 1977. Considérant qu'en vue d'une meilleure organisation du Corps Professionnel des Ingénieurs et Architectes Haïtiens, d'une protection plus efficace des intérêts des membres de ce Corps, d'un contrôle plus averti de leurs activités, d'un rendement de celles-ci plus profitable à la collectivité, il convient de doter ce Collège National de l'autorité, des moyens et des pouvoirs nécessaires à ces fins; conformément à l'esprit et aux textes de Décret-loi Présidentiel du 25 mars 1974.
+                    </p>
+                    <p>
+                        Sur le rapport de la Commission élue le 7 mars 1976 chargée d'élaborer les statuts du Collège National et après discussion du Projet soumis.
+                    </p>
+                </div>
+
+                <!-- Documents à télécharger -->
+                {% if documents_historiques %}
+                <div class="flex flex-wrap gap-4 mb-6">
+                    {% for doc in documents_historiques %}
+                    <a href="{{ doc.fichier.url }}" download 
+                       class="inline-flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">
+                        <span class="material-symbols-outlined text-base">picture_as_pdf</span>
+                        <span>{{ doc.nom }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </section>
+
+            <!-- Section: Mission -->
+            <section class="scroll-mt-24 mb-12" id="mission">
+                <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 border-b border-gray-200 dark:border-gray-800 mb-6">
+                    Mission du CNIAH
+                </h2>
+                
+                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 mb-6">
+                    <p>
+                        Le C.N.I.A.H. a pour obligation d'organiser l'exercice de la profession et veiller aux intérêts professionnels de ses membres et particulièrement rehausser et donner un maximum de prestige aux catégories professionnelles groupées en son sein en faisant en sorte qu'elles soient exercées avec dignité et efficience et dans le respect des dispositions légales en la matière.
+                    </p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                        Le C.N.I.A.H. regroupe les professionnels des différentes catégories du génie et de l'Architecture exerçant leur profession en Haïti tel que:
+                    </p>
+                </div>
+
+                <!-- Grille des professions -->
+                {% comment %} <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for profession in "Architectes,Urbanistes,Ingénieurs Civils,Ingénieurs Électriciens,Ingénieurs Mécaniciens,Ingénieurs Géologues,Ingénieurs Chimistes,Ingénieurs Civils des Mines"|split:"," %}
+                    <div class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                        <div class="bg-primary/10 rounded-full size-12 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-primary">engineering</span>
+                        </div>
+                        <p class="text-gray-800 dark:text-gray-200 font-medium">{{ profession }}</p>
+                    </div>
+                    {% endfor %}
+                </div> {% endcomment %}
+            </section>
+
+            <!-- Section: Comité de Direction -->
+            <section class="scroll-mt-24 mb-12" id="comite">
+                <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 border-b border-gray-200 dark:border-gray-800 mb-6">
+                    Comité de Direction
+                </h2>
+
+                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 mb-6">
+                    <p>
+                        Conformément à l'article 14 Chapitre 6 du Décret-loi du 25 mars 1974 le Comité de Direction est formé de 9 membres élus au scrutin secret par l'Assemblée Générale érigée en Assemblée Extraordinaire. Le Comité de Direction comprend un Président, un Vice-président, un Secrétaire, un Trésorier et Cinq Conseillers.
+                    </p>
+                    <p>
+                        Le Comité de Direction administre les intérêts du C.N.I.A.H. et le représente en tout et partout. Les décisions du comité seront prises à la majorité absolue de ses membres.
+                    </p>
+                </div>
+
+                {% for comite in comites %}
+                <details class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden" {% if comite.actif %}open{% endif %}>
+                    <summary class="flex items-center justify-between p-5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary text-2xl">groups</span>
+                            <div>
+                                <h3 class="text-gray-900 dark:text-white font-bold text-lg">
+                                    Comité de Direction {{ comite.annee_debut }}-{{ comite.annee_fin }}
+                                </h3>
+                                {% if comite.actif %}
+                                <span class="inline-block mt-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs font-semibold rounded-full">
+                                    Comité Actuel
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-gray-400 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+                    </summary>
+                    
+                    <div class="p-5 pt-0">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {% for membre in comite.membres_list %}
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-hidden">
+                                {% if membre.photo %}
+                                <div class="aspect-square bg-gray-200 dark:bg-gray-600">
+                                    <img src="{{ membre.photo.url }}" alt="{{ membre.prenom }} {{ membre.nom }}" 
+                                         class="w-full h-full object-cover">
+                                </div>
+                                {% else %}
+                                <div class="aspect-square bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-gray-400 text-6xl">person</span>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="p-4">
+                                    <h4 class="text-gray-900 dark:text-white font-bold text-lg mb-1">
+                                        {{ membre.prenom }} {{ membre.nom }}
+                                    </h4>
+                                    <p class="text-primary font-semibold text-sm mb-3">
+                                        {{ membre.get_poste_display }}
+                                    </p>
+                                    <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-4">
+                                        {{ membre.biographie|truncatewords:30 }}
+                                    </p>
+                                    
+                                    <!-- Bouton "Lire plus" modal -->
+                                    <button onclick="openBioModal{{ membre.id }}()" 
+                                            class="mt-3 text-primary text-sm font-semibold hover:underline">
+                                        Lire la biographie complète →
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Modal Biographie -->
+                            <div id="bioModal{{ membre.id }}" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onclick="closeBioModal{{ membre.id }}()">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                                    <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-start justify-between">
+                                        <div class="flex items-center gap-4">
+                                            {% if membre.photo %}
+                                            <img src="{{ membre.photo.url }}" alt="{{ membre.prenom }} {{ membre.nom }}" 
+                                                 class="w-20 h-20 rounded-full object-cover">
+                                            {% endif %}
+                                            <div>
+                                                <h3 class="text-gray-900 dark:text-white font-bold text-2xl">
+                                                    {{ membre.prenom }} {{ membre.nom }}
+                                                </h3>
+                                                <p class="text-primary font-semibold">{{ membre.get_poste_display }}</p>
+                                            </div>
+                                        </div>
+                                        <button onclick="closeBioModal{{ membre.id }}()" class="text-gray-400 hover:text-gray-600">
+                                            <span class="material-symbols-outlined text-3xl">close</span>
+                                        </button>
+                                    </div>
+                                    <div class="p-6 prose prose-gray dark:prose-invert max-w-none">
+                                        {{ membre.biographie|linebreaks }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script>
+                                function openBioModal{{ membre.id }}() {
+                                    document.getElementById('bioModal{{ membre.id }}').classList.remove('hidden');
+                                    document.body.style.overflow = 'hidden';
+                                }
+                                function closeBioModal{{ membre.id }}() {
+                                    document.getElementById('bioModal{{ membre.id }}').classList.add('hidden');
+                                    document.body.style.overflow = '';
+                                }
+                            </script>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </details>
+                {% endfor %}
+            </section>
+
+            <!-- Section: Commission d'Apurement -->
+            {% if commission %}
+            <section class="scroll-mt-24 mb-12" id="commission">
+                <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 border-b border-gray-200 dark:border-gray-800 mb-6">
+                    Commission d'Apurement des Comptes {{ commission.annee_debut }}-{{ commission.annee_fin }}
+                </h2>
+
+                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 mb-6">
+                    <p>
+                        Le Comité de direction soumet son bilan à l'Assemblée Générale extraordinaire de Janvier. Celle-ci nomme une commission chargée de l'apurement des comptes. Cette commission après examen du dit bilan, présente son rapport à l'Assemblée ordinaire de Mai, qui donne décharge, s'il y a lieu au Comité.
+                    </p>
+                    <p>
+                        Le Comité propose chaque année pour avis le budget du C.N.I.A.H. au moins quinze jours avant l'Assemblée Ordinaire de Mai, à la commission d'apurement des comptes. Le budget éventuellement modifié sera présenté par le Comité à l'Assemblée Ordinaire de Mai, pour discussion et vote.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for membre in commission.membres_list %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow">
+                        {% if membre.photo %}
+                        <div class="aspect-square bg-gray-200 dark:bg-gray-600">
+                            <img src="{{ membre.photo.url }}" alt="{{ membre.prenom }} {{ membre.nom }}" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                        {% else %}
+                        <div class="aspect-square bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-gray-400 text-6xl">person</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="p-5">
+                            <h4 class="text-gray-900 dark:text-white font-bold text-lg mb-1">
+                                {{ membre.prenom }} {{ membre.nom }}
+                            </h4>
+                            <p class="text-primary font-semibold text-sm mb-3">
+                                Membre de la Commission
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-4">
+                                {{ membre.biographie|truncatewords:30 }}
+                            </p>
+                            
+                            <button onclick="openCommissionModal{{ membre.id }}()" 
+                                    class="mt-3 text-primary text-sm font-semibold hover:underline">
+                                Lire la biographie complète →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal similaire au comité -->
+                    <div id="commissionModal{{ membre.id }}" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onclick="closeCommissionModal{{ membre.id }}()">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                            <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-start justify-between">
+                                <div class="flex items-center gap-4">
+                                    {% if membre.photo %}
+                                    <img src="{{ membre.photo.url }}" alt="{{ membre.prenom }} {{ membre.nom }}" 
+                                         class="w-20 h-20 rounded-full object-cover">
+                                    {% endif %}
+                                    <div>
+                                        <h3 class="text-gray-900 dark:text-white font-bold text-2xl">
+                                            {{ membre.prenom }} {{ membre.nom }}
+                                        </h3>
+                                        <p class="text-primary font-semibold">Membre de la Commission d'Apurement</p>
+                                    </div>
+                                </div>
+                                <button onclick="closeCommissionModal{{ membre.id }}()" class="text-gray-400 hover:text-gray-600">
+                                    <span class="material-symbols-outlined text-3xl">close</span>
+                                </button>
+                            </div>
+                            <div class="p-6 prose prose-gray dark:prose-invert max-w-none">
+                                {{ membre.biographie|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function openCommissionModal{{ membre.id }}() {
+                            document.getElementById('commissionModal{{ membre.id }}').classList.remove('hidden');
+                            document.body.style.overflow = 'hidden';
+                        }
+                        function closeCommissionModal{{ membre.id }}() {
+                            document.getElementById('commissionModal{{ membre.id }}').classList.add('hidden');
+                            document.body.style.overflow = '';
+                        }
+                    </script>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Section: Conseil de Discipline -->
+            {% if conseil %}
+            <section class="scroll-mt-24 mb-12" id="conseil">
+                <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 border-b border-gray-200 dark:border-gray-800 mb-6">
+                    Conseil de Discipline {{ conseil.annee_debut }}-{{ conseil.annee_fin }}
+                </h2>
+
+                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 mb-6">
+                    <p class="font-semibold text-gray-800 dark:text-gray-200">Les attributions du Conseil de Discipline sont de :</p>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li>Appliquer les règles du Code d'Éthique et de Pratique Professionnelle.</li>
+                        <li>Connaître de toutes infractions aux statuts, de tous litiges, se rapportant à la pratique professionnelle entre:
+                            <ul class="list-circle pl-6 mt-2">
+                                <li>Deux ou plusieurs membres du C.N.I.A.H.</li>
+                                <li>Un membre du C.N.I.A.H. et un client</li>
+                                <li>Un membre et un artisan appartenant à un des corps de métier relevant des corps professionnels du C.N.I.A.H.</li>
+                            </ul>
+                        </li>
+                        <li>Après enquête et délibération, faire rapport au Comité de Direction qui juge les cas soumis à son appréciation et appliquer les sanctions prévues par les règlements, formant avec ce dernier un Tribunal d'honneur.</li>
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for membre in conseil.membres_list %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow">
+                        {% if membre.photo %}
+                        <div class="aspect-square bg-gray-200 dark:bg-gray-600">
+                            <img src="{{ membre.photo.url }}" alt="{{ membre.prenom }} {{ membre.nom }}" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                        {% else %}
+                        <div class="aspect-square bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-gray-400 text-6xl">person</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="p-5">
+                            <h4 class="text-gray-900 dark:text-white font-bold text-lg mb-1">
+                                {{ membre.prenom }} {{ membre.nom }}
+                            </h4>
+                            <p class="text-primary font-semibold text-sm mb-3">
+                                Membre du Conseil
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-4">
+                                {{ membre.biographie|truncatewords:30 }}
+                            </p>
+                            
+                            <button onclick="openConseilModal{{ membre.id }}()" 
+                                    class="mt-3 text-primary text-sm font-semibold hover:underline">
+                                Lire la biographie complète →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal -->
+                    <div id="conseilModal{{ membre.id }}" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onclick="closeConseilModal{{ membre.id }}()">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                            <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-start justify-between">
+                                <div class="flex items-center gap-4">
+                                    {% if membre.photo %}
+                                    <img src="{{ membre.photo.url }}" alt="{{ membre.prenom }} {{ membre.nom }}" 
+                                         class="w-20 h-20 rounded-full object-cover">
+                                    {% endif %}
+                                    <div>
+                                        <h3 class="text-gray-900 dark:text-white font-bold text-2xl">
+                                            {{ membre.prenom }} {{ membre.nom }}
+                                        </h3>
+                                        <p class="text-primary font-semibold">Membre du Conseil de Discipline</p>
+                                    </div>
+                                </div>
+                                <button onclick="closeConseilModal{{ membre.id }}()" class="text-gray-400 hover:text-gray-600">
+                                    <span class="material-symbols-outlined text-3xl">close</span>
+                                </button>
+                            </div>
+                            <div class="p-6 prose prose-gray dark:prose-invert max-w-none">
+                                {{ membre.biographie|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function openConseilModal{{ membre.id }}() {
+                            document.getElementById('conseilModal{{ membre.id }}').classList.remove('hidden');
+                            document.body.style.overflow = 'hidden';
+                        }
+                        function closeConseilModal{{ membre.id }}() {
+                            document.getElementById('conseilModal{{ membre.id }}').classList.add('hidden');
+                            document.body.style.overflow = '';
+                        }
+                    </script>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<!-- Script pour active state dans la navigation -->
+<script>
+    // Smooth scroll
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // Update active state on scroll
+    window.addEventListener('scroll', () => {
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (window.pageYOffset >= sectionTop - 200) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('bg-primary/10', 'text-primary');
+            if (link.getAttribute('href') === '#' + current) {
+                link.classList.add('bg-primary/10');
+                link.querySelector('span.material-symbols-outlined').classList.add('text-primary');
+                link.querySelector('p').classList.add('text-primary');
+            }
+        });
+    });
+</script>
+{% endblock %}

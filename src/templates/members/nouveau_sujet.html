@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/members/nouveau_sujet.html {% endcomment %}
+
+{% block title %}Nouveau sujet - {{ categorie.nom }} - Forum CNIAH{% endblock %}
+
+{% block content %}
+<div class="flex flex-1 min-h-screen">
+    <!-- Sidebar -->
+    {% include 'members/components/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 lg:p-10 bg-background-light dark:bg-background-dark">
+        <div class="max-w-4xl mx-auto">
+            <!-- Breadcrumb -->
+            <div class="mb-6 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <a href="{% url 'members:forum' %}" class="hover:text-primary transition-colors">
+                    Forum
+                </a>
+                <span class="material-symbols-outlined text-base">chevron_right</span>
+                <a href="{% url 'members:forum_categorie' categorie.id %}" 
+                   class="hover:text-primary transition-colors">
+                    {{ categorie.nom }}
+                </a>
+                <span class="material-symbols-outlined text-base">chevron_right</span>
+                <span class="font-medium text-gray-700 dark:text-gray-300">
+                    Nouveau sujet
+                </span>
+            </div>
+
+            <!-- Page Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-2">
+                    Créer un nouveau sujet
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    dans <span class="font-medium text-primary">{{ categorie.nom }}</span>
+                </p>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200{% else %}bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200{% endif %}">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-xl">
+                            {% if message.tags == 'error' %}error{% else %}info{% endif %}
+                        </span>
+                        <p class="text-sm font-medium">{{ message }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Guidelines Card -->
+            <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                <div class="flex gap-4">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl flex-shrink-0">
+                        tips_and_updates
+                    </span>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-bold text-blue-900 dark:text-blue-200 mb-2">
+                            Conseils pour un bon sujet
+                        </h3>
+                        <ul class="space-y-1 text-sm text-blue-700 dark:text-blue-300">
+                            <li>✓ Choisissez un titre clair et descriptif</li>
+                            <li>✓ Fournissez des détails pertinents dans votre message</li>
+                            <li>✓ Restez respectueux et professionnel</li>
+                            <li>✓ Vérifiez que votre sujet n'existe pas déjà</li>
+                            <li>✓ Placez votre sujet dans la bonne catégorie</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-2xl">edit</span>
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white">
+                            Détails du sujet
+                        </h2>
+                    </div>
+                </div>
+
+                <form method="POST" class="p-6 space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Category Display -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                            Catégorie
+                        </label>
+                        <div class="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div class="size-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary">
+                                    {{ categorie.icone }}
+                                </span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 dark:text-white">
+                                    {{ categorie.nom }}
+                                </p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">
+                                    {{ categorie.description }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Title Field -->
+                    <div>
+                        <label for="titre" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                            Titre du sujet *
+                        </label>
+                        <input
+                            type="text"
+                            id="titre"
+                            name="titre"
+                            required
+                            maxlength="200"
+                            placeholder="Ex: Besoin de conseils pour un projet de construction..."
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            Soyez précis et descriptif (maximum 200 caractères)
+                        </p>
+                    </div>
+
+                    <!-- Content Field -->
+                    <div>
+                        <label for="contenu" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                            Contenu du message *
+                        </label>
+                        <textarea
+                            id="contenu"
+                            name="contenu"
+                            rows="12"
+                            required
+                            placeholder="Décrivez votre question ou sujet en détail...
+
+Quelques suggestions :
+- Contexte de votre demande
+- Détails techniques si applicable
+- Ce que vous avez déjà essayé
+- Questions spécifiques"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent resize-none"></textarea>
+                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            💡 Plus vous fournissez de détails, meilleures seront les réponses
+                        </p>
+                    </div>
+
+                    <!-- Preview Section (Optional) -->
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <div class="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-xl flex-shrink-0">
+                                info
+                            </span>
+                            <div class="flex-1 text-sm text-amber-700 dark:text-amber-300">
+                                <p class="font-bold mb-1">Avant de publier :</p>
+                                <ul class="space-y-1">
+                                    <li>• Relisez votre message pour corriger les erreurs</li>
+                                    <li>• Assurez-vous que le sujet est dans la bonne catégorie</li>
+                                    <li>• Vérifiez que vous respectez les règles du forum</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <a href="{% url 'members:forum_categorie' categorie.id %}"
+                           class="flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-bold transition-colors">
+                            <span class="material-symbols-outlined text-base">close</span>
+                            <span>Annuler</span>
+                        </a>
+
+                        <button type="submit"
+                                class="flex items-center gap-2 px-8 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold transition-colors shadow-lg">
+                            <span class="material-symbols-outlined text-base">send</span>
+                            <span>Publier le sujet</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Rules Card -->
+            <div class="mt-6 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+                <div class="flex gap-4">
+                    <span class="material-symbols-outlined text-gray-400 text-2xl flex-shrink-0">
+                        rule
+                    </span>
+                    <div class="flex-1">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">
+                            Règles du forum
+                        </h3>
+                        <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                            <p>• <strong>Respect :</strong> Traitez les autres avec courtoisie</p>
+                            <p>• <strong>Pertinence :</strong> Restez dans le sujet de la catégorie</p>
+                            <p>• <strong>Qualité :</strong> Fournissez des informations utiles</p>
+                            <p>• <strong>Pas de spam :</strong> Évitez les publicités non sollicitées</p>
+                            <p>• <strong>Professionnalisme :</strong> Maintenez un ton professionnel</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Besoin d'aide pour utiliser le forum ?
+                </p>
+                <a href="{% url 'contact:contact' %}" 
+                   class="inline-flex items-center gap-2 text-sm text-primary hover:underline font-medium">
+                    <span class="material-symbols-outlined text-base">help</span>
+                    <span>Contactez le support</span>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// Character counter for title
+document.getElementById('titre')?.addEventListener('input', function(e) {
+    const maxLength = 200;
+    const currentLength = e.target.value.length;
+    const remaining = maxLength - currentLength;
+    
+    // You can add a character counter display here if needed
+    console.log(`Caractères restants: ${remaining}`);
+});
+
+// Auto-resize textarea
+const textarea = document.getElementById('contenu');
+if (textarea) {
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+}
+
+// Confirmation before leaving with unsaved changes
+let formChanged = false;
+const form = document.querySelector('form');
+const inputs = form?.querySelectorAll('input, textarea');
+
+inputs?.forEach(input => {
+    input.addEventListener('input', () => {
+        formChanged = true;
+    });
+});
+
+window.addEventListener('beforeunload', (e) => {
+    if (formChanged && !form?.submitted) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+form?.addEventListener('submit', () => {
+    form.submitted = true;
+});
+</script>
+{% endblock %}

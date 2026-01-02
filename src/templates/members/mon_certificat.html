@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/members/mon_certificat.html {% endcomment %}
+
+{% block title %}Mon Certificat - Espace Membre CNIAH{% endblock %}
+
+{% block content %}
+<div class="flex flex-1 min-h-screen">
+    <!-- Sidebar -->
+    {% include 'members/components/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 lg:p-10 bg-background-light dark:bg-background-dark">
+        <div class="max-w-4xl mx-auto">
+            <!-- Page Heading -->
+            <div class="mb-8">
+                <h1 class="text-[#121117] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] mb-2">
+                    Mon Certificat Professionnel
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 text-base">
+                    Consultez et téléchargez votre certificat professionnel CNIAH
+                </p>
+            </div>
+
+            <!-- Certificate Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
+                <!-- Header avec status -->
+                <div class="{% if certification.est_valide %}bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800{% else %}bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800{% endif %} p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-4xl {% if certification.est_valide %}text-green-600 dark:text-green-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+                                {% if certification.est_valide %}check_circle{% else %}cancel{% endif %}
+                            </span>
+                            <div>
+                                <h2 class="text-xl font-bold {% if certification.est_valide %}text-green-900 dark:text-green-100{% else %}text-red-900 dark:text-red-100{% endif %}">
+                                    Certificat {% if certification.est_valide %}Valide{% else %}Expiré{% endif %}
+                                </h2>
+                                <p class="text-sm {% if certification.est_valide %}text-green-700 dark:text-green-300{% else %}text-red-700 dark:text-red-300{% endif %}">
+                                    {% if certification.est_valide %}
+                                        Expire le {{ certification.date_expiration|date:"d M Y" }}
+                                    {% else %}
+                                        Expiré le {{ certification.date_expiration|date:"d M Y" }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <a href="{% url 'members:mon_certificat' %}?download=1" 
+                           class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-sm transition-colors">
+                            <span class="material-symbols-outlined">download</span>
+                            <span>Télécharger PDF</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Certificate Content -->
+                <div class="p-8 md:p-12">
+                    <!-- Logo et En-tête -->
+                    <div class="text-center mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-center mb-4">
+                            <img src="{% static 'images/logo_cniah.png' %}" 
+                                 alt="CNIAH Logo" 
+                                 class="h-16 w-auto">
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">CNIAH</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            Collège National des Ingénieurs et Architectes Haïtiens
+                        </p>
+                    </div>
+
+                    <!-- Titre du certificat -->
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-900 dark:text-white uppercase tracking-wide">
+                            Certificat Professionnel
+                        </h2>
+                    </div>
+
+                    <!-- Informations du certificat -->
+                    <div class="space-y-4 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                    Numéro de certificat
+                                </label>
+                                <p class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ certification.numero_certificat }}
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                    Numéro de membre
+                                </label>
+                                <p class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ request.user.membre_actif.numero }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                    Nom complet
+                                </label>
+                                <p class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ request.user.get_full_name }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                    Titre professionnel
+                                </label>
+                                <p class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ request.user.membre_actif.titre }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                    Date de délivrance
+                                </label>
+                                <p class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ certification.date_delivrance|date:"d M Y" }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                    Date d'expiration
+                                </label>
+                                <p class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ certification.date_expiration|date:"d M Y" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code -->
+                    <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6 text-center">
+                        <div class="flex flex-col items-center gap-4">
+                            {% if certification.qr_code %}
+                            <img src="{{ certification.qr_code.url }}" 
+                                 alt="QR Code" 
+                                 class="w-48 h-48 border-4 border-white dark:border-gray-700 rounded-lg shadow-md">
+                            {% else %}
+                            <div class="w-48 h-48 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined text-6xl text-gray-400">qr_code</span>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                                    Vérification par QR Code
+                                </p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">
+                                    Scannez ce code pour vérifier l'authenticité du certificat
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer info -->
+                    <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            14, Rue Capois, #3, Champs-de-Mars, Port-au-Prince, Haiti<br>
+                            (509) 2942-3015 / (509) 2942-3016 - cniah.secretariat@gmail.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-8 flex flex-wrap gap-4 justify-center">
+                <a href="{% url 'members:mon_certificat' %}?download=1" 
+                   class="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold transition-colors shadow-lg">
+                    <span class="material-symbols-outlined">download</span>
+                    <span>Télécharger en PDF</span>
+                </a>
+                
+                <button onclick="window.print()" 
+                        class="flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-bold transition-colors">
+                    <span class="material-symbols-outlined">print</span>
+                    <span>Imprimer</span>
+                </button>
+                
+                <a href="{% url 'core:verifier_certification' %}" 
+                   class="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg font-bold transition-colors">
+                    <span class="material-symbols-outlined">verified</span>
+                    <span>Vérifier en ligne</span>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+@media print {
+    aside, button, .no-print {
+        display: none !important;
+    }
+    main {
+        margin: 0;
+        padding: 0;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: cniah_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=cniah_db
+      - POSTGRES_USER=cniah_user
+      - POSTGRES_PASSWORD=cniah_password
+    ports:
+      - "5442:5432" 
+    networks:
+      - cniah_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cniah_user -d cniah_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: cniah_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./src:/app
+    ports:
+      - "8002:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - cniah_network
+    stdin_open: true
+    tty: true
+
+  adminer:
+    image: adminer
+    container_name: cniah_adminer
+    ports:
+      - "8081:8080"  # Port modifié pour éviter conflit
+    depends_on:
+      - db
+    networks:
+      - cniah_network
+    environment:
+      - ADMINER_DEFAULT_SERVER=db
+
+volumes:
+  postgres_data:
+
+networks:
+  cniah_network:
+    driver: bridge

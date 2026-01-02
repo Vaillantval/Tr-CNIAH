@@ -1,0 +1,490 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src\templates\pages\home.html {% endcomment %}
+{% block title %}Accueil - CNIAH{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<style>
+    .swiper {
+        width: 100%;
+        height: 100%;
+    }
+    .swiper-slide {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .swiper-button-next, .swiper-button-prev {
+        color: var(--primary);
+    }
+    .swiper-pagination-bullet-active {
+        background-color: var(--primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Top Banner Advertisement -->
+{% if banner_ads %}
+<section class="bg-gray-50 dark:bg-gray-900/50 py-4">
+    <div class="container mx-auto px-4">
+        <div class="swiper bannerSwiper">
+            <div class="swiper-wrapper">
+                {% for ad in banner_ads %}
+                <div class="swiper-slide">
+                    <a href="{{ ad.link }}" {% if ad.open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %} class="block w-full">
+                        <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="w-full h-auto max-h-32 object-contain rounded-lg">
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Hero Section -->
+<section class="container mx-auto px-4 py-8 sm:py-16">
+    <div class="@container">
+        <div class="@[480px]:p-0">
+            <div class="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 @[480px]:rounded-xl items-start justify-end px-4 pb-10 @[480px]:px-10" 
+                 style='background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), 
+                    url("{% if hero_banner and hero_banner.image %}{{ hero_banner.image.url }}{% else %}{% static "images/hero_default.jpg" %}{% endif %}");'>
+                <div class="flex flex-col gap-2 text-left max-w-3xl">
+                    <h1 class="text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
+                        {% if hero_banner %}{{ hero_banner.title }}{% else %}Faire progresser l'ingénierie et l'architecture pour la nation{% endif %}
+                    </h1>
+                    <p class="text-white/90 text-base font-normal leading-normal @[480px]:text-lg @[480px]:font-normal @[480px]:leading-normal">
+                        {% if hero_banner %}{{ hero_banner.description }}{% else %}Le CNIAH se consacre au maintien des plus hauts standards de pratique, à la promotion de l'innovation et au service de l'intérêt public.{% endif %}
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <a href="{% url 'core:public_service' %}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+                        <span class="truncate">Découvrir Nos Services</span>
+                    </a>
+                    <a href="{% url 'core:engineers_architects' %}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-white/20 backdrop-blur-sm text-white text-base font-bold leading-normal tracking-[0.015em] border border-white/30 hover:bg-white/30 transition-colors">
+                        <span class="truncate">Consulter le répertoire</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Actualités Nationales -->
+{% if national_news %}
+<section class="container mx-auto px-4 py-8 sm:py-12">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl sm:text-3xl font-bold leading-tight dark:text-white flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">flag</span>
+            Actualités Nationales
+        </h2>
+        <a href="{% url 'news:list' %}?type=national" class="text-primary hover:underline font-medium">
+            Voir tout
+            <span class="material-symbols-outlined text-sm align-middle">arrow_forward</span>
+        </a>
+    </div>
+    
+    <div class="swiper nationalNewsSwiper">
+        <div class="swiper-wrapper">
+            {% for article in national_news %}
+            <div class="swiper-slide">
+                <a href="{% url 'news:detail' article.slug %}" class="flex flex-col gap-3 group h-full">
+                    <div class="w-full bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-xl overflow-hidden relative">
+                        <div class="h-full w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-105" 
+                             style='background-image: url("{% if article.image %}{{ article.image.url }}{% else %}https://via.placeholder.com/600x400{% endif %}");'>
+                        </div>
+                        <span class="absolute top-3 left-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
+                            National
+                        </span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-lg font-bold leading-tight dark:text-white line-clamp-2 mb-2">{{ article.title }}</p>
+                        <p class="text-sm font-normal leading-normal text-gray-600 dark:text-gray-400 line-clamp-3">
+                            {{ article.excerpt }}
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                            {{ article.published_at|date:"d M Y" }}
+                        </p>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-pagination"></div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Actualités Internationales -->
+{% if international_news %}
+<section class="bg-gray-50 dark:bg-gray-900/30 py-8 sm:py-12">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl sm:text-3xl font-bold leading-tight dark:text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">public</span>
+                Actualités Internationales
+            </h2>
+            <a href="{% url 'news:list' %}?type=international" class="text-primary hover:underline font-medium">
+                Voir tout
+                <span class="material-symbols-outlined text-sm align-middle">arrow_forward</span>
+            </a>
+        </div>
+        
+        <div class="swiper internationalNewsSwiper">
+            <div class="swiper-wrapper">
+                {% for article in international_news %}
+                <div class="swiper-slide">
+                    <a href="{% url 'news:detail' article.slug %}" class="flex flex-col gap-3 group h-full bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                        <div class="w-full bg-center bg-no-repeat aspect-[4/3] bg-cover relative">
+                            <div class="h-full w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-105" 
+                                 style='background-image: url("{% if article.image %}{{ article.image.url }}{% else %}https://via.placeholder.com/600x400{% endif %}");'>
+                            </div>
+                            <span class="absolute top-3 left-3 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                International
+                            </span>
+                        </div>
+                        <div class="p-4 flex-1">
+                            <p class="text-lg font-bold leading-tight dark:text-white line-clamp-2 mb-2">{{ article.title }}</p>
+                            <p class="text-sm font-normal leading-normal text-gray-600 dark:text-gray-400 line-clamp-3">
+                                {{ article.excerpt }}
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                                {{ article.published_at|date:"d M Y" }}
+                            </p>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Invitation Section -->
+<section class="bg-primary/10 dark:bg-primary/5 py-8 sm:py-12">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white sm:text-4xl">Invitation</h2>
+        <p class="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-300">
+            Rejoignez une communauté de professionnels dévoués à l'excellence. Devenez membre du CNIAH dès aujourd'hui.
+        </p>
+        <div class="mt-10 flex items-center justify-center gap-x-6">
+            <a class="rounded-lg bg-primary px-8 py-3 text-base font-bold text-white shadow-sm hover:bg-primary/90" href="{% url 'core:membership' %}">
+                INSCRIVEZ-VOUS
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Propositions Section -->
+{% if proposition_document %}
+<section class="container mx-auto px-4 py-12 sm:py-16">
+    <div class="text-center">
+        <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">Propositions du CNIAH</h2>
+        <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
+            {{ proposition_document.description|default:"Découvrez nos propositions pour un avenir bâti sur des fondations solides." }}
+        </p>
+        <div class="mt-10">
+            <a class="inline-flex items-center gap-2 rounded-lg border border-primary px-6 py-3 text-base font-bold text-primary hover:bg-primary/10 transition-colors" href="{{ proposition_document.file.url }}" download>
+                <span class="material-symbols-outlined">download</span>
+                <span>Télécharger le document</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Service Blocks -->
+<section class="bg-white dark:bg-background-dark py-12 sm:py-16">
+    <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12">
+        {% for block in service_blocks %}
+        <div class="flex flex-col gap-4 items-start">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ block.title }}</h3>
+            <div class="text-gray-600 dark:text-gray-400">{{ block.description|safe }}</div>
+            {% if block.button_text and block.button_link %}
+            <a class="mt-4 inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90" href="{{ block.button_link }}">
+                {{ block.button_text }}
+            </a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="flex flex-col gap-4 items-start">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Un architecte, pourquoi ?</h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Parce que vous avez votre façon de vivre et vos goûts personnels. Le rôle de l’architecte est avant tout de vous écouter ; à partir de vos besoins, de vos goûts, de votre mode de vie, de l’évolution possible de votre famille, l’architecte vous aide à définir votre projet : disposition des lieux, utilisation judicieuse des surfaces, organisation des volumes intérieurs, aspect extérieur.
+            </p>
+            <a class="mt-4 inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90" href="{% url 'core:engineers_architects' %}">
+                Trouver un Architecte
+            </a>
+        </div>
+        <div class="flex flex-col gap-4 items-start">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Un ingénieur, pourquoi ?</h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Au sein d'un cabinet d'études, d'un cabinet d'architecte ou d'une entreprise de construction, l'ingénieur est un professionnel chargé d'effectuer des études préalablement à la conclusion du contrat de construction. Son rôle est donc primordial pour son employeur, puisque c'est à partir de ses études qu'il saura si oui ou non un projet est réalisable.
+            </p>
+            <a class="mt-4 inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90" href="{% url 'core:engineers_architects' %}">
+                Trouver un Ingénieur
+            </a>
+        </div>
+        <div class="flex flex-col gap-4 items-start">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Le CNIAH pourquoi ?</h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Le CNIAH a pour mission première de promouvoir et réguler, d'assurer la qualité des services et ouvrages bâtis au service de la population. Crée par Décret-loi en date du 25 mars 1974, regroupe les professionnels qui ont l’autorisation légale d’exercer dans les diverses branches du Génie et de l’Architecture en Haïti suivant les modalités au Décret-loi.
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Recent Articles (Toutes catégories) -->
+{% if recent_articles %}
+<section class="container mx-auto px-4 py-12 sm:py-16">
+    <h2 class="text-2xl sm:text-3xl font-bold leading-tight tracking-[-0.015em] pb-8 dark:text-white">
+        Derniers Articles
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for article in recent_articles %}
+        <a href="{% url 'news:detail' article.slug %}" class="flex flex-col gap-3 group">
+            <div class="w-full bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-xl overflow-hidden">
+                <div class="h-full w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-105" 
+                     style='background-image: url("{% if article.image %}{{ article.image.url }}{% else %}https://via.placeholder.com/600x400{% endif %}");'>
+                </div>
+            </div>
+            <div>
+                {% if article.category %}
+                <span class="text-xs font-bold text-primary uppercase">{{ article.category.name }}</span>
+                {% endif %}
+                <p class="text-lg font-bold leading-normal dark:text-white mt-1">{{ article.title }}</p>
+                <p class="text-sm font-normal leading-normal text-gray-600 dark:text-gray-400">
+                    {{ article.excerpt|truncatewords:20 }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                    {{ article.published_at|date:"d M Y" }}
+                </p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Sidebar Advertisement -->
+{% if sidebar_ads %}
+<section class="bg-gray-50 dark:bg-gray-900/30 py-8">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for ad in sidebar_ads %}
+            <a href="{{ ad.link }}" {% if ad.open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %} class="block">
+                <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="w-full h-auto rounded-lg hover:shadow-lg transition-shadow">
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Newsletter -->
+<section class="py-12 sm:py-16">
+    <div class="container mx-auto px-4">
+        <div class="bg-primary/10 dark:bg-primary/5 p-8 rounded-xl md:p-12">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl font-bold uppercase tracking-tight text-gray-900 dark:text-white">Boite aux lettres</h2>
+                    <p class="mt-2 text-lg leading-8 text-gray-600 dark:text-gray-400">
+                        Abonnez-vous à notre newsletter pour recevoir les dernières actualités.
+                    </p>
+                </div>
+                <form method="post" action="{% url 'core:newsletter_subscribe' %}" class="flex w-full max-w-md gap-4">
+                    {% csrf_token %}
+                    <input autocomplete="email" class="min-w-0 flex-auto rounded-lg border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-black/20 px-3.5 py-2 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6" 
+                           name="email" placeholder="Entrez votre e-mail" required type="email"/>
+                    <button class="flex-none rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-primary/90" type="submit">
+                        S'abonner
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="container mx-auto px-4 py-12 sm:py-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+        <div class="text-left">
+            <h2 class="text-3xl font-bold uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                Contactez-nous
+            </h2>
+            <p class="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-400">
+                Pour toute question, n'hésitez pas à nous contacter.
+            </p>
+            <div class="mt-8 space-y-4 text-gray-700 dark:text-gray-300">
+                <p class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">location_on</span>
+                    <span>14, Rue Capois, #3, Champs-de-Mars, Port-au-Prince, Haiti</span>
+                </p>
+                <p class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">call</span>
+                    <span>(509) 2942-3015 / (509) 2942-3016</span>
+                </p>
+                <p class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">mail</span>
+                    <span>cniah.secretariat@gmail.com</span>
+                </p>
+            </div>
+        </div>
+        <div>
+            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-900 dark:text-white mb-6">
+                Formulaire de Contact
+            </h3>
+            <form action="{% url 'contact:contact' %}" method="POST" class="space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">Nom complet</label>
+                    <input name="name" type="text" required class="mt-2 block w-full rounded-md border-0 py-2 px-3 text-gray-900 dark:text-white bg-white/50 dark:bg-black/20 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">Email</label>
+                    <input name="email" type="email" required class="mt-2 block w-full rounded-md border-0 py-2 px-3 text-gray-900 dark:text-white bg-white/50 dark:bg-black/20 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">Message</label>
+                    <textarea name="message" rows="4" required class="mt-2 block w-full rounded-md border-0 py-2 px-3 text-gray-900 dark:text-white bg-white/50 dark:bg-black/20 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-primary"></textarea>
+                </div>
+                <button type="submit" class="w-full flex justify-center rounded-lg bg-primary px-3 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-primary/90">
+                    Envoyer le Message
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Sponsors -->
+{% if sponsors %}
+<section class="bg-white dark:bg-background-dark py-12 sm:py-16">
+    <div class="container mx-auto px-4">
+        <h2 class="text-center text-2xl font-bold leading-tight text-gray-800 dark:text-gray-200 mb-12">
+            Nos Partenaires et Sponsors
+        </h2>
+        <div class="swiper sponsorsSwiper">
+            <div class="swiper-wrapper items-center">
+                {% for sponsor in sponsors %}
+                <div class="swiper-slide flex justify-center">
+                    <img class="h-16 w-auto opacity-60 dark:opacity-40 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" 
+                         src="{{ sponsor.logo.url }}" 
+                         alt="{{ sponsor.name }}"/>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    // Banner Swiper
+    const bannerSwiper = new Swiper('.bannerSwiper', {
+        slidesPerView: 1,
+        spaceBetween: 10,
+        loop: true,
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+    });
+
+    // National News Swiper
+    const nationalNewsSwiper = new Swiper('.nationalNewsSwiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: false,
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+                spaceBetween: 20,
+            },
+            1024: {
+                slidesPerView: 3,
+                spaceBetween: 30,
+            },
+        },
+    });
+
+    // International News Swiper
+    const internationalNewsSwiper = new Swiper('.internationalNewsSwiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: false,
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+                spaceBetween: 20,
+            },
+            1024: {
+                slidesPerView: 3,
+                spaceBetween: 30,
+            },
+        },
+    });
+
+    // Sponsors Swiper
+    const sponsorsSwiper = new Swiper('.sponsorsSwiper', {
+        slidesPerView: 2,
+        spaceBetween: 30,
+        loop: true,
+        autoplay: {
+            delay: 3000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 3,
+                spaceBetween: 40,
+            },
+            768: {
+                slidesPerView: 4,
+                spaceBetween: 50,
+            },
+            1024: {
+                slidesPerView: 6,
+                spaceBetween: 60,
+            },
+        },
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_config.titre|default:"Liste des Membres Actifs" }} - CNIAH{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumbs -->
+    <div class="flex flex-wrap items-center gap-2 mb-6">
+        <a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary" href="{% url 'core:home' %}">Accueil</a>
+        <span class="text-gray-400 dark:text-gray-500 text-sm font-medium leading-normal">/</span>
+        <span class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Membres Actifs</span>
+    </div>
+
+    <!-- Page Heading -->
+    <div class="mb-8">
+        <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] mb-3">
+            {{ page_config.titre|default:"Liste des Ingénieurs et Architectes Actifs" }}
+        </h1>
+        {% if page_config.introduction %}
+        <div class="prose prose-gray dark:prose-invert max-w-none">
+            {{ page_config.introduction|linebreaks }}
+        </div>
+        {% else %}
+        <p class="text-gray-600 dark:text-gray-400 text-lg leading-normal">
+            Consultez la liste complète des ingénieurs et architectes membres actifs du CNIAH.
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Statistiques -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-1">Total Membres</p>
+                    <p class="text-gray-900 dark:text-white text-3xl font-bold">{{ total_membres }}</p>
+                </div>
+                <span class="material-symbols-outlined text-primary text-5xl">groups</span>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-1">Page</p>
+                    <p class="text-gray-900 dark:text-white text-3xl font-bold">{{ membres.number }}</p>
+                </div>
+                <span class="material-symbols-outlined text-primary text-5xl">description</span>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-1">Catégories</p>
+                    <p class="text-gray-900 dark:text-white text-3xl font-bold">{{ titres.count }}</p>
+                </div>
+                <span class="material-symbols-outlined text-primary text-5xl">category</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres et Recherche -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Recherche -->
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">Rechercher</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                    <input type="text" name="search" value="{{ search }}" placeholder="Nom, prénom ou numéro..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+            </div>
+
+            <!-- Filtre par titre -->
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">Filtrer par titre</label>
+                <select name="titre" 
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">Tous les titres</option>
+                    {% for titre in titres %}
+                    <option value="{{ titre.id }}" {% if titre_filter|add:0 == titre.id %}selected{% endif %}>
+                        {{ titre.nom }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Boutons -->
+            <div class="md:col-span-2 flex gap-3">
+                <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">
+                    Appliquer les filtres
+                </button>
+                <a href="{% url 'core:membres_actifs' %}" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold">
+                    Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tableau Desktop -->
+    <div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Numéro</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nom</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Prénom</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Titre</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% for membre in membres %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-mono font-semibold text-primary">{{ membre.numero }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ membre.nom }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-sm text-gray-900 dark:text-white">{{ membre.prenom }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                            {{ membre.titre.nom }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-12 text-center">
+                        <span class="material-symbols-outlined text-gray-400 text-6xl mb-4 block">person_search</span>
+                        <p class="text-gray-600 dark:text-gray-400">Aucun membre trouvé avec ces critères.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Cards Mobile -->
+    <div class="md:hidden space-y-4">
+        {% for membre in membres %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex-1">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Numéro</p>
+                    <p class="text-lg font-mono font-bold text-primary">{{ membre.numero }}</p>
+                </div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                    {{ membre.titre.nom }}
+                </span>
+            </div>
+            <div class="space-y-2">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Nom</p>
+                    <p class="text-base font-medium text-gray-900 dark:text-white">{{ membre.nom }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Prénom</p>
+                    <p class="text-base text-gray-900 dark:text-white">{{ membre.prenom }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-12">
+            <span class="material-symbols-outlined text-gray-400 text-6xl mb-4">person_search</span>
+            <p class="text-gray-600 dark:text-gray-400">Aucun membre trouvé avec ces critères.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if membres.has_other_pages %}
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-gray-600 dark:text-gray-400 text-sm">
+            Page {{ membres.number }} sur {{ membres.paginator.num_pages }}
+        </p>
+        
+        <nav class="flex gap-2">
+            {% if membres.has_previous %}
+            <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}" 
+               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Première
+            </a>
+            <a href="?page={{ membres.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}" 
+               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Précédent
+            </a>
+            {% endif %}
+
+            <span class="px-4 py-2 bg-primary text-white rounded-lg font-semibold">
+                {{ membres.number }}
+            </span>
+
+            {% if membres.has_next %}
+            <a href="?page={{ membres.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}" 
+               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Suivant
+            </a>
+            <a href="?page={{ membres.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}" 
+               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Dernière
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

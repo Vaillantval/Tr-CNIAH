@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/members/inscription.html {% endcomment %}
+
+{% block title %}Inscription - Espace Membre CNIAH{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center px-4 py-12">
+    <div class="max-w-md w-full">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+                <img src="{% static 'images/logo-cniah.png' %}" alt="CNIAH Logo" class="h-16 w-auto">
+            </div>
+            <h1 class="text-3xl font-black text-gray-900 dark:text-white mb-2">
+                Créer un compte
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Rejoignez l'espace membre CNIAH
+            </p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200{% elif message.tags == 'success' %}bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200{% else %}bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200{% endif %}">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-xl">
+                        {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}check_circle{% else %}info{% endif %}
+                    </span>
+                    <p class="text-sm font-medium">{{ message }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Numéro de membre -->
+                <div>
+                    <label for="numero_membre" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                        Numéro de membre CNIAH *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <span class="material-symbols-outlined text-xl">badge</span>
+                        </span>
+                        <input type="text" 
+                               id="numero_membre" 
+                               name="numero_membre" 
+                               required
+                               placeholder="Ex: CNIAH-2024-001"
+                               class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Votre numéro de membre actif CNIAH
+                    </p>
+                </div>
+
+                <!-- Nom d'utilisateur -->
+                <div>
+                    <label for="username" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                        Nom d'utilisateur *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <span class="material-symbols-outlined text-xl">person</span>
+                        </span>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               required
+                               placeholder="jean.dupont"
+                               class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                        Adresse email *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <span class="material-symbols-outlined text-xl">mail</span>
+                        </span>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               required
+                               placeholder="jean.dupont@example.com"
+                               class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Mot de passe -->
+                <div>
+                    <label for="password" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                        Mot de passe *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <span class="material-symbols-outlined text-xl">lock</span>
+                        </span>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               required
+                               minlength="8"
+                               placeholder="••••••••"
+                               class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Minimum 8 caractères
+                    </p>
+                </div>
+
+                <!-- Confirmation mot de passe -->
+                <div>
+                    <label for="password_confirm" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                        Confirmer le mot de passe *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <span class="material-symbols-outlined text-xl">lock</span>
+                        </span>
+                        <input type="password" 
+                               id="password_confirm" 
+                               name="password_confirm" 
+                               required
+                               minlength="8"
+                               placeholder="••••••••"
+                               class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Conditions -->
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" 
+                           id="terms" 
+                           required
+                           class="mt-1 size-4 text-primary border-gray-300 rounded focus:ring-primary">
+                    <label for="terms" class="text-sm text-gray-600 dark:text-gray-400">
+                        J'accepte les <a href="#" class="text-primary hover:underline">conditions d'utilisation</a> 
+                        et la <a href="#" class="text-primary hover:underline">politique de confidentialité</a>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" 
+                        class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold transition-colors shadow-lg">
+                    <span>Créer mon compte</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </form>
+
+            <!-- Separator -->
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                        Vous avez déjà un compte ?
+                    </span>
+                </div>
+            </div>
+
+            <!-- Login Link -->
+            <a href="{% url 'members:connexion' %}" 
+               class="block w-full text-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-bold transition-colors">
+                Se connecter
+            </a>
+        </div>
+
+        <!-- Back to home -->
+        <div class="mt-6 text-center">
+            <a href="{% url 'core:home' %}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary">
+                ← Retour à l'accueil
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validation du mot de passe
+document.querySelector('form').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('password_confirm').value;
+    
+    if (password !== passwordConfirm) {
+        e.preventDefault();
+        alert('Les mots de passe ne correspondent pas !');
+    }
+});
+</script>
+{% endblock %}

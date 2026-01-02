@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/members/documents.html {% endcomment %}
+
+{% block title %}Documents - Espace Membre CNIAH{% endblock %}
+
+{% block content %}
+<div class="flex flex-1 min-h-screen">
+    <!-- Sidebar -->
+    {% include 'members/components/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 lg:p-10 bg-background-light dark:bg-background-dark">
+        <div class="max-w-6xl mx-auto">
+            <!-- Page Heading -->
+            <div class="mb-8">
+                <h1 class="text-[#121117] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] mb-2">
+                    Bibliothèque de Documents
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 text-base">
+                    Accédez aux documents réservés aux membres CNIAH
+                </p>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="mb-8">
+                <div class="flex flex-wrap gap-2 p-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <a href="{% url 'members:documents' %}" 
+                       class="px-4 py-2 {% if not categorie_filter %}bg-primary text-white{% else %}bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %} rounded-lg font-medium text-sm transition-colors">
+                        Tous
+                    </a>
+                    {% for cat_value, cat_label in categories %}
+                    <a href="{% url 'members:documents' %}?categorie={{ cat_value }}" 
+                       class="px-4 py-2 {% if categorie_filter == cat_value %}bg-primary text-white{% else %}bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %} rounded-lg font-medium text-sm transition-colors">
+                        {{ cat_label }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Documents Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for doc in documents %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-shadow overflow-hidden group">
+                    <!-- Icon Header -->
+                    <div class="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 p-8 text-center border-b border-gray-200 dark:border-gray-700">
+                        <div class="inline-flex items-center justify-center size-20 rounded-full bg-white dark:bg-gray-800 shadow-md mb-4 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-4xl text-primary">
+                                {% if doc.categorie == 'certificat' %}workspace_premium
+                                {% elif doc.categorie == 'formation' %}school
+                                {% elif doc.categorie == 'reglementation' %}gavel
+                                {% elif doc.categorie == 'template' %}description
+                                {% else %}folder{% endif %}
+                            </span>
+                        </div>
+                        <span class="inline-block px-3 py-1 bg-primary/20 dark:bg-primary/30 text-primary rounded-full text-xs font-bold uppercase">
+                            {{ doc.get_categorie_display }}
+                        </span>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                            {{ doc.titre }}
+                        </h3>
+                        
+                        {% if doc.description %}
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                            {{ doc.description }}
+                        </p>
+                        {% endif %}
+
+                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-4">
+                            <span class="material-symbols-outlined text-base">calendar_today</span>
+                            <span>{{ doc.date_ajout|date:"d M Y" }}</span>
+                        </div>
+
+                        <!-- Download Button -->
+                        <a href="{{ doc.fichier.url }}" 
+                           download
+                           class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-sm transition-colors">
+                            <span class="material-symbols-outlined">download</span>
+                            <span>Télécharger</span>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-12 text-center">
+                    <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">folder_off</span>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        Aucun document disponible
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        {% if categorie_filter %}
+                            Aucun document dans cette catégorie pour le moment.
+                        {% else %}
+                            Il n'y a pas de documents disponibles pour le moment.
+                        {% endif %}
+                    </p>
+                    {% if categorie_filter %}
+                    <a href="{% url 'members:documents' %}" 
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold transition-colors">
+                        <span>Voir tous les documents</span>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Help Section -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Info Card -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                    <div class="flex gap-4">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl">info</span>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-blue-900 dark:text-blue-200 mb-2">
+                                À propos des documents
+                            </h3>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">
+                                Ces documents sont exclusivement réservés aux membres actifs du CNIAH. 
+                                Ils comprennent des certificats, formations, réglementations et templates professionnels.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Request Card -->
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
+                    <div class="flex gap-4">
+                        <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-3xl">contact_support</span>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-green-900 dark:text-green-200 mb-2">
+                                Document introuvable ?
+                            </h3>
+                            <p class="text-sm text-green-700 dark:text-green-300 mb-3">
+                                Si vous cherchez un document spécifique qui n'est pas disponible, contactez-nous.
+                            </p>
+                            <a href="{% url 'contact:contact' %}" 
+                               class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold transition-colors">
+                                <span>Nous contacter</span>
+                                <span class="material-symbols-outlined text-base">arrow_forward</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Legend -->
+            <div class="mt-8 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                    Catégories de documents
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                        <span class="material-symbols-outlined text-primary text-2xl">workspace_premium</span>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">Certificats</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">Certificats professionnels et attestations</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                        <span class="material-symbols-outlined text-primary text-2xl">school</span>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">Formations</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">Matériel de formation et guides</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                        <span class="material-symbols-outlined text-primary text-2xl">gavel</span>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">Réglementations</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">Lois et règlements du secteur</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                        <span class="material-symbols-outlined text-primary text-2xl">description</span>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">Templates</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">Modèles de documents professionnels</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                        <span class="material-symbols-outlined text-primary text-2xl">folder</span>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">Autre</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">Autres ressources utiles</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

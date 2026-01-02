@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src\templates\pages\ingenieurs\index.html {% endcomment %}
+{% block title %}Ingénieurs et Architectes - CNIAH{% endblock %}
+
+{% block content %}
+<section class="container mx-auto px-4 py-16 sm:py-24">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 items-start">
+        <!-- Sidebar -->
+        <aside class="col-span-1 lg:sticky lg:top-24">
+            <h2 class="text-xl font-bold mb-6 dark:text-white">Menu</h2>
+            <nav class="flex flex-col gap-1">
+                <a class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#adhesion">Adhésion</a>
+                <a class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#cotisation">Cotisation</a>
+                <a class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#education">Éducation Continue</a>
+                <a class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#branches">Branches</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="col-span-1 lg:col-span-3">
+            <div class="prose prose-lg dark:prose-invert max-w-none space-y-8">
+                <h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+                    Membres du C.N.I.A.H
+                </h1>
+                <p class="text-lg leading-8 text-gray-600 dark:text-gray-400">
+                    Le Collège National des Ingénieurs et Architectes Haïtiens rassemble les professionnels les plus qualifiés du pays.
+                </p>
+
+                <div class="text-center my-10">
+                    <a class="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-4 text-base font-bold text-white shadow-sm transition-colors hover:bg-primary/90" href="#">
+                        Consulter la Liste des membres
+                    </a>
+                </div>
+
+                <div id="adhesion">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        Critères d'Adhésion
+                    </h2>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Pour devenir membre du C.N.I.A.H, les candidats doivent satisfaire à des exigences rigoureuses.
+                    </p>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                        <li><strong class="font-semibold text-gray-800 dark:text-gray-200">Formation académique</strong> : Diplôme reconnu</li>
+                        <li><strong class="font-semibold text-gray-800 dark:text-gray-200">Expérience professionnelle</strong> : Expérience pratique pertinente</li>
+                        <li><strong class="font-semibold text-gray-800 dark:text-gray-200">Intégrité morale</strong> : Éthique irréprochable</li>
+                        <li><strong class="font-semibold text-gray-800 dark:text-gray-200">Engagement continu</strong> : Formation continue</li>
+                    </ul>
+                </div>
+
+                <div id="branches">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        Branches du Génie et de l'Architecture
+                    </h2>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Le C.N.I.A.H reconnaît et encadre une large diversité de spécialisations pour répondre aux besoins complexes de la société haïtienne. Nos membres exercent dans les principales branches suivantes :
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <!-- Architecture -->
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-black/20 rounded-lg">
+                            <span class="material-symbols-outlined text-primary text-3xl mt-1">apartment</span>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">Architecture</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Conception de bâtiments et d'espaces urbains, alliant esthétique, fonctionnalité et durabilité.</p>
+                            </div>
+                        </div>
+
+                        <!-- Génie Civil -->
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-black/20 rounded-lg">
+                            <span class="material-symbols-outlined text-primary text-3xl mt-1">construction</span>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">Génie Civil</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Planification, conception et construction d'infrastructures telles que les routes, ponts et bâtiments.</p>
+                            </div>
+                        </div>
+
+                        <!-- Génie Électrique -->
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-black/20 rounded-lg">
+                            <span class="material-symbols-outlined text-primary text-3xl mt-1">electric_bolt</span>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">Génie Électrique</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Systèmes de production, de distribution et d'utilisation de l'énergie électrique.</p>
+                            </div>
+                        </div>
+
+                        <!-- Génie Mécanique -->
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-black/20 rounded-lg">
+                            <span class="material-symbols-outlined text-primary text-3xl mt-1">precision_manufacturing</span>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">Génie Mécanique</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Conception et fabrication de systèmes mécaniques, de la machinerie lourde aux dispositifs de précision.</p>
+                            </div>
+                        </div>
+
+                        <!-- Génie Électromécanique -->
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-black/20 rounded-lg">
+                            <span class="material-symbols-outlined text-primary text-3xl mt-1">lan</span>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">Génie Électromécanique</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Intégration des principes de l'électricité et de la mécanique pour créer des systèmes automatisés.</p>
+                            </div>
+                        </div>
+
+                        <!-- Génie Sanitaire et Environnemental -->
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-black/20 rounded-lg">
+                            <span class="material-symbols-outlined text-primary text-3xl mt-1">eco</span>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">Génie Sanitaire et Environnemental</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Gestion de l'eau, des déchets et protection de l'environnement pour un développement durable.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

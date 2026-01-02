@@ -1,0 +1,163 @@
+/* src/static/css/variables.css */
+
+:root {
+  /* Colors - Modern theme with oklch(37.9% 0.146 265.522) as primary */
+  --background: #f8f9fb;
+  --foreground: #121117;
+  --card: #ffffff;
+  --card-foreground: #121117;
+  --popover: #ffffff;
+  --popover-foreground: #121117;
+  
+  /* Primary color using OKLCH */
+  --primary: oklch(37.9% 0.146 265.522);
+  --primary-50: oklch(95% 0.03 265.522);
+  --primary-100: oklch(90% 0.05 265.522);
+  --primary-200: oklch(80% 0.08 265.522);
+  --primary-300: oklch(70% 0.10 265.522);
+  --primary-400: oklch(55% 0.12 265.522);
+  --primary-500: oklch(37.9% 0.146 265.522);
+  --primary-600: oklch(32% 0.15 265.522);
+  --primary-700: oklch(27% 0.14 265.522);
+  --primary-800: oklch(22% 0.12 265.522);
+  --primary-900: oklch(17% 0.10 265.522);
+  --primary-foreground: #ffffff;
+  
+  /* Secondary colors derived from primary */
+  --secondary: oklch(45% 0.10 265.522);
+  --secondary-foreground: #ffffff;
+  
+  --muted: #f0f2f5;
+  --muted-foreground: #6b7280;
+  --accent: oklch(37.9% 0.146 265.522);
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: oklch(37.9% 0.146 265.522);
+  
+  /* Chart colors */
+  --chart-1: oklch(37.9% 0.146 265.522);
+  --chart-2: oklch(55% 0.12 265.522);
+  --chart-3: oklch(65% 0.18 30);
+  --chart-4: oklch(60% 0.20 330);
+  --chart-5: oklch(55% 0.16 150);
+  
+  /* Fonts */
+  --font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Space Grotesk', serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+  
+  /* Radius */
+  --radius: 0.5rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  
+  /* Shadows with primary color tint */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-primary: 0 4px 14px 0 rgba(59, 53, 126, 0.25);
+  
+  /* Spacing */
+  --spacing: 0.25rem;
+  --tracking-normal: normal;
+}
+
+.dark {
+  --background: #0f0e13;
+  --foreground: #ffffff;
+  --card: #1a1825;
+  --card-foreground: #ffffff;
+  --popover: #1a1825;
+  --popover-foreground: #ffffff;
+  
+  /* Primary color in dark mode - slightly lighter for better visibility */
+  --primary: oklch(45% 0.146 265.522);
+  --primary-50: oklch(17% 0.10 265.522);
+  --primary-100: oklch(22% 0.12 265.522);
+  --primary-200: oklch(27% 0.14 265.522);
+  --primary-300: oklch(32% 0.15 265.522);
+  --primary-400: oklch(37.9% 0.146 265.522);
+  --primary-500: oklch(45% 0.146 265.522);
+  --primary-600: oklch(55% 0.12 265.522);
+  --primary-700: oklch(70% 0.10 265.522);
+  --primary-800: oklch(80% 0.08 265.522);
+  --primary-900: oklch(90% 0.05 265.522);
+  --primary-foreground: #ffffff;
+  
+  --secondary: oklch(50% 0.10 265.522);
+  --secondary-foreground: #ffffff;
+  
+  --muted: #252330;
+  --muted-foreground: #9ca3af;
+  --accent: oklch(45% 0.146 265.522);
+  --accent-foreground: #ffffff;
+  --destructive: #f87171;
+  --destructive-foreground: #121117;
+  --border: #2d2a3a;
+  --input: #2d2a3a;
+  --ring: oklch(45% 0.146 265.522);
+  
+  /* Chart colors for dark mode */
+  --chart-1: oklch(45% 0.146 265.522);
+  --chart-2: oklch(60% 0.12 265.522);
+  --chart-3: oklch(70% 0.18 30);
+  --chart-4: oklch(65% 0.20 330);
+  --chart-5: oklch(60% 0.16 150);
+  
+  /* Enhanced shadows for dark mode */
+  --shadow-primary: 0 4px 14px 0 rgba(85, 75, 180, 0.35);
+}
+
+/* Utility classes for the new color scheme */
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+.border-primary {
+  border-color: var(--primary);
+}
+
+.ring-primary {
+  --tw-ring-color: var(--primary);
+}
+
+.hover\:bg-primary:hover {
+  background-color: var(--primary);
+}
+
+.hover\:text-primary:hover {
+  color: var(--primary);
+}
+
+/* Primary gradient backgrounds */
+.bg-primary-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-600) 100%);
+}
+
+.dark .bg-primary-gradient {
+  background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-600) 100%);
+}
+
+/* Glassmorphism effect with primary tint */
+.glass-primary {
+  background: rgba(59, 53, 126, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 53, 126, 0.2);
+}
+
+.dark .glass-primary {
+  background: rgba(85, 75, 180, 0.1);
+  border: 1px solid rgba(85, 75, 180, 0.2);
+}

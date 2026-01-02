@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Normes et Réglementations - CNIAH{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Heading -->
+    <div class="mb-10">
+        <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] mb-3">
+            Normes et Réglementations
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400 text-lg leading-normal">
+            Consultez les normes et réglementations professionnelles essentielles pour les ingénieurs et architectes en Haïti.
+        </p>
+    </div>
+
+    <!-- Stats et Recherche -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Barre de recherche -->
+            <div class="md:col-span-2">
+                <form method="get" class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                    <input type="text" name="search" value="{{ search }}" 
+                           placeholder="Rechercher une norme par mot-clé..."
+                           class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           id="search-input">
+                </form>
+            </div>
+
+            <!-- Compteur de résultats -->
+            <div class="flex items-center gap-3">
+                <div class="bg-primary/10 rounded-full size-12 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-2xl">description</span>
+                </div>
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Total normes</p>
+                    <p class="text-gray-900 dark:text-white text-2xl font-bold">{{ total_normes }}</p>
+                </div>
+            </div>
+
+            <!-- Catégories -->
+            <div class="flex items-center gap-3">
+                <div class="bg-green-100 dark:bg-green-900/30 rounded-full size-12 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">category</span>
+                </div>
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Catégories</p>
+                    <p class="text-gray-900 dark:text-white text-2xl font-bold">{{ categories.count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres par catégorie -->
+    <div class="flex gap-3 overflow-x-auto pb-4 mb-8">
+        <a href="{% url 'core:norms' %}" 
+           class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-6 transition-colors {% if not categorie_filter %}bg-primary text-white{% else %}bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 hover:bg-primary/20{% endif %}">
+            <span class="text-sm font-medium">Toutes les normes</span>
+        </a>
+        {% for cat in categories %}
+        <a href="?categorie={{ cat.id }}" 
+           class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-6 transition-colors {% if categorie_filter|add:0 == cat.id %}bg-primary text-white{% else %}bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 hover:bg-primary/20{% endif %}">
+            <span class="material-symbols-outlined text-sm">{{ cat.icone }}</span>
+            <span class="text-sm font-medium">{{ cat.nom }}</span>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Grille des normes -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for norme in normes %}
+        <div class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl hover:border-primary transition-all duration-300">
+            <!-- Icon section -->
+            <div class="bg-gradient-to-br from-primary/10 to-primary/5 p-8 flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-primary/5 transform -skew-y-6 group-hover:skew-y-6 transition-transform duration-500"></div>
+                <span class="material-symbols-outlined text-primary text-7xl relative z-10 group-hover:scale-110 transition-transform duration-300">
+                    {{ norme.categorie.icone }}
+                </span>
+            </div>
+
+            <!-- Content -->
+            <div class="p-5">
+                <!-- Catégorie badge -->
+                <div class="mb-3">
+                    <span class="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
+                        <span class="material-symbols-outlined text-sm">{{ norme.categorie.icone }}</span>
+                        {{ norme.categorie.nom }}
+                    </span>
+                </div>
+
+                <!-- Titre -->
+                <h3 class="text-gray-900 dark:text-white text-lg font-bold leading-tight mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                    {{ norme.titre }}
+                </h3>
+
+                <!-- Métadonnées -->
+                <div class="flex items-center gap-3 mb-3 text-sm text-gray-600 dark:text-gray-400">
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">tag</span>
+                        {{ norme.version }}
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">calendar_today</span>
+                        {{ norme.date_publication|date:"d/m/Y" }}
+                    </span>
+                </div>
+
+                <!-- Description -->
+                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-4 line-clamp-3">
+                    {{ norme.description }}
+                </p>
+
+                <!-- Action button -->
+                <a href="{{ norme.fichier.url }}" download 
+                   class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold group-hover:shadow-lg">
+                    <span class="material-symbols-outlined text-base">download</span>
+                    <span>Télécharger</span>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <!-- État vide -->
+        <div class="col-span-full flex flex-col items-center justify-center py-20">
+            <span class="material-symbols-outlined text-gray-400 text-8xl mb-4">search_off</span>
+            <h3 class="text-gray-600 dark:text-gray-400 text-xl font-bold mb-2">Aucune norme trouvée</h3>
+            <p class="text-gray-500 dark:text-gray-500 text-center mb-4">
+                {% if search %}
+                    Aucun résultat pour "{{ search }}"
+                {% else %}
+                    Aucune norme disponible dans cette catégorie
+                {% endif %}
+            </p>
+            {% if search or categorie_filter %}
+            <a href="{% url 'core:norms' %}" 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">
+                <span class="material-symbols-outlined">refresh</span>
+                Voir toutes les normes
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Section informative -->
+    {% if not search and not categorie_filter %}
+    <div class="mt-12 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-8">
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            <div class="flex-shrink-0">
+                <div class="bg-blue-100 dark:bg-blue-900/30 rounded-full size-16 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-4xl">info</span>
+                </div>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-blue-900 dark:text-blue-200 text-xl font-bold mb-3">
+                    À propos des normes CNIAH
+                </h3>
+                <p class="text-blue-800 dark:text-blue-300 mb-4">
+                    Ces normes sont établies pour garantir la qualité, la sécurité et la conformité des travaux d'ingénierie et d'architecture en Haïti. Elles sont régulièrement mises à jour pour refléter les meilleures pratiques internationales adaptées au contexte haïtien.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 flex-shrink-0">check_circle</span>
+                        <div>
+                            <p class="font-semibold text-blue-900 dark:text-blue-200 text-sm">Application obligatoire</p>
+                            <p class="text-blue-700 dark:text-blue-300 text-xs">Pour tous les projets soumis au CNIAH</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 flex-shrink-0">update</span>
+                        <div>
+                            <p class="font-semibold text-blue-900 dark:text-blue-200 text-sm">Mises à jour régulières</p>
+                            <p class="text-blue-700 dark:text-blue-300 text-xs">Vérifiez la version la plus récente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Contact pour questions -->
+    <div class="mt-8 text-center">
+        <p class="text-gray-600 dark:text-gray-400 mb-3">
+            Questions sur les normes ou besoin d'assistance ?
+        </p>
+        <a href="mailto:normes@cniah.ht" 
+           class="inline-flex items-center gap-2 text-primary font-semibold hover:underline">
+            <span class="material-symbols-outlined">email</span>
+            normes@cniah.ht
+        </a>
+    </div>
+</div>
+
+<!-- Script pour recherche instantanée (optionnel) -->
+<script>
+    // Recherche avec debounce
+    let searchTimeout;
+    const searchInput = document.getElementById('search-input');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 500);
+        });
+    }
+</script>
+{% endblock %}

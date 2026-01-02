@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Publicité - CNIAH{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="@container">
+    <div class="flex flex-col gap-6 px-4 py-10 @[480px]:gap-8 @[864px]:flex-row container mx-auto">
+        <div class="flex flex-col gap-6 @[480px]:min-w-[400px] @[480px]:gap-8 @[864px]:justify-center">
+            <div class="flex flex-col gap-2 text-left">
+                <h1 class="text-[#121117] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
+                    Faites de la publicité avec nous et atteignez votre public cible
+                </h1>
+                <h2 class="text-[#121117] dark:text-gray-300 text-sm font-normal leading-normal @[480px]:text-base @[480px]:font-normal @[480px]:leading-normal">
+                    Connectez-vous avec une communauté dédiée de professionnels et de décideurs de votre secteur. Collaborez avec CNIAH pour augmenter la visibilité de votre marque.
+                </h2>
+            </div>
+            <a href="{% url 'contact:contact' %}" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 @[480px]:h-12 @[480px]:px-5 bg-primary text-[#121117] text-sm font-bold leading-normal tracking-[0.015em] @[480px]:text-base @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em] hover:opacity-90 transition-opacity">
+                <span class="truncate">Contactez-nous</span>
+            </a>
+        </div>
+        <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg @[480px]:h-auto @[480px]:min-w-[400px] @[864px]:w-full" 
+             style='background-image: url("https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1000&q=80");'></div>
+    </div>
+</div>
+
+<!-- Feature Section -->
+<div class="flex flex-col gap-10 px-4 py-10 @container container mx-auto">
+    <div class="flex flex-col gap-4">
+        <h2 class="text-[#121117] dark:text-white tracking-light text-[32px] font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em] max-w-[720px]">
+            Pourquoi faire de la publicité avec CNIAH ?
+        </h2>
+        <p class="text-[#121117] dark:text-gray-300 text-base font-normal leading-normal max-w-[720px]">
+            Tirez parti de notre plateforme pour interagir avec un public très ciblé et influent. Nous offrons une opportunité unique de positionner votre marque à l'avant-garde de l'industrie.
+        </p>
+    </div>
+    
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-3 p-0">
+        <div class="flex flex-1 gap-3 rounded-lg border border-gray-200/80 dark:border-gray-800/80 bg-white dark:bg-gray-900 p-4 flex-col">
+            <span class="material-symbols-outlined text-primary text-3xl">groups</span>
+            <div class="flex flex-col gap-1">
+                <h3 class="text-[#121117] dark:text-white text-base font-bold leading-tight">Public Ciblé</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Atteignez les professionnels et les dirigeants clés qui recherchent activement des solutions et des services comme les vôtres.</p>
+            </div>
+        </div>
+        
+        <div class="flex flex-1 gap-3 rounded-lg border border-gray-200/80 dark:border-gray-800/80 bg-white dark:bg-gray-900 p-4 flex-col">
+            <span class="material-symbols-outlined text-primary text-3xl">visibility</span>
+            <div class="flex flex-col gap-1">
+                <h3 class="text-[#121117] dark:text-white text-base font-bold leading-tight">Haute Visibilité</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                    Bénéficiez d'une exposition de premier plan sur notre site web, nos newsletters et nos événements, assurant que votre message soit vu.
+                </p>
+            </div>
+        </div>
+        
+        <div class="flex flex-1 gap-3 rounded-lg border border-gray-200/80 dark:border-gray-800/80 bg-white dark:bg-gray-900 p-4 flex-col">
+            <span class="material-symbols-outlined text-primary text-3xl">verified</span>
+            <div class="flex flex-col gap-1">
+                <h3 class="text-[#121117] dark:text-white text-base font-bold leading-tight">Association de Marque</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                    Associez votre marque à une organisation de confiance et respectée, renforçant votre crédibilité et votre réputation.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Advertising Formats -->
+<div class="container mx-auto px-4">
+    <h2 class="text-[#121117] dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">Nos formats publicitaires</h2>
+    
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
+        <div class="flex flex-col gap-3 pb-3">
+            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg bg-gray-200 dark:bg-gray-700" 
+                 style='background-image: url("https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=500&q=80");'></div>
+            <div>
+                <p class="text-[#121117] dark:text-white text-base font-medium leading-normal">Bannière sur la page d'accueil</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Emplacement premium sur notre page la plus visitée pour un impact et une reconnaissance de marque maximum.</p>
+            </div>
+        </div>
+        
+        <div class="flex flex-col gap-3 pb-3">
+            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg bg-gray-200 dark:bg-gray-700" 
+                 style='background-image: url("https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=500&q=80");'></div>
+            <div>
+                <p class="text-[#121117] dark:text-white text-base font-medium leading-normal">Article Sponsorisé</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Un article dédié à votre produit ou service, intégré de manière transparente à notre contenu.</p>
+            </div>
+        </div>
+        
+        <div class="flex flex-col gap-3 pb-3">
+            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg bg-gray-200 dark:bg-gray-700" 
+                 style='background-image: url("https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=500&q=80");'></div>
+            <div>
+                <p class="text-[#121117] dark:text-white text-base font-medium leading-normal">Présence dans l'E-Newsletter</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Présentez votre marque directement dans notre newsletter hebdomadaire envoyée à des milliers d'abonnés engagés.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Form Section -->
+<div class="flex flex-col gap-10 px-4 py-10 container mx-auto">
+    <div class="flex flex-col gap-4 text-center">
+        <h2 class="text-[#121117] dark:text-white text-3xl font-bold leading-tight tracking-[-0.015em]">Prêt à commencer ?</h2>
+        <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal max-w-2xl mx-auto">Contactez notre équipe publicitaire pour discuter de vos besoins et créer une campagne sur mesure qui atteint vos objectifs.</p>
+    </div>
+    
+    <div class="w-full max-w-2xl mx-auto rounded-lg border border-gray-200/80 dark:border-gray-800/80 bg-white dark:bg-gray-900 p-6 sm:p-8">
+        <form class="flex flex-col gap-6" method="post" action="{% url 'contact:contact' %}">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-2">
+                    <label class="text-[#121117] dark:text-white text-sm font-medium" for="name">Nom</label>
+                    <input class="h-10 px-3 rounded border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-[#121117] dark:text-white focus:ring-primary focus:border-primary" 
+                           id="name" name="name" type="text" required/>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[#121117] dark:text-white text-sm font-medium" for="company">Entreprise</label>
+                    <input class="h-10 px-3 rounded border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-[#121117] dark:text-white focus:ring-primary focus:border-primary" 
+                           id="company" name="company" type="text"/>
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-[#121117] dark:text-white text-sm font-medium" for="email">Email</label>
+                <input class="h-10 px-3 rounded border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-[#121117] dark:text-white focus:ring-primary focus:border-primary" 
+                       id="email" name="email" type="email" required/>
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-[#121117] dark:text-white text-sm font-medium" for="message">Message</label>
+                <textarea class="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-[#121117] dark:text-white focus:ring-primary focus:border-primary" 
+                          id="message" name="message" rows="4" required></textarea>
+            </div>
+            
+            <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-[#121117] text-base font-bold leading-normal tracking-[0.015em] w-full sm:w-auto sm:self-end hover:opacity-90 transition-opacity" 
+                    type="submit">
+                <span class="truncate">Envoyer le message</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

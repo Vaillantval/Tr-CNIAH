@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/pages/cniah/video_detail.html {% endcomment %}
+
+{% block title %}{{ video.title }} - CNIAH{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 lg:px-10 py-8">
+    <!-- Breadcrumb -->
+    <nav class="mb-8 text-sm">
+        <ol class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <li><a href="{% url 'core:home' %}" class="hover:text-primary">Accueil</a></li>
+            <li><span class="material-symbols-outlined text-xs">chevron_right</span></li>
+            <li><a href="{% url 'core:documents' %}" class="hover:text-primary">Documents</a></li>
+            <li><span class="material-symbols-outlined text-xs">chevron_right</span></li>
+            <li class="text-gray-900 dark:text-white font-medium">{{ video.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+            <!-- Video Player -->
+            <div class="aspect-video bg-black rounded-xl overflow-hidden mb-6 shadow-2xl">
+                {% if video.video_type == 'youtube' or video.video_type == 'vimeo' %}
+                    {% with embed_url=video.get_embed_url %}
+                        {% if embed_url %}
+                        <iframe 
+                            src="{{ embed_url }}"
+                            class="w-full h-full"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allowfullscreen
+                        ></iframe>
+                        {% else %}
+                        <div class="w-full h-full flex flex-col items-center justify-center text-white p-8 text-center">
+                            <span class="material-symbols-outlined text-6xl mb-4 opacity-50">error</span>
+                            <h3 class="text-xl font-bold mb-2">Erreur de chargement</h3>
+                            <p class="text-gray-400 mb-4">L'URL de la vidéo est invalide ou incorrecte.</p>
+                            <p class="text-sm text-gray-500">URL: {{ video.video_url }}</p>
+                        </div>
+                        {% endif %}
+                    {% endwith %}
+                {% elif video.video_file %}
+                <video controls class="w-full h-full" controlsList="nodownload">
+                    <source src="{{ video.video_file.url }}" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                </video>
+                {% else %}
+                <div class="w-full h-full flex flex-col items-center justify-center text-white p-8 text-center">
+                    <span class="material-symbols-outlined text-6xl mb-4 opacity-50">videocam_off</span>
+                    <h3 class="text-xl font-bold mb-2">Aucune vidéo disponible</h3>
+                    <p class="text-gray-400">Cette ressource n'a pas de vidéo associée.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Video Info -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                {% if video.series_name %}
+                <span class="text-xs font-bold text-primary uppercase tracking-wider">{{ video.series_name }}</span>
+                {% endif %}
+                
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mt-2 mb-4">
+                    {% if video.episode_number %}Épisode {{ video.episode_number }}: {% endif %}{{ video.title }}
+                </h1>
+
+                <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6 flex-wrap">
+                    {% if video.duration %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">schedule</span>
+                        {{ video.duration }}
+                    </span>
+                    {% endif %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">visibility</span>
+                        {{ video.view_count }} vue{{ video.view_count|pluralize }}
+                    </span>
+                    {% if video.category %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">folder</span>
+                        {{ video.category.name }}
+                    </span>
+                    {% endif %}
+                    {% if video.created_at %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">calendar_today</span>
+                        {{ video.created_at|date:"d M Y" }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="prose dark:prose-invert max-w-none">
+                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                        {{ video.description }}
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    {% if video.video_type == 'youtube' %}
+                    <a href="{{ video.video_url }}" target="_blank" rel="noopener noreferrer" 
+                       class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm">open_in_new</span>
+                        <span>Voir sur YouTube</span>
+                    </a>
+                    {% elif video.video_type == 'vimeo' %}
+                    <a href="{{ video.video_url }}" target="_blank" rel="noopener noreferrer" 
+                       class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm">open_in_new</span>
+                        <span>Voir sur Vimeo</span>
+                    </a>
+                    {% endif %}
+                    
+                    <button onclick="shareVideo()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium text-sm transition-colors">
+                        <span class="material-symbols-outlined text-sm">share</span>
+                        <span>Partager</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 sticky top-24">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Vidéos similaires</h3>
+                
+                <div class="flex flex-col gap-4">
+                    {% for related in related_videos %}
+                    <a href="{% url 'core:video_detail' related.slug %}" class="group flex gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+                        <div class="relative w-32 aspect-video rounded overflow-hidden flex-shrink-0 bg-gray-200">
+                            {% if related.thumbnail %}
+                            <img 
+                                src="{{ related.thumbnail.url }}" 
+                                alt="{{ related.title }}"
+                                class="w-full h-full object-cover"
+                            />
+                            {% else %}
+                            <div class="w-full h-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-gray-400">videocam</span>
+                            </div>
+                            {% endif %}
+                            <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-white text-2xl">play_circle</span>
+                            </div>
+                            {% if related.duration %}
+                            <div class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+                                {{ related.duration }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary transition-colors">
+                                {{ related.title }}
+                            </h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                {{ related.view_count }} vue{{ related.view_count|pluralize }}
+                            </p>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="text-sm text-gray-500 dark:text-gray-500 text-center py-4">
+                        Aucune vidéo similaire disponible.
+                    </p>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <a href="{% url 'core:documents' %}" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-lg bg-primary text-white hover:bg-primary/90 font-bold text-sm transition-all">
+                        <span class="material-symbols-outlined">library_books</span>
+                        <span>Voir tous les documents</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function shareVideo() {
+    const title = "{{ video.title|escapejs }}";
+    const url = window.location.href;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: title,
+            text: "Regardez cette vidéo : " + title,
+            url: url
+        }).catch(err => console.log('Erreur de partage:', err));
+    } else {
+        // Fallback: copier l'URL dans le presse-papier
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Lien copié dans le presse-papier !');
+        });
+    }
+}
+</script>
+{% endblock %}

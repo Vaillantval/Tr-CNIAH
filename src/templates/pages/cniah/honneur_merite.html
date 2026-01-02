@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Honneur et Mérite - CNIAH{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Section -->
+    <div class="relative rounded-lg overflow-hidden mb-12" style="height: 300px; background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);">
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+            <span class="material-symbols-outlined text-white text-6xl mb-4">military_tech</span>
+            <h1 class="text-white text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em] mb-3">
+                Honneur et Mérite
+            </h1>
+            <p class="text-white/90 text-lg max-w-2xl">
+                Reconnaître l'excellence et célébrer les réalisations exceptionnelles de nos membres
+            </p>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="relative">
+        <!-- Ligne verticale -->
+        <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-primary/30 hidden md:block"></div>
+
+        {% for honneur in honneurs %}
+        <div class="relative mb-12 md:pl-20">
+            <!-- Année badge -->
+            <div class="absolute left-0 top-0 bg-primary text-white rounded-full w-16 h-16 flex items-center justify-center font-bold text-lg shadow-lg hidden md:flex">
+                {{ honneur.annee }}
+            </div>
+            
+            <!-- Année mobile -->
+            <div class="md:hidden mb-4">
+                <span class="inline-block bg-primary text-white px-4 py-2 rounded-full font-bold">
+                    {{ honneur.annee }}
+                </span>
+            </div>
+
+            <!-- Contenu -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow">
+                <h2 class="text-gray-900 dark:text-white text-2xl font-bold mb-4">
+                    {{ honneur.titre }}
+                </h2>
+                
+                <div class="prose prose-gray dark:prose-invert max-w-none mb-6">
+                    {{ honneur.description|linebreaks }}
+                </div>
+
+                <!-- Contenu multimédia -->
+                {% if honneur.type_contenu == 'video' and honneur.video_url %}
+                    <div class="aspect-video bg-gray-900 rounded-lg overflow-hidden">
+                        {% if 'youtube.com' in honneur.video_url or 'youtu.be' in honneur.video_url %}
+                            {% with video_id=honneur.video_url|slice:"-11:" %}
+                            <iframe class="w-full h-full" src="https://www.youtube.com/embed/{{ video_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            {% endwith %}
+                        {% elif 'vimeo.com' in honneur.video_url %}
+                            <iframe class="w-full h-full" src="{{ honneur.video_url }}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                        {% endif %}
+                    </div>
+                    
+                {% elif honneur.type_contenu == 'images' and honneur.images.exists %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {% for image in honneur.images.all %}
+                        <div class="group relative aspect-square rounded-lg overflow-hidden cursor-pointer" onclick="openImageModal{{ honneur.id }}({{ forloop.counter0 }})">
+                            <img src="{{ image.image.url }}" alt="{{ image.legende }}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
+                            {% if image.legende %}
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                                <p class="text-white text-sm">{{ image.legende }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Modal pour images -->
+                    <div id="imageModal{{ honneur.id }}" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+                        <button onclick="closeImageModal{{ honneur.id }}()" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+                            <span class="material-symbols-outlined text-4xl">close</span>
+                        </button>
+                        
+                        <button onclick="prevImage{{ honneur.id }}()" class="absolute left-4 text-white hover:text-gray-300 z-10">
+                            <span class="material-symbols-outlined text-5xl">chevron_left</span>
+                        </button>
+                        
+                        <button onclick="nextImage{{ honneur.id }}()" class="absolute right-4 text-white hover:text-gray-300 z-10">
+                            <span class="material-symbols-outlined text-5xl">chevron_right</span>
+                        </button>
+
+                        <div class="max-w-5xl w-full">
+                            {% for image in honneur.images.all %}
+                            <div id="modalImage{{ honneur.id }}_{{ forloop.counter0 }}" class="{% if not forloop.first %}hidden{% endif %}">
+                                <img src="{{ image.image.url }}" alt="{{ image.legende }}" class="w-full h-auto max-h-[85vh] object-contain">
+                                {% if image.legende %}
+                                <p class="text-white text-center mt-4 text-lg">{{ image.legende }}</p>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <script>
+                        let currentIndex{{ honneur.id }} = 0;
+                        const totalImages{{ honneur.id }} = {{ honneur.images.count }};
+                        
+                        function openImageModal{{ honneur.id }}(index) {
+                            currentIndex{{ honneur.id }} = index;
+                            document.getElementById('imageModal{{ honneur.id }}').classList.remove('hidden');
+                            showImage{{ honneur.id }}(index);
+                        }
+                        
+                        function closeImageModal{{ honneur.id }}() {
+                            document.getElementById('imageModal{{ honneur.id }}').classList.add('hidden');
+                        }
+                        
+                        function showImage{{ honneur.id }}(index) {
+                            for (let i = 0; i < totalImages{{ honneur.id }}; i++) {
+                                document.getElementById('modalImage{{ honneur.id }}_' + i).classList.add('hidden');
+                            }
+                            document.getElementById('modalImage{{ honneur.id }}_' + index).classList.remove('hidden');
+                        }
+                        
+                        function nextImage{{ honneur.id }}() {
+                            currentIndex{{ honneur.id }} = (currentIndex{{ honneur.id }} + 1) % totalImages{{ honneur.id }};
+                            showImage{{ honneur.id }}(currentIndex{{ honneur.id }});
+                        }
+                        
+                        function prevImage{{ honneur.id }}() {
+                            currentIndex{{ honneur.id }} = (currentIndex{{ honneur.id }} - 1 + totalImages{{ honneur.id }}) % totalImages{{ honneur.id }};
+                            showImage{{ honneur.id }}(currentIndex{{ honneur.id }});
+                        }
+                        
+                        // Keyboard navigation
+                        document.addEventListener('keydown', function(e) {
+                            if (!document.getElementById('imageModal{{ honneur.id }}').classList.contains('hidden')) {
+                                if (e.key === 'ArrowRight') nextImage{{ honneur.id }}();
+                                if (e.key === 'ArrowLeft') prevImage{{ honneur.id }}();
+                                if (e.key === 'Escape') closeImageModal{{ honneur.id }}();
+                            }
+                        });
+                    </script>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not honneurs %}
+    <div class="text-center py-20">
+        <span class="material-symbols-outlined text-gray-400 text-8xl mb-6">emoji_events</span>
+        <h2 class="text-gray-600 dark:text-gray-400 text-2xl font-bold mb-2">Aucune distinction pour le moment</h2>
+        <p class="text-gray-500 dark:text-gray-500">Les honneurs et mérites seront ajoutés prochainement.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

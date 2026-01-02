@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/pages/cniah/membership.html {% endcomment %}
+
+{% block title %}Adhésion - CNIAH{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="container mx-auto px-4 pt-8 md:pt-16 pb-12">
+    <div class="flex flex-wrap justify-between gap-4">
+        <div class="flex min-w-72 flex-col gap-3">
+            <p class="text-[#121117] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Devenir Membre du CNIAH</p>
+            <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">Rejoignez notre réseau de professionnels et découvrez les critères d'admission pour les membres nationaux et internationaux.</p>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex py-3 mt-8">
+        <div class="flex h-10 w-full flex-row items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+            <label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white has-[:checked]:dark:bg-background-dark has-[:checked]:shadow-[0_0_4px_rgba(0,0,0,0.1)] has-[:checked]:text-[#121117] dark:has-[:checked]:text-white text-gray-600 dark:text-gray-400 text-sm font-medium leading-normal transition-colors duration-200">
+                <span class="truncate">Professionnels Nationaux</span>
+                <input checked class="invisible w-0" name="membership-type" type="radio" value="national" onchange="showTab('national')"/>
+            </label>
+            <label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white has-[:checked]:dark:bg-background-dark has-[:checked]:shadow-[0_0_4px_rgba(0,0,0,0.1)] has-[:checked]:text-[#121117] dark:has-[:checked]:text-white text-gray-600 dark:text-gray-400 text-sm font-medium leading-normal transition-colors duration-200">
+                <span class="truncate">Professionnels Internationaux</span>
+                <input class="invisible w-0" name="membership-type" type="radio" value="international" onchange="showTab('international')"/>
+            </label>
+        </div>
+    </div>
+
+    <!-- Content for National Professionals -->
+    <div id="national-content" class="tab-content">
+        <!-- Critères Section -->
+        <div class="mt-6 bg-primary/5 dark:bg-primary/10 rounded-xl p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-[#121117] dark:text-white mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">verified</span>
+                Critères d'Admission pour les Nationaux
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="bg-white dark:bg-background-dark rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-bold text-[#121117] dark:text-white mb-2 flex items-center gap-2">
+                        <span class="text-primary text-lg">A.</span>
+                        Les diplômés de la Faculté des Sciences
+                    </h3>
+                </div>
+                
+                <div class="bg-white dark:bg-background-dark rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-bold text-[#121117] dark:text-white mb-2 flex items-center gap-2">
+                        <span class="text-primary text-lg">B.</span>
+                        Les diplômés des universités haïtiennes reconnues par le MENFP
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Required Documents -->
+        <div class="mt-8">
+            <h3 class="text-xl font-bold text-[#121117] dark:text-white mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">folder_open</span>
+                Pièces Requises
+            </h3>
+            
+            <div class="bg-white dark:bg-background-dark rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">Ces candidats devront fournir :</p>
+                <ol class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">1</span>
+                        <span class="text-gray-700 dark:text-gray-300">Une photocopie recto-verso du ou des diplômes</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">2</span>
+                        <span class="text-gray-700 dark:text-gray-300">Une pièce d'identité nationale</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">3</span>
+                        <span class="text-gray-700 dark:text-gray-300">Leur curriculum Vitae</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">4</span>
+                        <span class="text-gray-700 dark:text-gray-300">Une photo d'identité de 2"×2"</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">5</span>
+                        <span class="text-gray-700 dark:text-gray-300">Le formulaire d'admission dûment rempli</span>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Dérogation Section -->
+        <div class="mt-8">
+            <h3 class="text-xl font-bold text-[#121117] dark:text-white mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">rule</span>
+                Dérogation pour les Nationaux
+            </h3>
+            
+            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-6 border border-amber-200 dark:border-amber-800">
+                <p class="text-sm text-amber-900 dark:text-amber-200 mb-4 font-medium">
+                    <span class="material-symbols-outlined text-base align-middle mr-1">info</span>
+                    Conformément à l'article 63 des Statuts du C.N.I.A.H.
+                </p>
+                
+                <p class="text-gray-700 dark:text-gray-300 mb-4">
+                    Les professionnels haïtiens ingénieurs ou architectes non membre de droit du C.N.I.A.H. pourront présenter leur candidature d'admission au Collège sous les conditions suivantes :
+                </p>
+                
+                <div class="space-y-4 mt-4">
+                    <div class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-bold">1</span>
+                        <div class="text-gray-700 dark:text-gray-300">
+                            <p class="font-medium mb-1">Critères académiques ou professionnels :</p>
+                            <ul class="list-disc list-inside space-y-1 text-sm ml-4">
+                                <li>Être détenteur d'un diplôme ou titre haïtien ou étranger non reconnu par le MENFP, <strong>OU</strong></li>
+                                <li>Pouvoir justifier de dix (10) ans d'activité professionnelle dans une branche du génie ou de l'architecture et faire état de références valables (études de projets, direction de travaux, etc.)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-bold">2</span>
+                        <p class="text-gray-700 dark:text-gray-300">
+                            <span class="font-medium">Parrainage :</span> Être présenté par trois (3) membres actifs du C.N.I.A.H.
+                        </p>
+                    </div>
+                </div>
+                
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-4 italic">
+                    * Ce candidat est soumis aux mêmes exigences de pièces mentionnées ci-dessus.
+                </p>
+            </div>
+        </div>
+
+        <!-- Documents à télécharger pour Nationaux -->
+        <div class="mt-8">
+            <h3 class="text-xl font-bold text-[#121117] dark:text-white mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">download</span>
+                Documents à Télécharger
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for doc in national_documents %}
+                <a href="{% url 'core:membership_document_download' doc.pk %}" 
+                   class="flex items-center justify-between p-4 rounded-lg border border-gray-200/80 dark:border-gray-800/80 bg-white dark:bg-background-dark hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 group">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center justify-center size-10 rounded-full bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined">{{ doc.icon }}</span>
+                        </div>
+                        <div>
+                            <p class="text-[#121117] dark:text-white font-medium text-sm">{{ doc.title }}</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-xs">{{ doc.get_file_extension }} - {{ doc.file_size }}</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-400 group-hover:text-primary transition-colors">download</span>
+                </a>
+                {% empty %}
+                <div class="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+                    <span class="material-symbols-outlined text-4xl mb-2 opacity-50">folder_open</span>
+                    <p>Aucun document disponible pour le moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Content for International Professionals -->
+    <div id="international-content" class="tab-content hidden">
+        <!-- Critères Section -->
+        <div class="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-[#121117] dark:text-white mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">public</span>
+                Critères d'Admission pour les Internationaux
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="bg-white dark:bg-background-dark rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-bold text-[#121117] dark:text-white mb-2 flex items-center gap-2">
+                        <span class="text-blue-600 dark:text-blue-400 text-lg">A.</span>
+                        Diplômes reconnus
+                    </h3>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm">
+                        Tout détenteur d'un diplôme étranger d'une université connue et cautionné par l'institution qui l'a embauché.
+                    </p>
+                </div>
+                
+                <div class="bg-white dark:bg-background-dark rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-bold text-[#121117] dark:text-white mb-2 flex items-center gap-2">
+                        <span class="text-blue-600 dark:text-blue-400 text-lg">B.</span>
+                        Organisations internationales
+                    </h3>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm">
+                        Tout détenteur d'un diplôme étranger travaillant dans le cadre d'une organisation ou institution internationale reconnue par l'État haïtien et qui est cautionné par l'organisation qui l'a embauché.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Required Documents for International -->
+        <div class="mt-8">
+            <h3 class="text-xl font-bold text-[#121117] dark:text-white mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">folder_open</span>
+                Pièces Requises
+            </h3>
+            
+            <div class="bg-white dark:bg-background-dark rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">Ces candidats devront fournir :</p>
+                <ol class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">1</span>
+                        <span class="text-gray-700 dark:text-gray-300">Une photocopie recto-verso du ou des diplômes</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">2</span>
+                        <span class="text-gray-700 dark:text-gray-300">Des pièces d'identité valides (passeport, carte d'identité)</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">3</span>
+                        <span class="text-gray-700 dark:text-gray-300">Le curriculum Vitae</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">4</span>
+                        <span class="text-gray-700 dark:text-gray-300">Une photo d'identité de 2"×2"</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">5</span>
+                        <span class="text-gray-700 dark:text-gray-300">Le formulaire d'admission dûment rempli</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">6</span>
+                        <span class="text-gray-700 dark:text-gray-300 font-medium">Une lettre de support de l'institution qui les a engagés</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">7</span>
+                        <span class="text-gray-700 dark:text-gray-300 font-medium">Un permis de séjour qui devra être présenté dans un délai de quatre (4) mois</span>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Documents à télécharger pour Internationaux -->
+        <div class="mt-8">
+            <h3 class="text-xl font-bold text-[#121117] dark:text-white mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">download</span>
+                Documents à Télécharger
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for doc in international_documents %}
+                <a href="{% url 'core:membership_document_download' doc.pk %}" 
+                   class="flex items-center justify-between p-4 rounded-lg border border-gray-200/80 dark:border-gray-800/80 bg-white dark:bg-background-dark hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 group">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center justify-center size-10 rounded-full bg-blue-600/20 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined">{{ doc.icon }}</span>
+                        </div>
+                        <div>
+                            <p class="text-[#121117] dark:text-white font-medium text-sm">{{ doc.title }}</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-xs">{{ doc.get_file_extension }} - {{ doc.file_size }}</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">download</span>
+                </a>
+                {% empty %}
+                <div class="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+                    <span class="material-symbols-outlined text-4xl mb-2 opacity-50">folder_open</span>
+                    <p>Aucun document disponible pour le moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="mt-12 mb-8 px-6 py-10 bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-xl border border-primary/20">
+        <div class="text-center max-w-2xl mx-auto">
+            <span class="material-symbols-outlined text-primary text-5xl mb-4">contact_support</span>
+            <h3 class="text-2xl font-bold text-[#121117] dark:text-white mb-3">Des questions ?</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Si vous avez besoin d'aide ou d'informations supplémentaires concernant le processus d'adhésion, n'hésitez pas à nous contacter.
+            </p>
+            <a href="{% url 'contact:contact' %}" 
+               class="inline-flex items-center justify-center gap-2 rounded-lg h-12 px-8 bg-primary text-white text-base font-bold hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl">
+                <span class="material-symbols-outlined">mail</span>
+                <span>Contactez-nous</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(type) {
+    const nationalContent = document.getElementById('national-content');
+    const internationalContent = document.getElementById('international-content');
+    
+    if (type === 'national') {
+        nationalContent.classList.remove('hidden');
+        internationalContent.classList.add('hidden');
+    } else {
+        nationalContent.classList.add('hidden');
+        internationalContent.classList.remove('hidden');
+    }
+}
+
+// Animation d'apparition au scroll
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, {
+    threshold: 0.1
+});
+
+document.querySelectorAll('.tab-content > div').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+});
+</script>
+{% endblock %}

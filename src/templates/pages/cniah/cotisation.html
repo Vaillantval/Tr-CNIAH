@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cotisation et Contribution - CNIAH{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumbs -->
+    <div class="flex flex-wrap items-center gap-2 mb-6">
+        <a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary" href="{% url 'core:home' %}">Accueil</a>
+        <span class="text-gray-400 dark:text-gray-500 text-sm font-medium leading-normal">/</span>
+        <span class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Cotisation et Contribution</span>
+    </div>
+
+    <!-- Page Heading -->
+    <div class="mb-10">
+        <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] mb-3">
+            Cotisation et Contribution
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400 text-lg leading-normal">
+            Informations sur les frais d'inscription, cotisations annuelles et contributions spéciales pour les membres du CNIAH.
+        </p>
+    </div>
+
+    <!-- Section: Inscription et Cotisation Annuelle -->
+    <section class="mb-12">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="bg-primary/20 rounded-full size-12 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-2xl">account_balance_wallet</span>
+                </div>
+                <h2 class="text-gray-900 dark:text-white text-2xl font-bold">Inscription et Cotisation Annuelle</h2>
+            </div>
+
+            <div class="prose prose-gray dark:prose-invert max-w-none mb-6">
+                <p class="text-gray-700 dark:text-gray-300">
+                    Le Collège National des Ingénieurs et Architectes Haïtiens (C.N.I.A.H.) créé par <strong>Décret-loi Présidentiel en date du 25 mars 1974</strong>, paru au Moniteur le 8 avril 1974, regroupe les professionnels qui ont l'autorisation légale d'exercer dans les diverses branches du génie et de l'architecture en Haïti (Chapitre 2, Article 5 à 8).
+                </p>
+                <p class="text-gray-700 dark:text-gray-300">
+                    Dans le souci de vous permettre de vous mettre en règle avec la Loi et de rejoindre le groupe des professionnels du bâti, le C.N.I.A.H. vous invite à vous inscrire sur la liste des professionnels agréés.
+                </p>
+            </div>
+
+            <!-- Frais -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-primary/5 dark:bg-primary/10 rounded-lg p-4 border border-primary/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Frais d'inscription</p>
+                            <p class="text-gray-900 dark:text-white text-3xl font-bold">500 HTG</p>
+                        </div>
+                        <span class="material-symbols-outlined text-primary text-4xl">person_add</span>
+                    </div>
+                </div>
+                <div class="bg-primary/5 dark:bg-primary/10 rounded-lg p-4 border border-primary/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Cotisation annuelle</p>
+                            <p class="text-gray-900 dark:text-white text-3xl font-bold">2,500 HTG</p>
+                        </div>
+                        <span class="material-symbols-outlined text-primary text-4xl">calendar_today</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comptes Bancaires -->
+            <h3 class="text-gray-900 dark:text-white text-xl font-bold mb-4">Liste des Comptes Bancaires du C.N.I.A.H.</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- UNIBANK -->
+                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-primary text-3xl">account_balance</span>
+                        <h4 class="text-gray-900 dark:text-white text-lg font-bold">UNIBANK</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <div>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Compte Gourde</p>
+                            <p class="text-gray-900 dark:text-white font-mono text-lg">103 1021 1283 537</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Compte Dollar</p>
+                            <p class="text-gray-900 dark:text-white font-mono text-lg">103 1022 1283 545</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOGEBEL -->
+                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-primary text-3xl">account_balance</span>
+                        <h4 class="text-gray-900 dark:text-white text-lg font-bold">SOGEBEL</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <div>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Compte Gourde</p>
+                            <p class="text-gray-900 dark:text-white font-mono text-lg">02 71 12 65 91</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Compte Dollar</p>
+                            <p class="text-gray-900 dark:text-white font-mono text-lg">15 20 10 83 49</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Note importante -->
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <div class="flex gap-3">
+                    <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-500 flex-shrink-0">info</span>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm">
+                        <strong>Important :</strong> Merci de nous faire parvenir la copie de la fiche de dépôt avec le sceau de la banque comme reçu pour les archives du C.N.I.A.H. ainsi que toutes les autres pièces requises.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bouton téléchargement -->
+            {% if document %}
+            <div class="mt-6">
+                <a href="{{ document.fichier.url }}" download class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">
+                    <span class="material-symbols-outlined">download</span>
+                    <span>Télécharger la liste des comptes bancaires</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Section: Contribution Spéciale -->
+    <section>
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="bg-green-100 dark:bg-green-900/30 rounded-full size-12 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-500 text-2xl">volunteer_activism</span>
+                </div>
+                <h2 class="text-gray-900 dark:text-white text-2xl font-bold">Contribution Spéciale Annuelle</h2>
+            </div>
+
+            <div class="prose prose-gray dark:prose-invert max-w-none mb-6">
+                <p class="text-gray-700 dark:text-gray-300">
+                    Chers Membres du CNIAH,
+                </p>
+                <p class="text-gray-700 dark:text-gray-300">
+                    L'histoire du CNIAH, en particulier ses difficultés récentes, confirme indéniablement la nécessité de revoir ses besoins pour un fonctionnement efficace au service de ses membres et du pays, comme prévu par sa mission. Plusieurs réflexions ont été faites, plusieurs dispositions et initiatives ont été prises par le passé (recherche de Sponsors, organisation de la Biennale en 2015, organisation des Olympiades des Métiers de la Construction en 2017,...) pour assurer une autonomie financière du Bureau du CNIAH, mais les résultats n'ont pas été au rendez-vous.
+                </p>
+                <p class="text-gray-700 dark:text-gray-300">
+                    Nous vous invitons alors à participer à une <strong>cotisation annuelle spéciale</strong> pour soutenir le développement et le rayonnement de notre institution.
+                </p>
+            </div>
+
+            <!-- Montant contribution -->
+            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-6 border border-green-200 dark:border-green-800 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-1">Contribution annuelle spéciale</p>
+                        <p class="text-gray-900 dark:text-white text-4xl font-bold">240 USD</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">Par membre et par an</p>
+                    </div>
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-500 text-6xl">paid</span>
+                </div>
+            </div>
+
+            <!-- Même tableau de comptes -->
+            <p class="text-gray-700 dark:text-gray-300 mb-4">Utilisez les mêmes comptes bancaires mentionnés ci-dessus pour effectuer votre contribution.</p>
+        </div>
+    </section>
+</div>
+{% endblock %}

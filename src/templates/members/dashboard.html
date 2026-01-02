@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/members/dashboard.html {% endcomment %}
+
+{% block title %}Dashboard - Espace Membre CNIAH{% endblock %}
+
+{% block content %}
+<div class="flex flex-1 min-h-screen">
+    <!-- Sidebar (composant réutilisable) -->
+    {% include 'members/components/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 lg:p-10 bg-background-light dark:bg-background-dark">
+        <div class="max-w-6xl mx-auto">
+            <!-- Page Heading -->
+            <div class="flex flex-wrap justify-between gap-3 mb-8">
+                <div class="flex min-w-72 flex-col gap-1">
+                    <h1 class="text-[#121117] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">
+                        Bonjour, {{ request.user.first_name }} !
+                    </h1>
+                    <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">
+                        Bienvenue dans votre espace membre
+                    </p>
+                </div>
+            </div>
+
+            <!-- Alert Card - Cotisation -->
+            {% if derniere_cotisation %}
+            <div class="mb-10">
+                <div class="flex flex-col md:flex-row items-stretch justify-between gap-4 rounded-xl 
+                            {% if derniere_cotisation.statut == 'payee' %}bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800{% else %}bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800{% endif %} 
+                            p-6 shadow-lg">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="material-symbols-outlined {% if derniere_cotisation.statut == 'payee' %}text-green-600{% else %}text-amber-600{% endif %}">
+                                {% if derniere_cotisation.statut == 'payee' %}check_circle{% else %}warning{% endif %}
+                            </span>
+                            <p class="{% if derniere_cotisation.statut == 'payee' %}text-green-900 dark:text-green-200{% else %}text-amber-900 dark:text-amber-200{% endif %} 
+                                      text-sm font-bold tracking-wide">
+                                {% if derniere_cotisation.statut == 'payee' %}COTISATION À JOUR{% else %}ALERTE COTISATION{% endif %}
+                            </p>
+                        </div>
+                        <p class="text-[#121117] dark:text-white text-lg font-bold leading-tight mb-2">
+                            {% if derniere_cotisation.statut == 'payee' %}
+                                Votre cotisation est active jusqu'au {{ derniere_cotisation.date_fin|date:"d M Y" }}
+                            {% else %}
+                                Votre cotisation doit être renouvelée
+                            {% endif %}
+                        </p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                            Période : {{ derniere_cotisation.date_debut|date:"d M Y" }} - {{ derniere_cotisation.date_fin|date:"d M Y" }}
+                        </p>
+                        {% if derniere_cotisation.statut != 'payee' %}
+                        <a href="{% url 'members:mes_cotisations' %}" 
+                           class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-sm transition-colors">
+                            <span>Renouveler maintenant</span>
+                            <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <!-- Card: Certificat -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="material-symbols-outlined text-primary text-3xl">workspace_premium</span>
+                        {% if request.user.has_valid_certification %}
+                        <span class="size-3 rounded-full bg-green-500"></span>
+                        {% else %}
+                        <span class="size-3 rounded-full bg-red-500"></span>
+                        {% endif %}
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                        {% if request.user.has_valid_certification %}Valide{% else %}Expiré{% endif %}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Certificat professionnel</p>
+                    <a href="{% url 'members:mon_certificat' %}" class="text-primary hover:underline text-sm font-medium">
+                        Voir mon certificat →
+                    </a>
+                </div>
+
+                <!-- Card: Numéro de membre -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="material-symbols-outlined text-primary text-3xl">badge</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                        {{ request.user.membre_actif.numero }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Numéro de membre</p>
+                </div>
+
+                <!-- Card: Documents -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="material-symbols-outlined text-primary text-3xl">folder</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                        {{ documents.count }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Documents disponibles</p>
+                    <a href="{% url 'members:documents' %}" class="text-primary hover:underline text-sm font-medium">
+                        Consulter →
+                    </a>
+                </div>
+
+                <!-- Card: Opportunités -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="material-symbols-outlined text-primary text-3xl">work</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                        {{ opportunites.count }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Nouvelles opportunités</p>
+                    <a href="{% url 'members:opportunites' %}" class="text-primary hover:underline text-sm font-medium">
+                        Découvrir →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Section Header -->
+            <h2 class="text-[#121117] dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] mb-4">
+                Aperçu rapide
+            </h2>
+
+            <!-- Grid of Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Card: Opportunités récentes -->
+                <div class="flex flex-col gap-4 rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg border border-gray-200/80 dark:border-gray-700">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-primary/20 dark:bg-primary/30 p-2 rounded-full">
+                            <span class="material-symbols-outlined text-primary">work</span>
+                        </div>
+                        <h3 class="text-[#121117] dark:text-white text-base font-bold leading-tight">Opportunités</h3>
+                    </div>
+                    <div class="space-y-2">
+                        {% for opp in opportunites %}
+                        <div class="py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ opp.titre }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ opp.entreprise }}</p>
+                        </div>
+                        {% empty %}
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Aucune opportunité disponible</p>
+                        {% endfor %}
+                    </div>
+                    <a class="text-primary text-sm font-bold leading-normal mt-auto hover:underline" 
+                       href="{% url 'members:opportunites' %}">
+                        Voir toutes les opportunités
+                    </a>
+                </div>
+
+                <!-- Card: Documents récents -->
+                <div class="flex flex-col gap-4 rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg border border-gray-200/80 dark:border-gray-700">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-primary/20 dark:bg-primary/30 p-2 rounded-full">
+                            <span class="material-symbols-outlined text-primary">folder</span>
+                        </div>
+                        <h3 class="text-[#121117] dark:text-white text-base font-bold leading-tight">Documents</h3>
+                    </div>
+                    <div class="space-y-2">
+                        {% for doc in documents %}
+                        <div class="py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ doc.titre }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ doc.get_categorie_display }}</p>
+                        </div>
+                        {% empty %}
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Aucun document disponible</p>
+                        {% endfor %}
+                    </div>
+                    <a class="text-primary text-sm font-bold leading-normal mt-auto hover:underline" 
+                       href="{% url 'members:documents' %}">
+                        Accéder aux documents
+                    </a>
+                </div>
+
+                <!-- Card: Forum -->
+                <div class="flex flex-col gap-4 rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg border border-gray-200/80 dark:border-gray-700">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-primary/20 dark:bg-primary/30 p-2 rounded-full">
+                            <span class="material-symbols-outlined text-primary">forum</span>
+                        </div>
+                        <h3 class="text-[#121117] dark:text-white text-base font-bold leading-tight">Forum</h3>
+                    </div>
+                    <p class="text-sm font-normal leading-normal text-gray-600 dark:text-gray-400 flex-1">
+                        Échangez avec d'autres professionnels et participez aux discussions de la communauté.
+                    </p>
+                    <a class="text-primary text-sm font-bold leading-normal mt-auto hover:underline" 
+                       href="{% url 'members:forum' %}">
+                        Accéder au forum
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Sidebar Toggle -->
+            <div class="lg:hidden fixed bottom-6 right-6 z-50">
+                <button id="mobile-menu-toggle" 
+                        class="flex items-center justify-center size-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90">
+                    <span class="material-symbols-outlined text-2xl">menu</span>
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// Mobile menu toggle
+document.getElementById('mobile-menu-toggle')?.addEventListener('click', function() {
+    const sidebar = document.querySelector('aside');
+    sidebar?.classList.toggle('hidden');
+    sidebar?.classList.toggle('fixed');
+    sidebar?.classList.toggle('z-50');
+    sidebar?.classList.toggle('lg:flex');
+});
+</script>
+{% endblock %}

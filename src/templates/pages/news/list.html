@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src\templates\pages\news\list.html {% endcomment %}
+{% block title %}Actualités - CNIAH{% endblock %}
+
+{% block content %}
+<div class="bg-primary/5 dark:bg-primary/10 py-8">
+    <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Actualités</h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400">Restez informé des dernières nouvelles du CNIAH et du secteur</p>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-12">
+    <!-- Filtres -->
+    <div class="mb-8 flex flex-wrap gap-4 items-center">
+        <div class="flex gap-2">
+            <a href="{% url 'news:list' %}" class="px-4 py-2 rounded-lg {% if not current_type and not current_category %}bg-primary text-white{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors">
+                Toutes
+            </a>
+            <a href="{% url 'news:list' %}?type=national" class="px-4 py-2 rounded-lg {% if current_type == 'national' %}bg-primary text-white{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors">
+                Nationales
+            </a>
+            <a href="{% url 'news:list' %}?type=international" class="px-4 py-2 rounded-lg {% if current_type == 'international' %}bg-primary text-white{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors">
+                Internationales
+            </a>
+        </div>
+        
+        {% if categories %}
+        <div class="flex-1">
+            <select onchange="window.location.href='?category=' + this.value" class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
+                <option value="">Toutes les catégories</option>
+                {% for category in categories %}
+                <option value="{{ category.slug }}" {% if current_category == category.slug %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Liste des articles -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for article in articles %}
+        <article class="flex flex-col gap-4 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
+            <a href="{% url 'news:detail' article.slug %}" class="block">
+                <div class="w-full aspect-[16/9] bg-gray-200 dark:bg-gray-700 overflow-hidden relative">
+                    {% if article.image %}
+                    <img src="{{ article.image.url }}" alt="{{ article.title }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                        <span class="material-symbols-outlined text-6xl text-primary/30">article</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Badge de type -->
+                    <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold text-white {% if article.news_type == 'national' %}bg-primary{% else %}bg-blue-600{% endif %}">
+                        {% if article.news_type == 'national' %}National{% else %}International{% endif %}
+                    </span>
+                </div>
+                
+                <div class="p-4">
+                    {% if article.category %}
+                    <span class="text-xs font-bold text-primary uppercase">{{ article.category.name }}</span>
+                    {% endif %}
+                    
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mt-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        {{ article.title }}
+                    </h2>
+                    
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-3">
+                        {{ article.excerpt }}
+                    </p>
+                    
+                    <div class="flex items-center justify-between mt-4 text-xs text-gray-500 dark:text-gray-500">
+                        <span>{{ article.published_at|date:"d M Y" }}</span>
+                        {% if article.author %}
+                        <span>Par {{ article.author }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </article>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">article</span>
+            <p class="text-xl text-gray-500 dark:text-gray-400">Aucune actualité disponible pour le moment.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="mt-12 flex justify-center gap-2">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if current_type %}&type={{ current_type }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+            Première
+        </a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+            Précédent
+        </a>
+        {% endif %}
+
+        <span class="px-4 py-2 rounded-lg bg-primary text-white">
+            Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+            Suivant
+        </a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+            Dernière
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

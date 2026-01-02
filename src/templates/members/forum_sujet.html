@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/members/forum_sujet.html {% endcomment %}
+
+{% block title %}{{ sujet.titre }} - Forum CNIAH{% endblock %}
+
+{% block content %}
+<div class="flex flex-1 min-h-screen">
+    <!-- Sidebar -->
+    {% include 'members/components/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 lg:p-10 bg-background-light dark:bg-background-dark">
+        <div class="max-w-5xl mx-auto">
+            <!-- Breadcrumb -->
+            <div class="mb-6 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <a href="{% url 'members:forum' %}" class="hover:text-primary transition-colors">
+                    Forum
+                </a>
+                <span class="material-symbols-outlined text-base">chevron_right</span>
+                <a href="{% url 'members:forum_categorie' sujet.categorie.id %}" 
+                   class="hover:text-primary transition-colors">
+                    {{ sujet.categorie.nom }}
+                </a>
+                <span class="material-symbols-outlined text-base">chevron_right</span>
+                <span class="font-medium text-gray-700 dark:text-gray-300 truncate">
+                    {{ sujet.titre }}
+                </span>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200{% else %}bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200{% endif %}">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-xl">
+                            {% if message.tags == 'success' %}check_circle{% else %}info{% endif %}
+                        </span>
+                        <p class="text-sm font-medium">{{ message }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Subject Header Card -->
+            <div class="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-xl border border-primary/20 dark:border-primary/30 p-6">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="size-12 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-2xl text-primary">
+                            {{ sujet.categorie.icone }}
+                        </span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h1 class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mb-2">
+                            {% if sujet.epingle %}
+                            <span class="text-amber-500 mr-2">📌</span>
+                            {% endif %}
+                            {% if sujet.verrouille %}
+                            <span class="text-red-500 mr-2">🔒</span>
+                            {% endif %}
+                            {{ sujet.titre }}
+                        </h1>
+                        <div class="flex flex-wrap items-center gap-4 text-sm">
+                            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                                <span class="material-symbols-outlined text-base">visibility</span>
+                                <span>{{ sujet.vues }} vue{{ sujet.vues|pluralize }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                                <span class="material-symbols-outlined text-base">chat_bubble</span>
+                                <span>{{ reponses.count }} réponse{{ reponses.count|pluralize }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                                <span class="material-symbols-outlined text-base">schedule</span>
+                                <span>{{ sujet.date_creation|date:"d M Y à H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Original Post -->
+            <div class="mb-6 bg-white dark:bg-gray-800 rounded-xl border-2 border-primary/20 dark:border-primary/30 shadow-sm overflow-hidden">
+                <!-- Author Header -->
+                <div class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 border-2 border-primary/30"
+                             style='background-image: url("https://ui-avatars.com/api/?name={{ sujet.auteur.get_full_name|urlencode }}&background=d0bb95&color=121117");'>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white">
+                                {{ sujet.auteur.get_full_name }}
+                            </h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {% if sujet.auteur.membre_actif %}
+                                    {{ sujet.auteur.membre_actif.titre }}
+                                {% else %}
+                                    Membre CNIAH
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="text-right text-sm text-gray-500 dark:text-gray-400">
+                            <p>{{ sujet.date_creation|date:"d M Y" }}</p>
+                            <p>{{ sujet.date_creation|date:"H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post Content -->
+                <div class="p-6">
+                    <div class="prose prose-sm md:prose-base dark:prose-invert max-w-none">
+                        {{ sujet.contenu|linebreaks }}
+                    </div>
+                </div>
+
+                <!-- Post Footer -->
+                <div class="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-3">
+                    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>Message original</span>
+                        {% if sujet.date_modification != sujet.date_creation %}
+                        <span>Modifié le {{ sujet.date_modification|date:"d M Y à H:i" }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Responses Section Header -->
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                    Réponses ({{ reponses.count }})
+                </h2>
+            </div>
+
+            <!-- Responses List -->
+            <div class="space-y-4 mb-8">
+                {% for reponse in reponses %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                    <!-- Author Header -->
+                    <div class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-gray-300 dark:border-gray-600"
+                                 style='background-image: url("https://ui-avatars.com/api/?name={{ reponse.auteur.get_full_name|urlencode }}&background=random&color=fff");'>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">
+                                    {{ reponse.auteur.get_full_name }}
+                                </h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {% if reponse.auteur.membre_actif %}
+                                        {{ reponse.auteur.membre_actif.titre }}
+                                    {% else %}
+                                        Membre CNIAH
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="text-right text-xs text-gray-500 dark:text-gray-400">
+                                <p>{{ reponse.date_creation|date:"d M Y" }}</p>
+                                <p>{{ reponse.date_creation|date:"H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Response Content -->
+                    <div class="p-6">
+                        <div class="prose prose-sm dark:prose-invert max-w-none">
+                            {{ reponse.contenu|linebreaks }}
+                        </div>
+                    </div>
+
+                    <!-- Response Footer -->
+                    {% if reponse.date_modification != reponse.date_creation %}
+                    <div class="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-2">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            Modifié le {{ reponse.date_modification|date:"d M Y à H:i" }}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
+                    <span class="material-symbols-outlined text-5xl text-gray-400 mb-3">chat_bubble_outline</span>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Aucune réponse pour le moment. Soyez le premier à répondre !
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Reply Form -->
+            {% if not sujet.verrouille %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-2xl">reply</span>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                            Ajouter une réponse
+                        </h3>
+                    </div>
+                </div>
+
+                <form method="POST" class="p-6">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="contenu" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                            Votre réponse
+                        </label>
+                        <textarea
+                            id="contenu"
+                            name="contenu"
+                            rows="6"
+                            required
+                            placeholder="Écrivez votre réponse ici... Soyez respectueux et constructif."
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent resize-none"></textarea>
+                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            💡 Astuce : Soyez clair et précis dans votre réponse pour aider la communauté.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span class="material-symbols-outlined text-base">info</span>
+                            <span>Respectez les règles du forum</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="{% url 'members:forum_categorie' sujet.categorie.id %}"
+                               class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium text-sm transition-colors">
+                                Annuler
+                            </a>
+                            <button type="submit"
+                                    class="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-sm transition-colors shadow-lg">
+                                <span class="material-symbols-outlined text-base">send</span>
+                                <span>Publier ma réponse</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <!-- Locked Message -->
+            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+                <div class="flex gap-4">
+                    <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-3xl">lock</span>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-bold text-amber-900 dark:text-amber-200 mb-2">
+                            Sujet verrouillé
+                        </h3>
+                        <p class="text-sm text-amber-700 dark:text-amber-300">
+                            Ce sujet a été verrouillé par un modérateur. Vous ne pouvez plus y répondre.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Back Button -->
+            <div class="mt-8 text-center">
+                <a href="{% url 'members:forum_categorie' sujet.categorie.id %}"
+                   class="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg font-bold transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    <span>Retour à {{ sujet.categorie.nom }}</span>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+/* Style pour le contenu formaté */
+.prose {
+    color: inherit;
+}
+.prose p {
+    margin-bottom: 1em;
+}
+.prose strong {
+    font-weight: 600;
+}
+.dark .prose-invert {
+    color: inherit;
+}
+</style>
+{% endblock %}

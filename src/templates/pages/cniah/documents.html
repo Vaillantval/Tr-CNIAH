@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% comment %} src/templates/pages/cniah/documents.html {% endcomment %}
+{% block title %}Documents de Référence - CNIAH{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 lg:px-10 py-8 flex flex-col gap-10">
+    <!-- Page Heading & Search -->
+    <section class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between border-b border-gray-200 dark:border-gray-700 pb-8">
+        <div class="flex flex-col gap-4 max-w-2xl">
+            <h1 class="text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white">
+                Documents de Référence
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
+                Consultez notre bibliothèque de guides pratiques, manuels techniques et vidéos éducatives pour la construction et l'architecture en Haïti.
+            </p>
+        </div>
+        <div class="w-full md:w-auto md:min-w-[320px]">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-gray-500">search</span>
+                </div>
+                <input 
+                    class="block w-full pl-10 pr-4 py-3 border-none rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-primary sm:text-sm shadow-sm" 
+                    placeholder="Rechercher un document..." 
+                    type="text"
+                    id="searchInput"
+                />
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Series Section -->
+    {% if video_series %}
+    <section class="flex flex-col gap-6">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-3xl">play_circle</span>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Série Éducative : ZAFE GOUDOUGOUDOU</h2>
+        </div>
+        <div class="bg-primary/10 dark:bg-primary/5 rounded-2xl p-6 md:p-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                {% for video in video_series %}
+                <a href="{% url 'core:video_detail' video.slug %}" class="group flex flex-col gap-3 cursor-pointer">
+                    <div class="relative w-full aspect-video rounded-xl overflow-hidden shadow-md bg-gray-200">
+                        <img 
+                            src="{{ video.thumbnail.url }}" 
+                            alt="{{ video.title }}"
+                            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                            <span class="material-symbols-outlined text-white text-4xl opacity-90 drop-shadow-lg group-hover:scale-110 transition-transform">play_circle</span>
+                        </div>
+                        {% if video.duration %}
+                        <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            {{ video.duration }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex flex-col">
+                        {% if video.episode_number %}
+                        <span class="text-xs font-bold text-primary uppercase tracking-wider">Épisode {{ video.episode_number }}</span>
+                        {% endif %}
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white leading-tight group-hover:text-primary transition-colors">{{ video.title }}</h3>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Technical Documents Grid -->
+    <section class="flex flex-col gap-8 mt-4">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-3xl">library_books</span>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Guides Techniques et Manuels</h2>
+            </div>
+            <!-- Filters -->
+            <div class="flex gap-2 flex-wrap">
+                <a href="{% url 'core:documents' %}" 
+                   class="px-4 py-2 text-sm font-medium rounded-full transition-colors {% if not current_category %}bg-primary text-white{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %}">
+                    Tous
+                </a>
+                {% for category in categories %}
+                <a href="{% url 'core:documents' %}?category={{ category.slug }}" 
+                   class="px-4 py-2 text-sm font-medium rounded-full transition-colors {% if current_category == category.slug %}bg-primary text-white{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %}">
+                    {{ category.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for doc in documents %}
+            <article class="flex flex-col p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow group">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="p-3 rounded-lg {{ doc.get_icon_color }}">
+                        <span class="material-symbols-outlined">
+                            {% if doc.file_type == 'pdf' %}picture_as_pdf{% elif doc.file_type == 'doc' %}description{% elif doc.file_type == 'xls' %}table_chart{% elif doc.file_type == 'ppt' %}slideshow{% else %}folder_zip{% endif %}
+                        </span>
+                    </div>
+                    {% if doc.file_size %}
+                    <span class="text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                        {{ doc.file_type|upper }} • {{ doc.file_size }}
+                    </span>
+                    {% endif %}
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
+                    {{ doc.title }}
+                </h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 flex-1">
+                    {{ doc.description|truncatewords:25 }}
+                </p>
+                {% if doc.category %}
+                <span class="text-xs text-primary font-bold uppercase mb-4">{{ doc.category.name }}</span>
+                {% endif %}
+                <a href="{% url 'core:document_download' doc.slug %}" 
+                   class="w-full mt-auto flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-primary text-primary hover:bg-primary hover:text-white font-bold text-sm transition-all">
+                    <span>Télécharger</span>
+                    <span class="material-symbols-outlined text-lg">download</span>
+                </a>
+                {% if doc.download_count > 0 %}
+                <p class="text-xs text-gray-500 dark:text-gray-500 mt-2 text-center">
+                    {{ doc.download_count }} téléchargement{{ doc.download_count|pluralize }}
+                </p>
+                {% endif %}
+            </article>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">folder_open</span>
+                <p class="text-xl text-gray-500 dark:text-gray-400">Aucun document disponible dans cette catégorie.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Newsletter / Updates Section -->
+    <section class="mt-8 rounded-2xl bg-gray-900 dark:bg-black p-8 md:p-12 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-8 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div class="relative z-10 max-w-xl">
+            <h2 class="text-2xl md:text-3xl font-bold mb-3 text-white">Restez informé des mises à jour</h2>
+            <p class="text-gray-400 text-sm md:text-base">Recevez les nouveaux guides techniques et les mises à jour du code du bâtiment directement dans votre boîte mail.</p>
+        </div>
+        <form method="post" action="{% url 'core:newsletter_subscribe' %}" class="relative z-10 w-full md:w-auto flex flex-col sm:flex-row gap-3">
+            {% csrf_token %}
+            <input 
+                name="email"
+                class="px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary w-full md:w-64" 
+                placeholder="Votre email professionnel" 
+                type="email"
+                required
+            />
+            <button class="px-6 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-colors whitespace-nowrap" type="submit">
+                S'abonner
+            </button>
+        </form>
+    </section>
+</main>
+
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const articles = document.querySelectorAll('article');
+    
+    articles.forEach(article => {
+        const title = article.querySelector('h3').textContent.toLowerCase();
+        const description = article.querySelector('p').textContent.toLowerCase();
+        
+        if (title.includes(searchTerm) || description.includes(searchTerm)) {
+            article.style.display = '';
+        } else {
+            article.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% comment %} src/templates/members/components/sidebar.html {% endcomment %}
+{% load static %}
+
+<aside class="sticky top-[69px] hidden lg:flex h-[calc(100vh-69px)] w-64 flex-col border-r border-solid border-gray-200 dark:border-gray-700 bg-white dark:bg-background-dark p-4">
+    <div class="flex h-full flex-col justify-between">
+        <div class="flex flex-col gap-4">
+            <!-- User Info -->
+            <div class="flex gap-3">
+                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+                     style='background-image: url("{% if request.user.membre_actif.photo %}{{ request.user.membre_actif.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.get_full_name|urlencode }}&background=d0bb95&color=121117{% endif %}");'>
+                </div>
+                <div class="flex flex-col">
+                    <h1 class="text-[#121117] dark:text-white text-base font-medium leading-normal">
+                        {{ request.user.get_full_name }}
+                    </h1>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+                        {{ request.user.membre_actif.titre }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex flex-col gap-2">
+                <!-- Dashboard -->
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if request.resolver_match.url_name == 'dashboard' %}bg-primary/20 dark:bg-primary/30{% else %}hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}"
+                   href="{% url 'members:dashboard' %}">
+                    <span class="material-symbols-outlined text-[#121117] dark:text-white text-base">dashboard</span>
+                    <p class="text-[#121117] dark:text-white text-sm font-medium leading-normal">Tableau de Bord</p>
+                </a>
+
+                <!-- Mon Profil -->
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if request.resolver_match.url_name == 'mon_profil' %}bg-primary/20 dark:bg-primary/30{% else %}hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}"
+                   href="{% url 'members:mon_profil' %}">
+                    <span class="material-symbols-outlined text-[#121117] dark:text-gray-300 text-base">person</span>
+                    <p class="text-[#121117] dark:text-gray-300 text-sm font-medium leading-normal">Mon Profil</p>
+                </a>
+
+                <!-- Mon Certificat (NOUVEAU) -->
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if request.resolver_match.url_name == 'mon_certificat' %}bg-primary/20 dark:bg-primary/30{% else %}hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}"
+                   href="{% url 'members:mon_certificat' %}">
+                    <span class="material-symbols-outlined text-[#121117] dark:text-gray-300 text-base">workspace_premium</span>
+                    <p class="text-[#121117] dark:text-gray-300 text-sm font-medium leading-normal">Mon Certificat</p>
+                    {% if request.user.has_valid_certification %}
+                    <span class="ml-auto size-2 rounded-full bg-green-500"></span>
+                    {% else %}
+                    <span class="ml-auto size-2 rounded-full bg-red-500"></span>
+                    {% endif %}
+                </a>
+
+                <!-- Mes Cotisations -->
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if request.resolver_match.url_name == 'mes_cotisations' %}bg-primary/20 dark:bg-primary/30{% else %}hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}"
+                   href="{% url 'members:mes_cotisations' %}">
+                    <span class="material-symbols-outlined text-[#121117] dark:text-gray-300 text-base">credit_card</span>
+                    <p class="text-[#121117] dark:text-gray-300 text-sm font-medium leading-normal">Mes Cotisations</p>
+                </a>
+
+                <!-- Opportunités -->
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if request.resolver_match.url_name == 'opportunites' %}bg-primary/20 dark:bg-primary/30{% else %}hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}"
+                   href="{% url 'members:opportunites' %}">
+                    <span class="material-symbols-outlined text-[#121117] dark:text-gray-300 text-base">work</span>
+                    <p class="text-[#121117] dark:text-gray-300 text-sm font-medium leading-normal">Opportunités</p>
+                </a>
+
+                <!-- Documents -->
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if request.resolver_match.url_name == 'documents' %}bg-primary/20 dark:bg-primary/30{% else %}hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}"
+                   href="{% url 'members:documents' %}">
+                    <span class="material-symbols-outlined text-[#121117] dark:text-gray-300 text-base">folder</span>
+                    <p class="text-[#121117] dark:text-gray-300 text-sm font-medium leading-normal">Documents</p>
+                </a>
+
+                <!-- Forum -->
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'forum' in request.resolver_match.url_name %}bg-primary/20 dark:bg-primary/30{% else %}hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}"
+                   href="{% url 'members:forum' %}">
+                    <span class="material-symbols-outlined text-[#121117] dark:text-gray-300 text-base">forum</span>
+                    <p class="text-[#121117] dark:text-gray-300 text-sm font-medium leading-normal">Forum</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="flex flex-col gap-2">
+            <!-- Paramètres -->
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+               href="#">
+                <span class="material-symbols-outlined text-[#121117] dark:text-gray-300 text-base">settings</span>
+                <p class="text-[#121117] dark:text-gray-300 text-sm font-medium leading-normal">Paramètres</p>
+            </a>
+
+            <!-- Déconnexion -->
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10"
+               href="{% url 'members:deconnexion' %}">
+                <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-base">logout</span>
+                <p class="text-red-600 dark:text-red-400 text-sm font-medium leading-normal">Déconnexion</p>
+            </a>
+        </div>
+    </div>
+</aside>
