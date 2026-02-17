@@ -40,7 +40,7 @@ services:
     image: adminer
     container_name: cniah_adminer
     ports:
-      - "8081:8080"  # Port modifié pour éviter conflit
+      - "8081:8080" 
     depends_on:
       - db
     networks:
