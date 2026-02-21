@@ -826,3 +826,104 @@ class Sponsor(models.Model):
     
     def __str__(self):
         return f"{self.nom} ({self.get_niveau_display()})"
+
+# ============= DEMANDE D'ADHÉSION =============
+class DemandeAdhesion(models.Model):
+    """Formulaire de demande d'admission au CNIAH (membre-01)"""
+
+    TYPE_CHOICES = [
+        ('admission', 'Nouvelle admission'),
+        ('mise_a_jour', 'Mise à jour de statut'),
+    ]
+    STATUT_DEMANDE_CHOICES = [
+        ('en_attente', 'En attente'),
+        ('en_cours', "En cours d'examen"),
+        ('approuvee', 'Approuvée'),
+        ('rejetee', 'Rejetée'),
+    ]
+    STATUT_MEMBRE_CHOICES = [
+        ('membre', 'Membre'),
+        ('postulant', 'Postulant'),
+    ]
+
+    # Méta-données de la demande
+    type_demande = models.CharField(
+        max_length=20, choices=TYPE_CHOICES, default='admission',
+        verbose_name="Type de demande",
+    )
+    statut_demande = models.CharField(
+        max_length=20, choices=STATUT_DEMANDE_CHOICES, default='en_attente',
+        verbose_name="Statut de la demande",
+    )
+    statut_souhaite = models.CharField(
+        max_length=20, choices=STATUT_MEMBRE_CHOICES, default='postulant',
+        verbose_name="Statut souhaité",
+    )
+
+    # Informations personnelles
+    nom = models.CharField(max_length=100, verbose_name="Nom")
+    prenom = models.CharField(max_length=100, verbose_name="Prénom")
+    titre = models.CharField(max_length=100, verbose_name="Titre professionnel")
+    fonction = models.CharField(max_length=200, blank=True, verbose_name="Fonction")
+    nif = models.CharField(max_length=50, blank=True, verbose_name="NIF")
+    telephone = models.CharField(max_length=30, verbose_name="Téléphone")
+    email = models.EmailField(verbose_name="Adresse courriel")
+    adresse = models.TextField(verbose_name="Adresse")
+
+    # Formation
+    diplome_1 = models.CharField(max_length=200, verbose_name="Diplôme 1 (avec année)")
+    diplome_2 = models.CharField(max_length=200, blank=True, verbose_name="Diplôme 2 (avec année)")
+    cv_resume = models.TextField(blank=True, verbose_name="Curriculum Vitae (résumé)")
+
+    # Cotisations
+    don_montant = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        verbose_name="Don (montant en HTG)",
+    )
+
+    # Pièces jointes
+    photo_identite = models.ImageField(
+        upload_to='adhesion/photos/', blank=True, null=True,
+        verbose_name='Photo d\'identité 2"×2"',
+    )
+    copie_diplomes = models.FileField(
+        upload_to='adhesion/diplomes/', blank=True, null=True,
+        verbose_name="Copie du/des diplôme(s)",
+    )
+    piece_identite = models.FileField(
+        upload_to='adhesion/identites/', blank=True, null=True,
+        verbose_name="Pièce d'identité",
+    )
+    cv_fichier = models.FileField(
+        upload_to='adhesion/cvs/', blank=True, null=True,
+        verbose_name="CV (fichier)",
+    )
+    certificat_cniah = models.FileField(
+        upload_to='adhesion/certificats/', blank=True, null=True,
+        verbose_name="Certificat CNIAH",
+    )
+    lettre_support = models.FileField(
+        upload_to='adhesion/lettres/', blank=True, null=True,
+        verbose_name="Lettre de support",
+    )
+    permis_sejour = models.FileField(
+        upload_to='adhesion/permis/', blank=True, null=True,
+        verbose_name="Permis de séjour",
+    )
+    autres_documents = models.FileField(
+        upload_to='adhesion/autres/', blank=True, null=True,
+        verbose_name="Autres documents",
+    )
+
+    # Meta
+    date_soumission = models.DateTimeField(auto_now_add=True, verbose_name="Date de soumission")
+    notes_admin = models.TextField(blank=True, verbose_name="Notes administratives")
+
+    class Meta:
+        verbose_name = "Demande d'Adhésion"
+        verbose_name_plural = "Demandes d'Adhésion"
+        ordering = ['-date_soumission']
+
+    def __str__(self):
+        date_str = self.date_soumission.strftime('%d/%m/%Y') if self.date_soumission else ''
+        return f"{self.prenom} {self.nom} — {self.get_type_demande_display()} ({date_str})"

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% comment %} src/templates/pages/cniah/membres_actifs.html {% endcomment %}
 
 {% block title %}{{ page_config.titre|default:"Liste des Membres Actifs" }} - CNIAH{% endblock %}
 
@@ -18,9 +19,7 @@
             {{ page_config.titre|default:"Liste des Ingénieurs et Architectes Actifs" }}
         </h1>
         {% if page_config.introduction %}
-        <div class="prose prose-gray dark:prose-invert max-w-none">
-            {{ page_config.introduction|linebreaks }}
-        </div>
+        <div class="prose prose-gray dark:prose-invert max-w-none">{{ page_config.introduction|linebreaks }}</div>
         {% else %}
         <p class="text-gray-600 dark:text-gray-400 text-lg leading-normal">
             Consultez la liste complète des ingénieurs et architectes membres actifs du CNIAH.
@@ -39,7 +38,6 @@
                 <span class="material-symbols-outlined text-primary text-5xl">groups</span>
             </div>
         </div>
-        
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -49,7 +47,6 @@
                 <span class="material-symbols-outlined text-primary text-5xl">description</span>
             </div>
         </div>
-        
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -64,150 +61,212 @@
     <!-- Filtres et Recherche -->
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
         <form method="get" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Recherche -->
             <div>
                 <label class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">Rechercher</label>
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                    <input type="text" name="search" value="{{ search }}" placeholder="Nom, prénom ou numéro..." 
+                    <input type="text" name="search" value="{{ search }}" placeholder="Nom, prénom ou numéro..."
                            class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
                 </div>
             </div>
-
-            <!-- Filtre par titre -->
             <div>
                 <label class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">Filtrer par titre</label>
-                <select name="titre" 
+                <select name="titre"
                         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
                     <option value="">Tous les titres</option>
                     {% for titre in titres %}
-                    <option value="{{ titre.id }}" {% if titre_filter|add:0 == titre.id %}selected{% endif %}>
-                        {{ titre.nom }}
-                    </option>
+                    <option value="{{ titre.id }}" {% if titre_filter|add:0 == titre.id %}selected{% endif %}>{{ titre.nom }}</option>
                     {% endfor %}
                 </select>
             </div>
-
-            <!-- Boutons -->
-            <div class="md:col-span-2 flex gap-3">
-                <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">
-                    Appliquer les filtres
-                </button>
-                <a href="{% url 'core:membres_actifs' %}" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold">
-                    Réinitialiser
-                </a>
+            <!-- Mode d'affichage -->
+            <div class="md:col-span-2 flex flex-wrap items-center gap-3 justify-between">
+                <div class="flex gap-3">
+                    <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">Appliquer</button>
+                    <a href="{% url 'core:membres_actifs' %}" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold">Réinitialiser</a>
+                </div>
+                <!-- Toggle vue -->
+                <div class="flex gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                    <button type="button" onclick="setView('cards')" id="btn-cards"
+                            class="px-3 py-1.5 rounded-md text-sm font-medium transition-all bg-white dark:bg-gray-600 shadow text-gray-900 dark:text-white">
+                        <span class="material-symbols-outlined text-sm align-middle">grid_view</span> Cartes
+                    </button>
+                    <button type="button" onclick="setView('table')" id="btn-table"
+                            class="px-3 py-1.5 rounded-md text-sm font-medium transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                        <span class="material-symbols-outlined text-sm align-middle">table_rows</span> Tableau
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 
-    <!-- Tableau Desktop -->
-    <div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <table class="w-full">
-            <thead class="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Numéro</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nom</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Prénom</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Titre</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                {% for membre in membres %}
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="text-sm font-mono font-semibold text-primary">{{ membre.numero }}</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ membre.nom }}</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="text-sm text-gray-900 dark:text-white">{{ membre.prenom }}</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
-                            {{ membre.titre.nom }}
-                        </span>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="px-6 py-12 text-center">
-                        <span class="material-symbols-outlined text-gray-400 text-6xl mb-4 block">person_search</span>
-                        <p class="text-gray-600 dark:text-gray-400">Aucun membre trouvé avec ces critères.</p>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Cards Mobile -->
-    <div class="md:hidden space-y-4">
+    <!-- ===== VUE CARTES (avec photos) ===== -->
+    <div id="view-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         {% for membre in membres %}
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-start justify-between mb-3">
-                <div class="flex-1">
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Numéro</p>
-                    <p class="text-lg font-mono font-bold text-primary">{{ membre.numero }}</p>
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
+            <!-- Photo -->
+            <div class="aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                {% if membre.photo %}
+                <img src="{{ membre.photo.url }}"
+                     alt="{{ membre.prenom }} {{ membre.nom }}"
+                     class="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105">
+                {% else %}
+                <div class="w-full h-full flex flex-col items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-7xl">person</span>
                 </div>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                {% endif %}
+            </div>
+            <!-- Infos -->
+            <div class="p-4">
+                <p class="text-xs font-mono font-bold text-primary mb-1">N° {{ membre.numero }}</p>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white leading-tight">
+                    {{ membre.prenom }} {{ membre.nom }}
+                </h3>
+                <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">
                     {{ membre.titre.nom }}
                 </span>
             </div>
-            <div class="space-y-2">
-                <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Nom</p>
-                    <p class="text-base font-medium text-gray-900 dark:text-white">{{ membre.nom }}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Prénom</p>
-                    <p class="text-base text-gray-900 dark:text-white">{{ membre.prenom }}</p>
-                </div>
-            </div>
         </div>
         {% empty %}
-        <div class="text-center py-12">
-            <span class="material-symbols-outlined text-gray-400 text-6xl mb-4">person_search</span>
+        <div class="col-span-full text-center py-12">
+            <span class="material-symbols-outlined text-gray-400 text-6xl mb-4 block">person_search</span>
             <p class="text-gray-600 dark:text-gray-400">Aucun membre trouvé avec ces critères.</p>
         </div>
         {% endfor %}
+    </div>
+
+    <!-- ===== VUE TABLEAU ===== -->
+    <div id="view-table" class="hidden mb-8">
+        <!-- Desktop -->
+        <div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Photo</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Numéro</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nom</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Prénom</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Titre</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for membre in membres %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td class="px-6 py-3">
+                            {% if membre.photo %}
+                            <img src="{{ membre.photo.url }}" alt="{{ membre.prenom }} {{ membre.nom }}"
+                                 class="w-10 h-10 rounded-full object-cover object-top">
+                            {% else %}
+                            <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-gray-400 text-lg">person</span>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm font-mono font-semibold text-primary">{{ membre.numero }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ membre.nom }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm text-gray-900 dark:text-white">{{ membre.prenom }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                                {{ membre.titre.nom }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <span class="material-symbols-outlined text-gray-400 text-6xl mb-4 block">person_search</span>
+                            <p class="text-gray-600 dark:text-gray-400">Aucun membre trouvé avec ces critères.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile cards (in table mode) -->
+        <div class="md:hidden space-y-4">
+            {% for membre in membres %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+                {% if membre.photo %}
+                <img src="{{ membre.photo.url }}" alt="{{ membre.prenom }} {{ membre.nom }}"
+                     class="w-16 h-16 rounded-full object-cover object-top flex-shrink-0">
+                {% else %}
+                <div class="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-gray-400 text-3xl">person</span>
+                </div>
+                {% endif %}
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-mono font-bold text-primary">N° {{ membre.numero }}</p>
+                    <p class="text-base font-bold text-gray-900 dark:text-white truncate">{{ membre.prenom }} {{ membre.nom }}</p>
+                    <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">{{ membre.titre.nom }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-12">
+                <span class="material-symbols-outlined text-gray-400 text-6xl mb-4">person_search</span>
+                <p class="text-gray-600 dark:text-gray-400">Aucun membre trouvé avec ces critères.</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
     <!-- Pagination -->
     {% if membres.has_other_pages %}
     <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p class="text-gray-600 dark:text-gray-400 text-sm">
-            Page {{ membres.number }} sur {{ membres.paginator.num_pages }}
+            Page {{ membres.number }} sur {{ membres.paginator.num_pages }} — {{ total_membres }} membres au total
         </p>
-        
         <nav class="flex gap-2">
             {% if membres.has_previous %}
-            <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}" 
-               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                Première
-            </a>
-            <a href="?page={{ membres.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}" 
-               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                Précédent
-            </a>
+            <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}"
+               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Première</a>
+            <a href="?page={{ membres.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}"
+               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Précédent</a>
             {% endif %}
-
-            <span class="px-4 py-2 bg-primary text-white rounded-lg font-semibold">
-                {{ membres.number }}
-            </span>
-
+            <span class="px-4 py-2 bg-primary text-white rounded-lg font-semibold">{{ membres.number }}</span>
             {% if membres.has_next %}
-            <a href="?page={{ membres.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}" 
-               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                Suivant
-            </a>
-            <a href="?page={{ membres.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}" 
-               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                Dernière
-            </a>
+            <a href="?page={{ membres.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}"
+               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Suivant</a>
+            <a href="?page={{ membres.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if titre_filter %}&titre={{ titre_filter }}{% endif %}"
+               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Dernière</a>
             {% endif %}
         </nav>
     </div>
     {% endif %}
 </div>
+
+<script>
+function setView(mode) {
+    const cards = document.getElementById('view-cards');
+    const table = document.getElementById('view-table');
+    const btnCards = document.getElementById('btn-cards');
+    const btnTable = document.getElementById('btn-table');
+
+    if (mode === 'cards') {
+        cards.classList.remove('hidden');
+        table.classList.add('hidden');
+        btnCards.classList.add('bg-white', 'dark:bg-gray-600', 'shadow', 'text-gray-900', 'dark:text-white');
+        btnCards.classList.remove('text-gray-600', 'dark:text-gray-400');
+        btnTable.classList.remove('bg-white', 'dark:bg-gray-600', 'shadow', 'text-gray-900', 'dark:text-white');
+        btnTable.classList.add('text-gray-600', 'dark:text-gray-400');
+    } else {
+        cards.classList.add('hidden');
+        table.classList.remove('hidden');
+        btnTable.classList.add('bg-white', 'dark:bg-gray-600', 'shadow', 'text-gray-900', 'dark:text-white');
+        btnTable.classList.remove('text-gray-600', 'dark:text-gray-400');
+        btnCards.classList.remove('bg-white', 'dark:bg-gray-600', 'shadow', 'text-gray-900', 'dark:text-white');
+        btnCards.classList.add('text-gray-600', 'dark:text-gray-400');
+    }
+    localStorage.setItem('membresView', mode);
+}
+// Restore preferred view
+const savedView = localStorage.getItem('membresView');
+if (savedView) setView(savedView);
+</script>
 {% endblock %}

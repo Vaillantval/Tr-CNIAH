@@ -1,10 +1,11 @@
 # src/apps/news/urls.py
+
 from django.urls import path
-from .views import NewsListView, NewsDetailView
+from . import views
 
 app_name = 'news'
 
 urlpatterns = [
-    path('', NewsListView.as_view(), name='list'),
-    path('<slug:slug>/', NewsDetailView.as_view(), name='detail'),
+    path('', views.NewsListView.as_view(), name='list'),
+    path('<slug:slug>/', views.NewsDetailView.as_view(), name='detail'),
 ]

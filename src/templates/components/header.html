@@ -1,5 +1,4 @@
 {% comment %} src\templates\components\header.html {% endcomment %}
-
 {% load static %}
 <header class="sticky top-0 z-50 w-full bg-primary shadow-lg">
     <div class="container mx-auto px-4">
@@ -13,11 +12,16 @@
                 </div>
                 <div class="flex items-center gap-6">
                     <a class="hover:text-white/70 transition-colors" href="{% url 'core:membership' %}">ADHÉSION</a>
-                    <a class="hover:text-white/70 transition-colors" href="{% url 'core:members_dashboard' %}">Espace Membres</a>
-                    <a class="hover:text-white/70 transition-colors font-bold" href="{% url 'members:connexion' %}">SE CONNECTER | S'ENREGISTRER</a>
+                    {% if user.is_authenticated %}
+                        <a class="hover:text-white/70 transition-colors" href="{% url 'core:members_dashboard' %}">Espace Membres</a>
+                        <a class="hover:text-white/70 transition-colors font-bold" href="{% url 'members:deconnexion' %}">SE DÉCONNECTER</a>
+                    {% else %}
+                        <a class="hover:text-white/70 transition-colors" href="{% url 'members:connexion' %}">Espace Membres</a>
+                        <a class="hover:text-white/70 transition-colors font-bold" href="{% url 'members:connexion' %}">SE CONNECTER | S'ENREGISTRER</a>
+                    {% endif %}
                 </div>
             </div>
-            
+
             <!-- Logo and Title -->
             <div class="flex flex-col items-center justify-center text-center border-y border-solid border-white/30 py-6">
                 <a href="{% url 'core:home' %}" class="w-20 h-20 mb-3 flex-shrink-0">
@@ -27,119 +31,70 @@
                     Collège National des Ingénieurs et Architectes Haïtiens
                 </h1>
             </div>
-            
+
             <!-- Main Navigation -->
             <nav class="hidden md:flex flex-1 justify-center items-center gap-1 py-3 text-sm font-medium text-white">
-                <!-- Accueil -->
-                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if request.resolver_match.url_name == 'home' %}bg-white/20 font-bold{% endif %}" 
-                   href="{% url 'core:home' %}">
-                    Accueil
-                </a>
-                
-                <!-- Ingénieurs et Architectes avec dropdown -->
+                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if request.resolver_match.url_name == 'home' %}bg-white/20 font-bold{% endif %}"
+                   href="{% url 'core:home' %}">Accueil</a>
+
                 <div class="relative group">
-                    <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all flex items-center gap-1 {% if 'engineers_architects' in request.resolver_match.url_name or 'cotisation' in request.resolver_match.url_name or 'formation' in request.resolver_match.url_name or 'honneur' in request.resolver_match.url_name or 'membres_actifs' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}" 
+                    <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all flex items-center gap-1 {% if 'membres_actifs' in request.resolver_match.url_name or 'cotisation' in request.resolver_match.url_name or 'formation' in request.resolver_match.url_name or 'honneur' in request.resolver_match.url_name or 'adhesion' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}"
                        href="{% url 'core:membres_actifs' %}">
                         Ingénieurs et Architectes
                         <span class="material-symbols-outlined text-sm">expand_more</span>
                     </a>
-                    <!-- Dropdown -->
                     <div class="absolute left-0 mt-1 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
-                        {% comment %} <a href="{% url 'core:membres_actifs' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">
-                            Répertoire des membres
-                        </a> {% endcomment %}
-                        <a href="{% url 'core:membership' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">
-                            Devenir membre
-                        </a>
-                        <a href="{% url 'core:cotisation' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">
-                            Cotisation et contribution
-                        </a>
-                        <a href="{% url 'core:formation_continue' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">
-                            Formation continue
-                        </a>
-                        <a href="{% url 'core:honneur_merite' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">
-                            Honneur et mérite
-                        </a>
-                        <a href="{% url 'core:membres_actifs' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">
-                            Liste des ingénieurs et architectes actifs
-                        </a>
-                        {% comment %} <a href="#" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors">
-                            Documents de référence
-                        </a> {% endcomment %}
+                        <a href="{% url 'core:membership' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">Devenir membre</a>
+                        <a href="{% url 'core:cotisation' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">Cotisation et contribution</a>
+                        <a href="{% url 'core:formation_continue' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">Formation continue</a>
+                        <a href="{% url 'core:honneur_merite' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">Honneur et mérite</a>
+                        <a href="{% url 'core:membres_actifs' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors">Liste des ingénieurs et architectes actifs</a>
                     </div>
                 </div>
-                
-                <!-- Au service du public avec dropdown -->
+
                 <div class="relative group">
-                    <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all flex items-center gap-1 {% if 'public_service' in request.resolver_match.url_name or 'certification' in request.resolver_match.url_name or 'plainte' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}" 
+                    <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all flex items-center gap-1 {% if 'public_service' in request.resolver_match.url_name or 'certification' in request.resolver_match.url_name or 'plainte' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}"
                        href="{% url 'core:public_service' %}">
                         Au service du public
                         <span class="material-symbols-outlined text-sm">expand_more</span>
                     </a>
-                    <!-- Dropdown -->
                     <div class="absolute left-0 mt-1 w-64 bg-white dark:bg-gray-900 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
-                        <a href="{% url 'core:public_service' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">
-                            Trouver un professionnel
-                        </a>
-                        <a href="{% url 'core:verifier_certification' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">
-                            Vérifier une certification
-                        </a>
-                        <a href="{% url 'core:deposer_plainte' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors">
-                            Déposer une plainte
-                        </a>
+                        <a href="{% url 'core:public_service' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">Trouver un professionnel</a>
+                        <a href="{% url 'core:verifier_certification' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-800">Vérifier une certification</a>
+                        <a href="{% url 'core:deposer_plainte' %}" class="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary/10 transition-colors">Déposer une plainte</a>
                     </div>
                 </div>
-                
-                <!-- Le CNIAH - LIEN SIMPLE -->
-                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if 'about' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}" 
-                   href="{% url 'core:about' %}">
-                    Le CNIAH
-                </a>
-                
-                <!-- Normes -->
-                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if 'norms' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}" 
-                   href="{% url 'core:norms' %}">
-                    Normes
-                </a>
 
+                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if 'about' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}"
+                   href="{% url 'core:about' %}">Le CNIAH</a>
+                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if 'norms' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}"
+                   href="{% url 'core:norms' %}">Normes</a>
                 <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if 'documents' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}"
-                href="{% url 'core:documents' %}">
-                    Documents
-                </a>
-                
-                <!-- Sponsors -->
-                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if 'sponsors' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}" 
-                   href="{% url 'core:sponsors' %}">
-                    Sponsors
-                </a>
-                
-                <!-- Publicité -->
-                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if 'advertising' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}" 
-                   href="{% url 'core:advertising' %}">
-                    Publicité
-                </a>
+                   href="{% url 'core:documents' %}">Documents</a>
+                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if 'sponsors' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}"
+                   href="{% url 'core:sponsors' %}">Sponsors</a>
+                <a class="leading-normal hover:bg-white/10 px-4 py-2 rounded transition-all {% if 'advertising' in request.resolver_match.url_name %}bg-white/20 font-bold{% endif %}"
+                   href="{% url 'core:advertising' %}">Publicité</a>
             </nav>
-            
+
             <!-- Mobile Menu Button -->
             <button class="md:hidden py-3 text-white" id="mobile-menu-btn" aria-label="Toggle mobile menu">
                 <span class="material-symbols-outlined">menu</span>
             </button>
         </div>
     </div>
-    
+
     <!-- Mobile Menu -->
     <div class="hidden md:hidden bg-primary-700 border-t border-white/30" id="mobile-menu">
         <nav class="container mx-auto px-4 py-4 flex flex-col gap-2">
             <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors" href="{% url 'core:home' %}">Accueil</a>
-            
-            <!-- Mobile Dropdown: Ingénieurs et Architectes -->
+
             <div class="mobile-dropdown">
                 <button class="w-full py-2 px-4 rounded text-white hover:bg-white/10 transition-colors flex items-center justify-between" onclick="toggleMobileDropdown(this)">
                     <span>Ingénieurs et Architectes</span>
                     <span class="material-symbols-outlined text-sm transform transition-transform">expand_more</span>
                 </button>
                 <div class="hidden pl-4 mt-1 space-y-1">
-                    <a class="block py-2 px-4 rounded text-white/80 hover:bg-white/10 text-sm" href="{% url 'core:engineers_architects' %}">Répertoire des membres</a>
                     <a class="block py-2 px-4 rounded text-white/80 hover:bg-white/10 text-sm" href="{% url 'core:membership' %}">Devenir membre</a>
                     <a class="block py-2 px-4 rounded text-white/80 hover:bg-white/10 text-sm" href="{% url 'core:cotisation' %}">Cotisation et contribution</a>
                     <a class="block py-2 px-4 rounded text-white/80 hover:bg-white/10 text-sm" href="{% url 'core:formation_continue' %}">Formation continue</a>
@@ -147,61 +102,51 @@
                     <a class="block py-2 px-4 rounded text-white/80 hover:bg-white/10 text-sm" href="{% url 'core:membres_actifs' %}">Liste des ingénieurs et architectes actifs</a>
                 </div>
             </div>
-            
-            <!-- Mobile Dropdown: Au service du public -->
+
             <div class="mobile-dropdown">
                 <button class="w-full py-2 px-4 rounded text-white hover:bg-white/10 transition-colors flex items-center justify-between" onclick="toggleMobileDropdown(this)">
                     <span>Au service du public</span>
                     <span class="material-symbols-outlined text-sm transform transition-transform">expand_more</span>
                 </button>
                 <div class="hidden pl-4 mt-1 space-y-1">
-                    <a class="block py-2 px-4 rounded text-white/80 hover:bg-white/10 text-sm" href="#">Trouver un professionnel</a>
+                    <a class="block py-2 px-4 rounded text-white/80 hover:bg-white/10 text-sm" href="{% url 'core:public_service' %}">Trouver un professionnel</a>
                     <a class="block py-2 px-4 rounded text-white/80 hover:bg-white/10 text-sm" href="{% url 'core:verifier_certification' %}">Vérifier une certification</a>
                     <a class="block py-2 px-4 rounded text-white/80 hover:bg-white/10 text-sm" href="{% url 'core:deposer_plainte' %}">Déposer une plainte</a>
                 </div>
             </div>
-            
-            <!-- Le CNIAH - Lien simple -->
+
             <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors" href="{% url 'core:about' %}">Le CNIAH</a>
-            
             <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors" href="{% url 'core:norms' %}">Normes</a>
             <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors" href="{% url 'core:documents' %}">Documents de Référence</a>
             <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors" href="{% url 'core:sponsors' %}">Sponsors</a>
             <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors" href="{% url 'core:advertising' %}">Publicité</a>
-            
+
             <div class="border-t border-white/30 mt-2 pt-2">
                 <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors block" href="{% url 'core:membership' %}">Adhésion</a>
-                <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors block" href="#">Espace Membres</a>
-                <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors block font-bold" href="#">Se Connecter</a>
+                {% if user.is_authenticated %}
+                    <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors block" href="{% url 'core:members_dashboard' %}">Espace Membres</a>
+                    <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors block font-bold" href="{% url 'members:deconnexion' %}">Se Déconnecter</a>
+                {% else %}
+                    <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors block" href="{% url 'members:connexion' %}">Espace Membres</a>
+                    <a class="py-2 px-4 rounded text-white hover:bg-white/10 transition-colors block font-bold" href="{% url 'members:connexion' %}">Se Connecter</a>
+                {% endif %}
             </div>
         </nav>
     </div>
 </header>
 
 <script>
-    // Toggle mobile menu
     document.getElementById('mobile-menu-btn').addEventListener('click', function() {
         document.getElementById('mobile-menu').classList.toggle('hidden');
     });
-    
-    // Toggle mobile dropdown
     function toggleMobileDropdown(button) {
         const dropdown = button.nextElementSibling;
         const icon = button.querySelector('.material-symbols-outlined');
-        
         dropdown.classList.toggle('hidden');
         icon.classList.toggle('rotate-180');
     }
 </script>
-
 <style>
-    /* Ensure dropdowns appear above other content */
-    .group:hover > div {
-        z-index: 60;
-    }
-    
-    /* Smooth rotation for mobile dropdown icons */
-    .rotate-180 {
-        transform: rotate(180deg);
-    }
+    .group:hover > div { z-index: 60; }
+    .rotate-180 { transform: rotate(180deg); }
 </style>

@@ -82,7 +82,13 @@
                     </li>
                     <li class="flex items-start gap-3">
                         <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">5</span>
-                        <span class="text-gray-700 dark:text-gray-300">Le formulaire d'admission dûment rempli</span>
+                        <span class="text-gray-700 dark:text-gray-300">
+                            Le formulaire d'admission dûment rempli —
+                            <a href="{% url 'core:adhesion' %}" class="text-primary font-semibold hover:underline inline-flex items-center gap-1">
+                                Remplir le formulaire en ligne
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                            </a>
+                        </span>
                     </li>
                 </ol>
             </div>
@@ -269,8 +275,35 @@
         </div>
     </div>
 
+    <!-- CTA Formulaire d'Adhésion -->
+    {% if not user.is_authenticated %}
+    <div class="mt-12 px-6 py-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg text-white text-center">
+        <span class="material-symbols-outlined text-5xl mb-4 block opacity-90">assignment</span>
+        <h3 class="text-2xl font-bold mb-3">Prêt à rejoindre le CNIAH ?</h3>
+        <p class="text-white/80 mb-6 max-w-xl mx-auto">
+            Soumettez votre demande d'admission directement en ligne. Le formulaire vous guidera à travers toutes les étapes et vous permettra de joindre vos pièces justificatives.
+        </p>
+        <a href="{% url 'core:adhesion' %}"
+           class="inline-flex items-center justify-center gap-2 rounded-lg h-12 px-8 bg-white text-primary text-base font-bold hover:bg-gray-100 transition-all shadow-md hover:shadow-lg">
+            <span class="material-symbols-outlined">edit_document</span>
+            <span>Soumettre ma demande d'adhésion</span>
+        </a>
+    </div>
+    {% else %}
+    <div class="mt-12 px-6 py-8 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 text-center">
+        <span class="material-symbols-outlined text-green-600 text-4xl mb-3 block">check_circle</span>
+        <h3 class="text-lg font-bold text-green-900 dark:text-green-200 mb-1">Vous êtes déjà membre</h3>
+        <p class="text-green-700 dark:text-green-300 text-sm mb-4">Pour mettre à jour votre statut ou soumettre une demande de mise à jour, accédez à votre espace membre.</p>
+        <a href="{% url 'core:members_dashboard' %}"
+           class="inline-flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">
+            <span class="material-symbols-outlined text-sm">dashboard</span>
+            Espace Membres
+        </a>
+    </div>
+    {% endif %}
+
     <!-- CTA Section -->
-    <div class="mt-12 mb-8 px-6 py-10 bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-xl border border-primary/20">
+    <div class="mt-8 mb-8 px-6 py-10 bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-xl border border-primary/20">
         <div class="text-center max-w-2xl mx-auto">
             <span class="material-symbols-outlined text-primary text-5xl mb-4">contact_support</span>
             <h3 class="text-2xl font-bold text-[#121117] dark:text-white mb-3">Des questions ?</h3>

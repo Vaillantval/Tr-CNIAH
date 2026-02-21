@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/pages/cniah/adhesion.html {% endcomment %}
+
+{% block title %}Demande d'Adhésion - CNIAH{% endblock %}
+
+{% block content %}
+<div class="bg-primary/5 dark:bg-primary/10 py-8 sm:py-12">
+    <div class="container mx-auto px-4">
+        <nav class="flex mb-4 text-sm" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li><a href="{% url 'core:home' %}" class="text-gray-600 dark:text-gray-400 hover:text-primary">Accueil</a></li>
+                <li><span class="text-gray-400 mx-2">/</span></li>
+                <li><a href="{% url 'core:membership' %}" class="text-gray-600 dark:text-gray-400 hover:text-primary">Adhésion</a></li>
+                <li><span class="text-gray-400 mx-2">/</span></li>
+                <li><span class="text-gray-900 dark:text-white font-medium">Demande d'Admission</span></li>
+            </ol>
+        </nav>
+        <h1 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-3">
+            Formulaire de Demande d'Admission
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400 text-lg">
+            Formulaire : <span class="font-mono font-semibold text-primary">membre-01</span> — Veuillez remplir tous les champs et annexer les pièces requises.
+        </p>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-10 max-w-5xl">
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-8 space-y-3">
+        {% for message in messages %}
+        <div class="flex items-start gap-3 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200{% else %}bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200{% endif %}">
+            <span class="material-symbols-outlined">{% if message.tags == 'success' %}check_circle{% else %}error{% endif %}</span>
+            <p>{{ message }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-10">
+        {% csrf_token %}
+
+        <!-- ====== SECTION 1 : TYPE D'ADHÉSION ====== -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
+                Type de demande
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label class="flex items-center gap-3 p-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-all">
+                    <input type="radio" name="type_demande" value="admission" required class="text-primary focus:ring-primary" checked>
+                    <div>
+                        <p class="font-semibold text-gray-900 dark:text-white">Nouvelle admission</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Devenir membre du CNIAH</p>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 p-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-all">
+                    <input type="radio" name="type_demande" value="mise_a_jour" class="text-primary focus:ring-primary">
+                    <div>
+                        <p class="font-semibold text-gray-900 dark:text-white">Mise à jour de statut</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Mise à jour d'un statut existant</p>
+                    </div>
+                </label>
+            </div>
+
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut demandé</label>
+                <select name="statut" class="w-full sm:w-64 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="postulant">Postulant</option>
+                    <option value="membre">Membre actif</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ====== SECTION 2 : INFORMATIONS PERSONNELLES ====== -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
+                Informations personnelles
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom <span class="text-red-500">*</span></label>
+                    <input type="text" name="nom" required
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="Votre nom de famille">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prénom <span class="text-red-500">*</span></label>
+                    <input type="text" name="prenom" required
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="Votre prénom">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Titre professionnel <span class="text-red-500">*</span></label>
+                    <select name="titre" required
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="">-- Choisir un titre --</option>
+                        <option value="Ingénieur Civil">Ingénieur Civil</option>
+                        <option value="Architecte">Architecte</option>
+                        <option value="Ingénieur Électricien">Ingénieur Électricien</option>
+                        <option value="Ingénieur Mécanicien">Ingénieur Mécanicien</option>
+                        <option value="Ingénieur Géologue">Ingénieur Géologue</option>
+                        <option value="Ingénieur Chimiste">Ingénieur Chimiste</option>
+                        <option value="Urbaniste">Urbaniste</option>
+                        <option value="Ingénieur Civil des Mines">Ingénieur Civil des Mines</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fonction actuelle</label>
+                    <input type="text" name="fonction"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="Ex : Chef de projet, Architecte indépendant">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">NIF (Numéro d'Identification Fiscale)</label>
+                    <input type="text" name="nif"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="Votre NIF">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Téléphone <span class="text-red-500">*</span></label>
+                    <input type="tel" name="telephone" required
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="+509 XXXX XXXX">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Adresse courriel <span class="text-red-500">*</span></label>
+                    <input type="email" name="email" required
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="votre@email.com">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Adresse postale <span class="text-red-500">*</span></label>
+                    <input type="text" name="adresse" required
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="Rue, Ville, Département">
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== SECTION 3 : FORMATION ACADÉMIQUE ====== -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
+                Formation académique
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diplôme 1 <span class="text-red-500">*</span></label>
+                    <input type="text" name="diplome_1" required
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="Ex : Licence en Génie Civil (2010)">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Inclure l'année d'obtention</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diplôme 2 (si applicable)</label>
+                    <input type="text" name="diplome_2"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                           placeholder="Ex : Master en Architecture (2013)">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Inclure l'année d'obtention</p>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Curriculum Vitae (résumé) <span class="text-red-500">*</span></label>
+                    <textarea name="cv_resume" rows="5" required
+                              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="Résumé de votre parcours professionnel, expériences, compétences…&#10;(Vous pouvez aussi fournir votre CV en annexe ci-dessous)"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== SECTION 4 : COTISATIONS ====== -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">4</span>
+                Cotisations et frais
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Frais d'inscription</p>
+                    <p class="text-2xl font-bold text-primary">500,00</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">gourdes</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Cotisation annuelle</p>
+                    <p class="text-2xl font-bold text-primary">2.500,00</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">gourdes</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Cotisation spéciale</p>
+                    <p class="text-2xl font-bold text-blue-600">US$ 240,00</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">par an (étrangers)</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-dashed border-gray-300 dark:border-gray-500">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Don (facultatif)</p>
+                    <div class="mt-2">
+                        <input type="number" name="don_montant" min="0" step="any"
+                               class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary"
+                               placeholder="Montant (HTG)">
+                    </div>
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-4 italic">
+                * Les paiements sont effectués au secrétariat du CNIAH. Veuillez conserver votre reçu.
+            </p>
+        </div>
+
+        <!-- ====== SECTION 5 : PIÈCES JOINTES ====== -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">5</span>
+                Pièces à annexer
+            </h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Formats acceptés : PDF, JPG, PNG, DOCX. Taille max : 10 Mo par fichier.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Photo d'identité 2x2 -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">photo_camera</span>
+                            Photo d'identité 2"×2" <span class="text-red-500">*</span>
+                        </span>
+                    </label>
+                    <input type="file" name="photo_identite" accept="image/*" required
+                           class="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-1">Fond blanc, récente (JPG ou PNG)</p>
+                </div>
+
+                <!-- Copie diplôme(s) -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">school</span>
+                            Copie du/des diplôme(s) <span class="text-red-500">*</span>
+                        </span>
+                    </label>
+                    <input type="file" name="copie_diplomes" accept=".pdf,.jpg,.jpeg,.png" multiple required
+                           class="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-1">Photocopie recto-verso. Plusieurs fichiers acceptés.</p>
+                </div>
+
+                <!-- Pièce d'identité -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">badge</span>
+                            Pièce d'identité <span class="text-red-500">*</span>
+                        </span>
+                    </label>
+                    <input type="file" name="piece_identite" accept=".pdf,.jpg,.jpeg,.png" required
+                           class="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-1">CIN, Passeport ou carte consulaire valide</p>
+                </div>
+
+                <!-- CV en annexe -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">description</span>
+                            Curriculum Vitae (fichier)
+                        </span>
+                    </label>
+                    <input type="file" name="cv_fichier" accept=".pdf,.doc,.docx"
+                           class="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-1">Facultatif si résumé rempli ci-dessus (PDF, DOC)</p>
+                </div>
+
+                <!-- Certificat CNIAH (mise à jour) -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">verified</span>
+                            Certificat CNIAH existant
+                        </span>
+                    </label>
+                    <input type="file" name="certificat_cniah" accept=".pdf,.jpg,.jpeg,.png"
+                           class="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-1">Uniquement pour une mise à jour de statut</p>
+                </div>
+
+                <!-- Lettre de support (étrangers) -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">mail</span>
+                            Lettre de support de l'institution
+                        </span>
+                    </label>
+                    <input type="file" name="lettre_support" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                           class="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-1">Obligatoire pour les professionnels étrangers</p>
+                </div>
+
+                <!-- Permis de séjour (étrangers) -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">travel_explore</span>
+                            Permis de séjour
+                        </span>
+                    </label>
+                    <input type="file" name="permis_sejour" accept=".pdf,.jpg,.jpeg,.png"
+                           class="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-1">Étrangers : à présenter dans un délai de 4 mois si non disponible</p>
+                </div>
+
+                <!-- Autres documents -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">attach_file</span>
+                            Autres documents
+                        </span>
+                    </label>
+                    <input type="file" name="autres_documents" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple
+                           class="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-1">Tout autre document pertinent (plusieurs fichiers)</p>
+                </div>
+            </div>
+
+            <!-- Checklist des pièces requises -->
+            <div class="mt-6 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                <p class="font-semibold text-amber-900 dark:text-amber-200 mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base">checklist</span>
+                    Récapitulatif des pièces requises selon votre profil
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm text-amber-800 dark:text-amber-300">
+                    <p>☑ Photocopie recto-verso du/des diplômes</p>
+                    <p>☑ Pièce d'identité valide</p>
+                    <p>☑ Curriculum Vitae</p>
+                    <p>☑ Photo d'identité 2"×2"</p>
+                    <p>☐ Lettre de support <em>(étrangers uniquement)</em></p>
+                    <p>☐ Permis de séjour <em>(étrangers — délai 4 mois)</em></p>
+                    <p>☐ Certificat CNIAH <em>(mise à jour uniquement)</em></p>
+                    <p>☐ 3 parrains membres actifs <em>(dérogation art. 63)</em></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== SECTION 6 : DÉCLARATION ====== -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">6</span>
+                Déclaration du candidat
+            </h2>
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300 mb-4">
+                <p>Je soussigné(e) certifie que toutes les informations fournies dans ce formulaire sont exactes et complètes. Je m'engage à respecter les statuts, le Code d'Éthique et de Pratique Professionnelle du CNIAH, ainsi que toutes les obligations incombant aux membres.</p>
+            </div>
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" name="declaration" required class="mt-1 text-primary focus:ring-primary rounded">
+                <span class="text-sm text-gray-700 dark:text-gray-300">
+                    J'ai lu et j'accepte les conditions d'adhésion au CNIAH. Je certifie l'exactitude des informations fournies. <span class="text-red-500">*</span>
+                </span>
+            </label>
+        </div>
+
+        <!-- ====== BOUTON SOUMETTRE ====== -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                <span class="text-red-500">*</span> Champs obligatoires. Votre demande sera traitée par le secrétariat du CNIAH dans les meilleurs délais.
+            </p>
+            <button type="submit"
+                    class="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 text-base font-bold text-white shadow-sm hover:bg-primary/90 transition-colors w-full sm:w-auto justify-center">
+                <span class="material-symbols-outlined">send</span>
+                Soumettre ma demande
+            </button>
+        </div>
+    </form>
+
+    <!-- Contact info -->
+    <div class="mt-10 bg-primary/5 dark:bg-primary/10 rounded-xl p-6 text-center">
+        <p class="font-semibold text-gray-900 dark:text-white mb-2">Des questions sur votre demande ?</p>
+        <p class="text-gray-600 dark:text-gray-400 text-sm">Contactez le secrétariat : <a href="mailto:info@cniah.org" class="text-primary hover:underline font-medium">info@cniah.org</a> — Tél : +509 2943 1111</p>
+        <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">9 Rue Tertulien Guilbaud, Varreux, Haïti</p>
+    </div>
+</div>
+{% endblock %}

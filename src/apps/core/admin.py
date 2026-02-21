@@ -1,7 +1,30 @@
 #src\apps\core\admin.py
 
 from django.contrib import admin
-from .models import *
+from django import forms
+from .models import (
+    Banner, ServiceBlock, Proposition, EngineeringBranch, Newsletter,
+    DocumentCategory, ReferenceDocument, VideoResource, ImageGallery,
+    MembershipDocument, CotisationDocument, FormationContent, FormationImage,
+    CategoryFormation, HonneurMerite, HonneurMeriteImage,
+    PageMembresActifs, MembreActif, TitreProfessionnel,
+    Certification, Plainte, DocumentPlainte,
+    DocumentHistorique,
+    ComiteDirection, MembreComite,
+    CommissionApurement, MembreCommission,
+    ConseilDiscipline, MembreConseil,
+    CategoryNorme, Norme, Sponsor,
+    DemandeAdhesion,
+)
+
+# Try to import CKEditor widget for rich-text biographies
+try:
+    from ckeditor_uploader.widgets import CKEditorUploadingWidget as _RichWidget
+except ImportError:
+    try:
+        from ckeditor.widgets import CKEditorWidget as _RichWidget
+    except ImportError:
+        _RichWidget = None
 
 admin.site.site_header = "Administration CNIAH"
 admin.site.site_title = "CNIAH Admin"
@@ -348,10 +371,22 @@ class DocumentHistoriqueAdmin(admin.ModelAdmin):
 
 
 # ============= COMITE DE DIRECTION =============
-class MembreComiteInline(admin.TabularInline):
+
+class MembreComiteForm(forms.ModelForm):
+    biographie = forms.CharField(
+        widget=_RichWidget() if _RichWidget else forms.Textarea(attrs={'rows': 8}),
+        required=False, label='Biographie',
+    )
+    class Meta:
+        model = MembreComite
+        fields = '__all__'
+
+
+class MembreComiteInline(admin.StackedInline):
     model = MembreComite
+    form = MembreComiteForm
     extra = 1
-    fields = ['prenom', 'nom', 'poste', 'photo', 'ordre']
+    fields = ['prenom', 'nom', 'poste', 'photo', 'biographie', 'ordre']
 
 
 @admin.register(ComiteDirection)
@@ -370,6 +405,7 @@ class ComiteDirectionAdmin(admin.ModelAdmin):
 
 @admin.register(MembreComite)
 class MembreComiteAdmin(admin.ModelAdmin):
+    form = MembreComiteForm
     list_display = ['nom_complet', 'poste', 'comite', 'ordre']
     list_filter = ['comite', 'poste']
     search_fields = ['nom', 'prenom']
@@ -381,10 +417,22 @@ class MembreComiteAdmin(admin.ModelAdmin):
 
 
 # ============= COMMISSION D'APUREMENT =============
-class MembreCommissionInline(admin.TabularInline):
+
+class MembreCommissionForm(forms.ModelForm):
+    biographie = forms.CharField(
+        widget=_RichWidget() if _RichWidget else forms.Textarea(attrs={'rows': 8}),
+        required=False, label='Biographie',
+    )
+    class Meta:
+        model = MembreCommission
+        fields = '__all__'
+
+
+class MembreCommissionInline(admin.StackedInline):
     model = MembreCommission
+    form = MembreCommissionForm
     extra = 1
-    fields = ['prenom', 'nom', 'photo', 'ordre']
+    fields = ['prenom', 'nom', 'photo', 'biographie', 'ordre']
 
 
 @admin.register(CommissionApurement)
@@ -402,6 +450,7 @@ class CommissionApurementAdmin(admin.ModelAdmin):
 
 @admin.register(MembreCommission)
 class MembreCommissionAdmin(admin.ModelAdmin):
+    form = MembreCommissionForm
     list_display = ['nom_complet', 'commission', 'ordre']
     list_filter = ['commission']
     search_fields = ['nom', 'prenom']
@@ -413,10 +462,22 @@ class MembreCommissionAdmin(admin.ModelAdmin):
 
 
 # ============= CONSEIL DE DISCIPLINE =============
-class MembreConseilInline(admin.TabularInline):
+
+class MembreConseilForm(forms.ModelForm):
+    biographie = forms.CharField(
+        widget=_RichWidget() if _RichWidget else forms.Textarea(attrs={'rows': 8}),
+        required=False, label='Biographie',
+    )
+    class Meta:
+        model = MembreConseil
+        fields = '__all__'
+
+
+class MembreConseilInline(admin.StackedInline):
     model = MembreConseil
+    form = MembreConseilForm
     extra = 1
-    fields = ['prenom', 'nom', 'photo', 'ordre']
+    fields = ['prenom', 'nom', 'photo', 'biographie', 'ordre']
 
 
 @admin.register(ConseilDiscipline)
@@ -434,6 +495,7 @@ class ConseilDisciplineAdmin(admin.ModelAdmin):
 
 @admin.register(MembreConseil)
 class MembreConseilAdmin(admin.ModelAdmin):
+    form = MembreConseilForm
     list_display = ['nom_complet', 'conseil', 'ordre']
     list_filter = ['conseil']
     search_fields = ['nom', 'prenom']
@@ -470,3 +532,44 @@ class SponsorAdmin(admin.ModelAdmin):
     search_fields = ['nom', 'description']
     list_editable = ['actif', 'ordre']
     ordering = ['niveau', 'ordre']
+
+# ============= DEMANDE D'ADHÉSION =============
+
+@admin.register(DemandeAdhesion)
+class DemandeAdhesionAdmin(admin.ModelAdmin):
+    list_display = (
+        'nom', 'prenom', 'email', 'titre',
+        'type_demande', 'statut_demande', 'date_soumission',
+    )
+    list_filter = ('statut_demande', 'type_demande', 'statut_souhaite')
+    search_fields = ('nom', 'prenom', 'email', 'telephone')
+    readonly_fields = ('date_soumission',)
+    list_editable = ('statut_demande',)
+    date_hierarchy = 'date_soumission'
+
+    fieldsets = (
+        ('Informations de la demande', {
+            'fields': ('type_demande', 'statut_demande', 'statut_souhaite', 'date_soumission'),
+        }),
+        ('Informations personnelles', {
+            'fields': ('nom', 'prenom', 'titre', 'fonction', 'nif', 'telephone', 'email', 'adresse'),
+        }),
+        ('Formation', {
+            'fields': ('diplome_1', 'diplome_2', 'cv_resume'),
+        }),
+        ('Cotisations', {
+            'fields': ('don_montant',),
+        }),
+        ('Pièces jointes', {
+            'fields': (
+                'photo_identite', 'copie_diplomes', 'piece_identite',
+                'cv_fichier', 'certificat_cniah', 'lettre_support',
+                'permis_sejour', 'autres_documents',
+            ),
+            'classes': ('collapse',),
+        }),
+        ('Notes administratives', {
+            'fields': ('notes_admin',),
+            'classes': ('collapse',),
+        }),
+    )

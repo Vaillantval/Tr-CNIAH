@@ -1,97 +1,100 @@
 # src/apps/core/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, DetailView
 from django.utils import timezone
-from apps.news.models import NewsArticle
-from apps.advertisements.models import Sponsor, Advertisement
 from django.http import FileResponse, Http404
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib import messages
-from django.utils import timezone
-from .models import *
+
+from apps.news.models import NewsArticle
+from apps.advertisements.models import Advertisement
+from apps.advertisements.models import Sponsor as AdSponsor
+from .models import (
+    DocumentCategory,
+    ReferenceDocument,
+    VideoResource,
+    ImageGallery,
+    MembershipDocument,
+    CotisationDocument,
+    FormationContent,
+    CategoryFormation,
+    HonneurMerite,
+    PageMembresActifs,
+    MembreActif,
+    TitreProfessionnel,
+    Certification,
+    Plainte,
+    DocumentPlainte,
+    DocumentHistorique,
+    ComiteDirection,
+    MembreComite,
+    CommissionApurement,
+    MembreCommission,
+    ConseilDiscipline,
+    MembreConseil,
+    Norme,
+    CategoryNorme,
+    Sponsor,
+    DemandeAdhesion,
+)
+
+
+# ============= ACCUEIL =============
 
 class HomeView(TemplateView):
     template_name = 'pages/home.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Hero Banner (à créer dans votre modèle)
-        # context['hero_banner'] = HeroBanner.objects.filter(is_active=True).first()
-        
-        # Actualités nationales (6 dernières)
+
+        now = timezone.now()
+        today = now.date()
+
+        # Actualités nationales (6 dernières publiées)
         context['national_news'] = NewsArticle.objects.filter(
-            is_active=True,
+            status='published',
             news_type='national',
-            published_at__lte=timezone.now()
-        )[:6]
-        
-        # Actualités internationales (6 dernières)
+            published_at__lte=now
+        ).order_by('-published_at')[:6]
+
+        # Actualités internationales (6 dernières publiées)
         context['international_news'] = NewsArticle.objects.filter(
-            is_active=True,
+            status='published',
             news_type='international',
-            published_at__lte=timezone.now()
-        )[:6]
-        
+            published_at__lte=now
+        ).order_by('-published_at')[:6]
+
         # Articles récents (tous types, 6 derniers)
         context['recent_articles'] = NewsArticle.objects.filter(
-            is_active=True,
-            published_at__lte=timezone.now()
-        ).select_related('category')[:6]
-        
-        # Publicités
-        today = timezone.now().date()
+            status='published',
+            published_at__lte=now
+        ).select_related('category').order_by('-published_at')[:6]
+
+        # Publicités bannière (haut de page)
         context['banner_ads'] = Advertisement.objects.filter(
             is_active=True,
             position='banner',
             start_date__lte=today,
             end_date__gte=today
         )
-        
+
+        # Publicités sidebar
         context['sidebar_ads'] = Advertisement.objects.filter(
             is_active=True,
             position='sidebar',
             start_date__lte=today,
             end_date__gte=today
         )[:4]
-        
-        # Sponsors
-        context['sponsors'] = Sponsor.objects.filter(actif=True)
-        
-        # Service blocks (à créer dans votre modèle si nécessaire)
-        # context['service_blocks'] = ServiceBlock.objects.filter(is_active=True)[:3]
-        
-        # Proposition document (à créer dans votre modèle si nécessaire)
-        # context['proposition_document'] = PropositionDocument.objects.filter(is_active=True).first()
-        
+
+        # Sponsors actifs — depuis apps.advertisements (is_active, order)
+        context['sponsors'] = AdSponsor.objects.filter(is_active=True).order_by('order')
+
         return context
 
 
-# class AboutView(TemplateView):
-#     template_name = 'pages/cniah/about.html'
-
-
-# class MembershipView(TemplateView):
-#     template_name = 'pages/cniah/membership.html'
-
-
-# class NormsView(TemplateView):
-#     template_name = 'pages/cniah/norms.html'
-
-
-# class SponsorsView(TemplateView):
-#     template_name = 'pages/cniah/sponsors.html'
-    
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['sponsors'] = Sponsor.objects.filter(is_active=True)
-#         return context
-
-
-# class AdvertisingView(TemplateView):
-#     template_name = 'pages/cniah/advertising.html'
-
+# ============= VUES PUBLIQUES =============
 
 class PublicServiceView(TemplateView):
     template_name = 'pages/public/index.html'
@@ -105,76 +108,73 @@ class MembersDashboardView(TemplateView):
     template_name = 'members/dashboard.html'
 
 
+# ============= NEWSLETTER =============
+
 def newsletter_subscribe(request):
     """Vue pour gérer l'inscription à la newsletter"""
     if request.method == 'POST':
-        email = request.POST.get('email')
-        # Logique pour enregistrer l'email dans la base de données
-        # Newsletter.objects.create(email=email)
-        from django.contrib import messages
-        messages.success(request, 'Merci de vous être abonné à notre newsletter!')
-    
-    from django.shortcuts import redirect
+        email = request.POST.get('email', '').strip()
+        if email:
+            # Newsletter.objects.get_or_create(email=email)
+            messages.success(request, 'Merci de vous être abonné à notre newsletter !')
+        else:
+            messages.error(request, 'Veuillez saisir une adresse email valide.')
     return redirect('core:home')
+
+
+# ============= DOCUMENTS =============
 
 class DocumentsView(TemplateView):
     template_name = 'pages/cniah/documents.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # Catégories actives
         context['categories'] = DocumentCategory.objects.filter(is_active=True)
-        
+
         # Filtre par catégorie
         category_slug = self.request.GET.get('category')
-        
+
         # Documents
         documents_qs = ReferenceDocument.objects.filter(is_active=True)
         if category_slug:
             documents_qs = documents_qs.filter(category__slug=category_slug)
         context['documents'] = documents_qs.select_related('category')
-        
+
         # Vidéos (série ZAFE GOUDOUGOUDOU)
-        videos_qs = VideoResource.objects.filter(
+        context['video_series'] = VideoResource.objects.filter(
             is_active=True,
             series_name__icontains='ZAFE GOUDOUGOUDOU'
         ).order_by('episode_number')
-        context['video_series'] = videos_qs
-        
+
         # Toutes les vidéos
         all_videos_qs = VideoResource.objects.filter(is_active=True)
         if category_slug:
             all_videos_qs = all_videos_qs.filter(category__slug=category_slug)
         context['all_videos'] = all_videos_qs.select_related('category')
-        
+
         # Galerie d'images
         images_qs = ImageGallery.objects.filter(is_active=True)
         if category_slug:
             images_qs = images_qs.filter(category__slug=category_slug)
         context['gallery_images'] = images_qs.select_related('category')[:12]
-        
-        # Catégorie actuelle
+
+        # Catégorie courante
         context['current_category'] = category_slug
         if category_slug:
             try:
-                context['current_category_obj'] = DocumentCategory.objects.get(
-                    slug=category_slug
-                )
+                context['current_category_obj'] = DocumentCategory.objects.get(slug=category_slug)
             except DocumentCategory.DoesNotExist:
                 pass
-        
+
         return context
 
 
 def document_download(request, slug):
-    """Vue pour télécharger un document et incrémenter le compteur"""
+    """Télécharger un document et incrémenter le compteur"""
     document = get_object_or_404(ReferenceDocument, slug=slug, is_active=True)
-    
-    # Incrémenter le compteur
     document.increment_download()
-    
-    # Servir le fichier
     try:
         return FileResponse(
             document.file.open('rb'),
@@ -184,92 +184,89 @@ def document_download(request, slug):
     except FileNotFoundError:
         raise Http404("Document non trouvé")
 
+
+# ============= VIDÉOS =============
 
 class VideoDetailView(DetailView):
     model = VideoResource
     template_name = 'pages/cniah/video_detail.html'
     context_object_name = 'video'
     slug_field = 'slug'
-    
+
     def get_queryset(self):
         return VideoResource.objects.filter(is_active=True)
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # Incrémenter les vues
         self.object.increment_view()
-        
+
         # Vidéos similaires (même série ou catégorie)
         related_videos = VideoResource.objects.filter(
             is_active=True
         ).exclude(id=self.object.id)
-        
+
         if self.object.series_name:
-            related_videos = related_videos.filter(
-                series_name=self.object.series_name
-            )
+            related_videos = related_videos.filter(series_name=self.object.series_name)
         elif self.object.category:
-            related_videos = related_videos.filter(
-                category=self.object.category
-            )
-        
+            related_videos = related_videos.filter(category=self.object.category)
+
         context['related_videos'] = related_videos[:4]
-        
         return context
 
+
+# ============= GALERIE =============
 
 class ImageGalleryView(TemplateView):
     template_name = 'pages/cniah/gallery.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # Catégories
         context['categories'] = DocumentCategory.objects.filter(is_active=True)
-        
+
         # Filtre
         category_slug = self.request.GET.get('category')
-        
+
         images_qs = ImageGallery.objects.filter(is_active=True)
         if category_slug:
             images_qs = images_qs.filter(category__slug=category_slug)
-        
+
         context['images'] = images_qs.select_related('category')
         context['current_category'] = category_slug
-        
+
         return context
-    
+
+
+# ============= ADHÉSION =============
 
 class MembershipView(TemplateView):
     template_name = 'pages/cniah/membership.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # Documents pour professionnels nationaux
         context['national_documents'] = MembershipDocument.objects.filter(
             is_active=True,
             member_type__in=['national', 'both']
         ).order_by('order')
-        
+
         # Documents pour professionnels internationaux
         context['international_documents'] = MembershipDocument.objects.filter(
             is_active=True,
             member_type__in=['international', 'both']
         ).order_by('order')
-        
+
         return context
 
 
 def membership_document_download(request, pk):
-    """Vue pour télécharger un document d'adhésion"""
+    """Télécharger un document d'adhésion"""
     document = get_object_or_404(MembershipDocument, pk=pk, is_active=True)
-    
-    # Incrémenter le compteur
     document.increment_download()
-    
-    # Servir le fichier
     try:
         return FileResponse(
             document.file.open('rb'),
@@ -278,16 +275,92 @@ def membership_document_download(request, pk):
         )
     except FileNotFoundError:
         raise Http404("Document non trouvé")
-    
 
-#  ============= COTISATION =============
+
+def adhesion_view(request):
+    """
+    Page de demande d'adhésion avec formulaire complet.
+    Accessible uniquement aux utilisateurs non authentifiés.
+    """
+    # Redirect authenticated users to dashboard
+    if request.user.is_authenticated:
+        return redirect('core:members_dashboard')
+
+    if request.method == 'POST':
+        from .models import DemandeAdhesion
+
+        # Retrieve form data
+        try:
+            demande = DemandeAdhesion(
+                type_demande=request.POST.get('type_demande', 'admission'),
+                statut_souhaite=request.POST.get('statut', 'postulant'),
+                nom=request.POST.get('nom', '').strip(),
+                prenom=request.POST.get('prenom', '').strip(),
+                titre=request.POST.get('titre', '').strip(),
+                fonction=request.POST.get('fonction', '').strip(),
+                nif=request.POST.get('nif', '').strip(),
+                telephone=request.POST.get('telephone', '').strip(),
+                email=request.POST.get('email', '').strip(),
+                adresse=request.POST.get('adresse', '').strip(),
+                diplome_1=request.POST.get('diplome_1', '').strip(),
+                diplome_2=request.POST.get('diplome_2', '').strip(),
+                cv_resume=request.POST.get('cv_resume', '').strip(),
+            )
+
+            # Handle optional don_montant
+            don_str = request.POST.get('don_montant', '').strip()
+            if don_str:
+                try:
+                    demande.don_montant = float(don_str)
+                except ValueError:
+                    pass
+
+            # Handle file uploads
+            if 'photo_identite' in request.FILES:
+                demande.photo_identite = request.FILES['photo_identite']
+            if 'copie_diplomes' in request.FILES:
+                demande.copie_diplomes = request.FILES['copie_diplomes']
+            if 'piece_identite' in request.FILES:
+                demande.piece_identite = request.FILES['piece_identite']
+            if 'cv_fichier' in request.FILES:
+                demande.cv_fichier = request.FILES['cv_fichier']
+            if 'certificat_cniah' in request.FILES:
+                demande.certificat_cniah = request.FILES['certificat_cniah']
+            if 'lettre_support' in request.FILES:
+                demande.lettre_support = request.FILES['lettre_support']
+            if 'permis_sejour' in request.FILES:
+                demande.permis_sejour = request.FILES['permis_sejour']
+            if 'autres_documents' in request.FILES:
+                demande.autres_documents = request.FILES['autres_documents']
+
+            demande.save()
+
+            messages.success(
+                request,
+                f"Votre demande d'adhésion a été soumise avec succès ! "
+                f"Le secrétariat du CNIAH vous contactera à {demande.email} dans les meilleurs délais."
+            )
+            return redirect('core:adhesion')
+
+        except Exception as e:
+            messages.error(
+                request,
+                f"Une erreur est survenue lors de la soumission de votre demande. "
+                f"Veuillez réessayer ou contacter le secrétariat. (Erreur : {str(e)})"
+            )
+
+    return render(request, 'pages/cniah/adhesion.html')
+
+
+# ============= COTISATION =============
+
 def cotisation(request):
     """Page Cotisation et Contribution"""
     document = CotisationDocument.objects.filter(
         titre__icontains="Liste des comptes bancaires",
         actif=True
     ).first()
-    
+
     context = {
         'document': document
     }
@@ -295,22 +368,20 @@ def cotisation(request):
 
 
 # ============= FORMATION CONTINUE =============
+
 def formation_continue(request):
     """Page Formation Continue"""
     categorie_filter = request.GET.get('categorie', None)
-    
+
     formations = FormationContent.objects.filter(actif=True).select_related('categorie')
-    
+
     if categorie_filter:
         formations = formations.filter(categorie_id=categorie_filter)
-    
-    formations = formations.order_by('-date_formation', 'ordre')
-    
-    # Précharger les images pour les formations de type groupe_images
-    formations = formations.prefetch_related('images')
-    
+
+    formations = formations.order_by('-date_formation', 'ordre').prefetch_related('images')
+
     categories = CategoryFormation.objects.all().order_by('ordre')
-    
+
     context = {
         'formations': formations,
         'categories': categories,
@@ -319,11 +390,12 @@ def formation_continue(request):
     return render(request, 'pages/cniah/formation_continue.html', context)
 
 
-# ============= HONNEUR ET MERITE =============
+# ============= HONNEUR ET MÉRITE =============
+
 def honneur_merite(request):
     """Page Honneur et Mérite"""
     honneurs = HonneurMerite.objects.all().prefetch_related('images').order_by('-annee', 'ordre')
-    
+
     context = {
         'honneurs': honneurs
     }
@@ -331,39 +403,38 @@ def honneur_merite(request):
 
 
 # ============= MEMBRES ACTIFS =============
+
 def membres_actifs(request):
-    """Page Liste des Membres Actifs avec pagination et filtres"""
+    """Liste des Membres Actifs avec pagination et filtres"""
     titre_filter = request.GET.get('titre', None)
     search = request.GET.get('search', '')
-    
-    # Configuration de la page (titre et intro)
+
+    # Configuration de la page
     page_config = PageMembresActifs.objects.first()
-    
-    # Récupérer les membres actifs
+
+    # Membres actifs
     membres = MembreActif.objects.filter(actif=True).select_related('titre')
-    
-    # Filtrer par titre professionnel
+
     if titre_filter:
         membres = membres.filter(titre_id=titre_filter)
-    
-    # Recherche par nom, prénom ou numéro
+
     if search:
         membres = membres.filter(
-            Q(nom__icontains=search) | 
+            Q(nom__icontains=search) |
             Q(prenom__icontains=search) |
             Q(numero__icontains=search)
         )
-    
+
     membres = membres.order_by('nom', 'prenom')
-    
+
     # Pagination
-    paginator = Paginator(membres, 50)  # 50 membres par page
+    paginator = Paginator(membres, 50)
     page_number = request.GET.get('page')
     membres_page = paginator.get_page(page_number)
-    
-    # Liste des titres pour le filtre
+
+    # Titres pour le filtre
     titres = TitreProfessionnel.objects.all().order_by('ordre')
-    
+
     context = {
         'page_config': page_config,
         'membres': membres_page,
@@ -375,21 +446,22 @@ def membres_actifs(request):
     return render(request, 'pages/cniah/membres_actifs.html', context)
 
 
-# ============= VERIFIER CERTIFICATION =============
+# ============= VÉRIFIER CERTIFICATION =============
+
 def verifier_certification(request):
     """Page Vérifier une Certification"""
     resultat = None
     methode = request.GET.get('methode', 'numero')
-    
+
     if request.method == 'POST':
         methode = request.POST.get('methode', 'numero')
-        
+
         if methode == 'numero':
             numero = request.POST.get('numero_certificat', '').strip()
             try:
-                cert = Certification.objects.select_related('membre', 'membre__titre').get(
-                    numero_certificat=numero
-                )
+                cert = Certification.objects.select_related(
+                    'membre', 'membre__titre'
+                ).get(numero_certificat=numero)
                 resultat = {
                     'trouve': True,
                     'valide': cert.est_valide,
@@ -400,11 +472,11 @@ def verifier_certification(request):
                     'trouve': False,
                     'message': 'Aucun certificat trouvé avec ce numéro.'
                 }
-        
+
         elif methode == 'nom':
             nom = request.POST.get('nom', '').strip()
             prenom = request.POST.get('prenom', '').strip()
-            
+
             if nom and prenom:
                 try:
                     membre = MembreActif.objects.get(
@@ -412,12 +484,11 @@ def verifier_certification(request):
                         prenom__iexact=prenom,
                         actif=True
                     )
-                    # Récupérer la certification la plus récente valide
                     cert = Certification.objects.filter(
                         membre=membre,
                         statut='valide'
                     ).order_by('-date_delivrance').first()
-                    
+
                     if cert:
                         resultat = {
                             'trouve': True,
@@ -439,7 +510,7 @@ def verifier_certification(request):
                     'trouve': False,
                     'message': 'Veuillez fournir le nom et le prénom.'
                 }
-    
+
     context = {
         'resultat': resultat,
         'methode': methode
@@ -447,11 +518,11 @@ def verifier_certification(request):
     return render(request, 'pages/cniah/verifier_certification.html', context)
 
 
-# ============= DEPOSER PLAINTE =============
+# ============= DÉPOSER PLAINTE =============
+
 def deposer_plainte(request):
     """Page Déposer une Plainte"""
     if request.method == 'POST':
-        # Créer la plainte
         plainte = Plainte(
             nom_plaignant=request.POST.get('nom'),
             email_plaignant=request.POST.get('email'),
@@ -461,26 +532,23 @@ def deposer_plainte(request):
             description=request.POST.get('description')
         )
         plainte.save()
-        
-        # Gérer les documents joints
-        files = request.FILES.getlist('documents')
-        for file in files:
+
+        # Documents joints
+        for file in request.FILES.getlist('documents'):
             DocumentPlainte.objects.create(
                 plainte=plainte,
                 fichier=file,
                 nom_fichier=file.name
             )
-        
+
         messages.success(
-            request, 
+            request,
             f'Votre plainte a été enregistrée avec succès. Numéro de référence : {plainte.numero_reference}'
         )
         return redirect('core:plainte_success', numero=plainte.numero_reference)
-    
-    types_plainte = Plainte.TYPE_PLAINTE_CHOICES
-    
+
     context = {
-        'types_plainte': types_plainte
+        'types_plainte': Plainte.TYPE_PLAINTE_CHOICES
     }
     return render(request, 'pages/cniah/deposer_plainte.html', context)
 
@@ -488,41 +556,41 @@ def deposer_plainte(request):
 def plainte_success(request, numero):
     """Page de confirmation après dépôt de plainte"""
     plainte = get_object_or_404(Plainte, numero_reference=numero)
-    
     context = {
         'plainte': plainte
     }
     return render(request, 'pages/cniah/plainte_success.html', context)
 
 
-# ============= ABOUT (REFONTE) =============
+# ============= ABOUT =============
+
 def about(request):
-    """Page À propos du CNIAH - Refonte complète"""
-    
+    """Page À propos du CNIAH"""
+
     # Documents historiques
     documents_historiques = DocumentHistorique.objects.all().order_by('ordre')
-    
-    # Comités de direction (tous)
+
+    # Comités de direction
     comites = ComiteDirection.objects.all().order_by('-annee_debut')
     for comite in comites:
         comite.membres_list = MembreComite.objects.filter(
             comite=comite
         ).order_by('ordre')
-    
+
     # Commission d'apurement actuelle
     commission_actuelle = CommissionApurement.objects.filter(actif=True).first()
     if commission_actuelle:
         commission_actuelle.membres_list = MembreCommission.objects.filter(
             commission=commission_actuelle
         ).order_by('ordre')
-    
+
     # Conseil de discipline actuel
     conseil_actuel = ConseilDiscipline.objects.filter(actif=True).first()
     if conseil_actuel:
         conseil_actuel.membres_list = MembreConseil.objects.filter(
             conseil=conseil_actuel
         ).order_by('ordre')
-    
+
     context = {
         'documents_historiques': documents_historiques,
         'comites': comites,
@@ -532,31 +600,28 @@ def about(request):
     return render(request, 'pages/cniah/about.html', context)
 
 
-# ============= NORMES (REFONTE) =============
+# ============= NORMES =============
+
 def norms(request):
-    """Page Normes - Refonte avec catégories et filtres"""
+    """Page Normes avec catégories et filtres"""
     categorie_filter = request.GET.get('categorie', None)
     search = request.GET.get('search', '')
-    
+
     normes = Norme.objects.filter(actif=True).select_related('categorie')
-    
-    # Filtrer par catégorie
+
     if categorie_filter:
         normes = normes.filter(categorie_id=categorie_filter)
-    
-    # Recherche
+
     if search:
         normes = normes.filter(
             Q(titre__icontains=search) |
             Q(description__icontains=search) |
             Q(version__icontains=search)
         )
-    
+
     normes = normes.order_by('-date_publication')
-    
-    # Catégories pour les filtres
     categories = CategoryNorme.objects.all().order_by('ordre')
-    
+
     context = {
         'normes': normes,
         'categories': categories,
@@ -567,29 +632,23 @@ def norms(request):
     return render(request, 'pages/cniah/norms.html', context)
 
 
-# ============= SPONSORS (AMELIORE) =============
+# ============= SPONSORS =============
+
 def sponsors(request):
-    """Page Sponsors - Version améliorée"""
-    sponsors_platine = Sponsor.objects.filter(niveau='platine', actif=True).order_by('ordre')
-    sponsors_or = Sponsor.objects.filter(niveau='or', actif=True).order_by('ordre')
-    sponsors_argent = Sponsor.objects.filter(niveau='argent', actif=True).order_by('ordre')
-    sponsors_bronze = Sponsor.objects.filter(niveau='bronze', actif=True).order_by('ordre')
-    
-    # Stats
-    total_sponsors = Sponsor.objects.filter(actif=True).count()
-    
+    """Page Sponsors"""
     context = {
-        'sponsors_platine': sponsors_platine,
-        'sponsors_or': sponsors_or,
-        'sponsors_argent': sponsors_argent,
-        'sponsors_bronze': sponsors_bronze,
-        'total_sponsors': total_sponsors
+        'sponsors_platine': Sponsor.objects.filter(niveau='platine', actif=True).order_by('ordre'),
+        'sponsors_or':      Sponsor.objects.filter(niveau='or',      actif=True).order_by('ordre'),
+        'sponsors_argent':  Sponsor.objects.filter(niveau='argent',  actif=True).order_by('ordre'),
+        'sponsors_bronze':  Sponsor.objects.filter(niveau='bronze',  actif=True).order_by('ordre'),
+        'total_sponsors':   Sponsor.objects.filter(actif=True).count(),
     }
     return render(request, 'pages/cniah/sponsors.html', context)
 
 
-# ============= ADVERTISING (AMELIORE) =============
+# ============= ADVERTISING =============
+
 def advertising(request):
-    """Page Publicité - Version améliorée"""
+    """Page Publicité"""
     context = {}
     return render(request, 'pages/cniah/advertising.html', context)

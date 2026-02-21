@@ -10,12 +10,16 @@ build/
 venv/
 env/
 
+#ssh
+.ssh/
+
 # Django
 *.log
 db.sqlite3
 db.sqlite3-journal
 /media
 /staticfiles
+src/staticfiles
 /static_root
 .env
 *.env
