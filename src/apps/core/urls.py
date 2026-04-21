@@ -21,7 +21,7 @@ urlpatterns = [
     path('norms/', views.norms, name='norms'),
     path('sponsors/', views.sponsors, name='sponsors'),
     path('advertising/', views.advertising, name='advertising'),
-    path('membres/espace/', views.MembersDashboardView.as_view(), name='members_dashboard'),
+    path('membres/espace/', views.members_dashboard, name='members_dashboard'),
 
     # Dropdown Ingénieurs et Architectes
     path('cotisation/', views.cotisation, name='cotisation'),

@@ -12,94 +12,103 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.units import inch
 import qrcode
-from .models import *
+from .models import User, Cotisation, Opportunite, DocumentMembre, ForumCategorie, ForumSujet, ForumReponse
+from .forms import InscriptionForm, ConnexionForm, ProfilForm, CotisationProofForm, NouveauSujetForm, ReponseForumForm
 from apps.core.models import MembreActif, Certification
 
 # ==================== AUTHENTIFICATION ====================
 
 def inscription(request):
-    """Inscription d'un nouveau membre"""
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        password_confirm = request.POST.get('password_confirm')
-        numero_membre = request.POST.get('numero_membre')
-        
-        # Validations
-        if password != password_confirm:
-            messages.error(request, "Les mots de passe ne correspondent pas.")
-            return render(request, 'members/inscription.html')
-        
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Ce nom d'utilisateur existe déjà.")
-            return render(request, 'members/inscription.html')
-        
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "Cet email est déjà utilisé.")
-            return render(request, 'members/inscription.html')
-        
-        # Vérifier le numéro de membre
-        try:
-            membre = MembreActif.objects.get(numero=numero_membre, actif=True)
-            
+        form = InscriptionForm(request.POST)
+        if form.is_valid():
+            numero_membre = form.cleaned_data['numero_membre']
+            try:
+                membre = MembreActif.objects.get(numero=numero_membre, actif=True)
+            except MembreActif.DoesNotExist:
+                form.add_error('numero_membre', "Numéro de membre invalide.")
+                return render(request, 'members/inscription.html', {'form': form})
+
             if hasattr(membre, 'user_account') and membre.user_account:
-                messages.error(request, "Ce numéro de membre est déjà associé à un compte.")
-                return render(request, 'members/inscription.html')
-            
-        except MembreActif.DoesNotExist:
-            messages.error(request, "Numéro de membre invalide.")
-            return render(request, 'members/inscription.html')
-        
-        # Créer l'utilisateur
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password,
-            first_name=membre.prenom,
-            last_name=membre.nom,
-            membre_actif=membre
-        )
-        
-        # Token de vérification
-        token = get_random_string(50)
-        user.email_verification_token = token
-        user.save()
-        
-        messages.success(request, "Compte créé ! Vérifiez votre email.")
-        return redirect('members:connexion')
-    
-    return render(request, 'members/inscription.html')
+                form.add_error('numero_membre', "Ce numéro de membre est déjà associé à un compte.")
+                return render(request, 'members/inscription.html', {'form': form})
+
+            token = get_random_string(50)
+            user = User.objects.create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password'],
+                first_name=membre.prenom,
+                last_name=membre.nom,
+                membre_actif=membre,
+                email_verification_token=token,
+            )
+            user.save()
+
+            verify_url = f"{settings.SITE_URL}/membres/verify/{token}/"
+            send_mail(
+                subject="CNIAH — Vérification de votre adresse email",
+                message=(
+                    f"Bonjour {user.get_full_name()},\n\n"
+                    f"Cliquez sur le lien suivant pour activer votre compte :\n{verify_url}\n\n"
+                    f"Ce lien est personnel et ne doit pas être partagé.\n\n"
+                    f"Le secrétariat du CNIAH"
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+            messages.success(request, "Compte créé ! Consultez votre email pour activer votre compte.")
+            return redirect('members:connexion')
+    else:
+        form = InscriptionForm()
+
+    return render(request, 'members/inscription.html', {'form': form})
 
 
 def connexion(request):
-    """Connexion"""
     if request.user.is_authenticated:
         return redirect('members:dashboard')
-    
+
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            if not user.email_verified:
-                messages.warning(request, "Veuillez vérifier votre email.")
-                return render(request, 'members/connexion.html')
-            
-            login(request, user)
-            messages.success(request, f"Bienvenue {user.get_full_name()} !")
-            return redirect('members:dashboard')
-        else:
-            messages.error(request, "Identifiants incorrects.")
-    
-    return render(request, 'members/connexion.html')
+        form = ConnexionForm(request.POST)
+        if form.is_valid():
+            user = authenticate(
+                request,
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password'],
+            )
+            if user is not None:
+                if not user.email_verified:
+                    messages.warning(request, "Veuillez vérifier votre email avant de vous connecter.")
+                    return render(request, 'members/connexion.html', {'form': form})
+                login(request, user)
+                messages.success(request, f"Bienvenue {user.get_full_name()} !")
+                return redirect('members:dashboard')
+            else:
+                messages.error(request, "Identifiants incorrects.")
+    else:
+        form = ConnexionForm()
+
+    return render(request, 'members/connexion.html', {'form': form})
+
+
+def verify_email(request, token):
+    try:
+        user = User.objects.get(email_verification_token=token, email_verified=False)
+    except User.DoesNotExist:
+        messages.error(request, "Lien de vérification invalide ou déjà utilisé.")
+        return redirect('members:connexion')
+
+    user.email_verified = True
+    user.email_verification_token = ''
+    user.save(update_fields=['email_verified', 'email_verification_token'])
+    messages.success(request, "Email vérifié ! Vous pouvez maintenant vous connecter.")
+    return redirect('members:connexion')
 
 
 @login_required
 def deconnexion(request):
-    """Déconnexion"""
     logout(request)
     messages.success(request, "Vous avez été déconnecté.")
     return redirect('core:home')
@@ -132,36 +141,36 @@ def dashboard(request):
 
 @login_required
 def mon_profil(request):
-    """Profil du membre"""
     if request.method == 'POST':
-        user = request.user
-        user.phone = request.POST.get('phone')
-        user.save()
-        
-        messages.success(request, "Profil mis à jour !")
-        return redirect('members:mon_profil')
-    
-    return render(request, 'members/profil.html')
+        form = ProfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profil mis à jour !")
+            return redirect('members:mon_profil')
+    else:
+        form = ProfilForm(instance=request.user)
+
+    return render(request, 'members/profil.html', {'form': form})
 
 
 @login_required
 def mes_cotisations(request):
-    """Gestion des cotisations"""
     if request.method == 'POST':
-        cotisation_id = request.POST.get('cotisation_id')
-        preuve = request.FILES.get('preuve_paiement')
-        reference = request.POST.get('reference')
-        
-        cotisation = get_object_or_404(Cotisation, id=cotisation_id, user=request.user)
-        cotisation.preuve_paiement = preuve
-        cotisation.reference_paiement = reference
-        cotisation.save()
-        
-        messages.success(request, "Preuve de paiement soumise.")
-        return redirect('members:mes_cotisations')
-    
+        form = CotisationProofForm(request.POST, request.FILES)
+        if form.is_valid():
+            cotisation = get_object_or_404(
+                Cotisation, id=form.cleaned_data['cotisation_id'], user=request.user
+            )
+            cotisation.preuve_paiement = form.cleaned_data['preuve_paiement']
+            cotisation.reference_paiement = form.cleaned_data.get('reference', '')
+            cotisation.save()
+            messages.success(request, "Preuve de paiement soumise.")
+            return redirect('members:mes_cotisations')
+    else:
+        form = CotisationProofForm()
+
     cotisations = request.user.cotisations.all()
-    return render(request, 'members/cotisations.html', {'cotisations': cotisations})
+    return render(request, 'members/cotisations.html', {'cotisations': cotisations, 'form': form})
 
 
 @login_required
@@ -352,48 +361,44 @@ def forum_categorie(request, categorie_id):
 
 @login_required
 def forum_sujet(request, sujet_id):
-    """Détail d'un sujet"""
     sujet = get_object_or_404(ForumSujet, id=sujet_id)
-    
-    # Incrémenter vues
-    sujet.vues += 1
-    sujet.save()
-    
+    ForumSujet.objects.filter(pk=sujet.pk).update(vues=sujet.vues + 1)
+
     if request.method == 'POST':
-        contenu = request.POST.get('contenu')
-        ForumReponse.objects.create(
-            sujet=sujet,
-            auteur=request.user,
-            contenu=contenu
-        )
-        messages.success(request, "Réponse publiée!")
-        return redirect('members:forum_sujet', sujet_id=sujet.id)
-    
+        form = ReponseForumForm(request.POST)
+        if form.is_valid():
+            ForumReponse.objects.create(
+                sujet=sujet,
+                auteur=request.user,
+                contenu=form.cleaned_data['contenu'],
+            )
+            messages.success(request, "Réponse publiée !")
+            return redirect('members:forum_sujet', sujet_id=sujet.id)
+    else:
+        form = ReponseForumForm()
+
     reponses = sujet.reponses.select_related('auteur').all()
-    
     return render(request, 'members/forum_sujet.html', {
         'sujet': sujet,
-        'reponses': reponses
+        'reponses': reponses,
+        'form': form,
     })
 
 
 @login_required
 def nouveau_sujet(request, categorie_id):
-    """Créer un nouveau sujet"""
     categorie = get_object_or_404(ForumCategorie, id=categorie_id)
-    
+
     if request.method == 'POST':
-        titre = request.POST.get('titre')
-        contenu = request.POST.get('contenu')
-        
-        sujet = ForumSujet.objects.create(
-            categorie=categorie,
-            auteur=request.user,
-            titre=titre,
-            contenu=contenu
-        )
-        
-        messages.success(request, "Sujet créé !")
-        return redirect('members:forum_sujet', sujet_id=sujet.id)
-    
-    return render(request, 'members/nouveau_sujet.html', {'categorie': categorie})
+        form = NouveauSujetForm(request.POST)
+        if form.is_valid():
+            sujet = form.save(commit=False)
+            sujet.categorie = categorie
+            sujet.auteur = request.user
+            sujet.save()
+            messages.success(request, "Sujet créé !")
+            return redirect('members:forum_sujet', sujet_id=sujet.id)
+    else:
+        form = NouveauSujetForm(initial={'categorie': categorie})
+
+    return render(request, 'members/nouveau_sujet.html', {'categorie': categorie, 'form': form})

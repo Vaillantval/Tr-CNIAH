@@ -1,27 +1,32 @@
-#requirements.txt
+# requirements.txt
 Django==5.0
 psycopg2-binary==2.9.9
 pillow==10.1.0
 django-ckeditor==6.7.0
-django-mptt==0.16.0
 django-cleanup==8.0.0
 python-decouple==3.8
 django-environ==0.11.2
 
-# Admin personnalisé
+# Admin
 django-jazzmin==3.0.0
 
 # Utilitaires
 django-extensions==3.2.3
 python-slugify==8.0.1
 
-# Production (optionnel pour dev)
+# PDF & QR
+reportlab==4.0.7
+qrcode[pil]==7.4.2
+
+# Production
 gunicorn==21.2.0
 whitenoise==6.6.0
 
-reportlab==4.0.7
-qrcode[pil]==7.4.2
-python-decouple==3.8
-psycopg2-binary==2.9.9
+# Formulaires
 django-crispy-forms==2.1
 crispy-tailwind==0.5.0
+
+# Tests
+pytest-django>=4.8
+factory-boy>=3.3
+coverage>=7.4

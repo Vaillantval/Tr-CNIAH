@@ -2,11 +2,16 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, DetailView
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.http import FileResponse, Http404
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.contrib import messages
+
+from .forms import AdhesionForm, PlainteForm, NewsletterForm
+from .constants import COTISATION_DOCUMENT_TITRE
 
 from apps.news.models import NewsArticle
 from apps.advertisements.models import Advertisement
@@ -37,7 +42,6 @@ from .models import (
     Norme,
     CategoryNorme,
     Sponsor,
-    DemandeAdhesion,
 )
 
 
@@ -104,21 +108,22 @@ class EngineersArchitectsView(TemplateView):
     template_name = 'pages/ingenieurs/index.html'
 
 
-class MembersDashboardView(TemplateView):
-    template_name = 'members/dashboard.html'
+@login_required
+def members_dashboard(request):
+    return redirect('members:dashboard')
 
 
 # ============= NEWSLETTER =============
 
 def newsletter_subscribe(request):
-    """Vue pour gérer l'inscription à la newsletter"""
     if request.method == 'POST':
-        email = request.POST.get('email', '').strip()
-        if email:
-            # Newsletter.objects.get_or_create(email=email)
+        form = NewsletterForm(request.POST)
+        if form.is_valid():
+            form.save()
             messages.success(request, 'Merci de vous être abonné à notre newsletter !')
         else:
-            messages.error(request, 'Veuillez saisir une adresse email valide.')
+            for error in form.errors.values():
+                messages.error(request, error.as_text())
     return redirect('core:home')
 
 
@@ -278,78 +283,24 @@ def membership_document_download(request, pk):
 
 
 def adhesion_view(request):
-    """
-    Page de demande d'adhésion avec formulaire complet.
-    Accessible uniquement aux utilisateurs non authentifiés.
-    """
-    # Redirect authenticated users to dashboard
     if request.user.is_authenticated:
         return redirect('core:members_dashboard')
 
     if request.method == 'POST':
-        from .models import DemandeAdhesion
-
-        # Retrieve form data
-        try:
-            demande = DemandeAdhesion(
-                type_demande=request.POST.get('type_demande', 'admission'),
-                statut_souhaite=request.POST.get('statut', 'postulant'),
-                nom=request.POST.get('nom', '').strip(),
-                prenom=request.POST.get('prenom', '').strip(),
-                titre=request.POST.get('titre', '').strip(),
-                fonction=request.POST.get('fonction', '').strip(),
-                nif=request.POST.get('nif', '').strip(),
-                telephone=request.POST.get('telephone', '').strip(),
-                email=request.POST.get('email', '').strip(),
-                adresse=request.POST.get('adresse', '').strip(),
-                diplome_1=request.POST.get('diplome_1', '').strip(),
-                diplome_2=request.POST.get('diplome_2', '').strip(),
-                cv_resume=request.POST.get('cv_resume', '').strip(),
-            )
-
-            # Handle optional don_montant
-            don_str = request.POST.get('don_montant', '').strip()
-            if don_str:
-                try:
-                    demande.don_montant = float(don_str)
-                except ValueError:
-                    pass
-
-            # Handle file uploads
-            if 'photo_identite' in request.FILES:
-                demande.photo_identite = request.FILES['photo_identite']
-            if 'copie_diplomes' in request.FILES:
-                demande.copie_diplomes = request.FILES['copie_diplomes']
-            if 'piece_identite' in request.FILES:
-                demande.piece_identite = request.FILES['piece_identite']
-            if 'cv_fichier' in request.FILES:
-                demande.cv_fichier = request.FILES['cv_fichier']
-            if 'certificat_cniah' in request.FILES:
-                demande.certificat_cniah = request.FILES['certificat_cniah']
-            if 'lettre_support' in request.FILES:
-                demande.lettre_support = request.FILES['lettre_support']
-            if 'permis_sejour' in request.FILES:
-                demande.permis_sejour = request.FILES['permis_sejour']
-            if 'autres_documents' in request.FILES:
-                demande.autres_documents = request.FILES['autres_documents']
-
-            demande.save()
-
+        form = AdhesionForm(request.POST, request.FILES)
+        if form.is_valid():
+            with transaction.atomic():
+                demande = form.save()
             messages.success(
                 request,
                 f"Votre demande d'adhésion a été soumise avec succès ! "
                 f"Le secrétariat du CNIAH vous contactera à {demande.email} dans les meilleurs délais."
             )
             return redirect('core:adhesion')
+    else:
+        form = AdhesionForm()
 
-        except Exception as e:
-            messages.error(
-                request,
-                f"Une erreur est survenue lors de la soumission de votre demande. "
-                f"Veuillez réessayer ou contacter le secrétariat. (Erreur : {str(e)})"
-            )
-
-    return render(request, 'pages/cniah/adhesion.html')
+    return render(request, 'pages/cniah/adhesion.html', {'form': form})
 
 
 # ============= COTISATION =============
@@ -357,7 +308,7 @@ def adhesion_view(request):
 def cotisation(request):
     """Page Cotisation et Contribution"""
     document = CotisationDocument.objects.filter(
-        titre__icontains="Liste des comptes bancaires",
+        titre__icontains=COTISATION_DOCUMENT_TITRE,
         actif=True
     ).first()
 
@@ -521,36 +472,31 @@ def verifier_certification(request):
 # ============= DÉPOSER PLAINTE =============
 
 def deposer_plainte(request):
-    """Page Déposer une Plainte"""
     if request.method == 'POST':
-        plainte = Plainte(
-            nom_plaignant=request.POST.get('nom'),
-            email_plaignant=request.POST.get('email'),
-            telephone=request.POST.get('telephone'),
-            membre_concerne=request.POST.get('membre_concerne'),
-            type_plainte=request.POST.get('type_plainte'),
-            description=request.POST.get('description')
-        )
-        plainte.save()
-
-        # Documents joints
-        for file in request.FILES.getlist('documents'):
-            DocumentPlainte.objects.create(
-                plainte=plainte,
-                fichier=file,
-                nom_fichier=file.name
+        form = PlainteForm(request.POST, request.FILES)
+        if form.is_valid():
+            with transaction.atomic():
+                plainte = form.save()
+                for file in request.FILES.getlist('documents'):
+                    from .validators import validate_upload
+                    try:
+                        validate_upload(file)
+                    except Exception:
+                        continue
+                    DocumentPlainte.objects.create(
+                        plainte=plainte,
+                        fichier=file,
+                        nom_fichier=file.name,
+                    )
+            messages.success(
+                request,
+                f'Votre plainte a été enregistrée. Numéro de référence : {plainte.numero_reference}'
             )
+            return redirect('core:plainte_success', numero=plainte.numero_reference)
+    else:
+        form = PlainteForm()
 
-        messages.success(
-            request,
-            f'Votre plainte a été enregistrée avec succès. Numéro de référence : {plainte.numero_reference}'
-        )
-        return redirect('core:plainte_success', numero=plainte.numero_reference)
-
-    context = {
-        'types_plainte': Plainte.TYPE_PLAINTE_CHOICES
-    }
-    return render(request, 'pages/cniah/deposer_plainte.html', context)
+    return render(request, 'pages/cniah/deposer_plainte.html', {'form': form})
 
 
 def plainte_success(request, numero):

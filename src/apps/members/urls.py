@@ -9,6 +9,7 @@ urlpatterns = [
     path('inscription/', views.inscription, name='inscription'),
     path('connexion/', views.connexion, name='connexion'),
     path('deconnexion/', views.deconnexion, name='deconnexion'),
+    path('verify/<str:token>/', views.verify_email, name='verify_email'),
     
     # Espace membre
     path('dashboard/', views.dashboard, name='dashboard'),

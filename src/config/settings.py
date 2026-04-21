@@ -29,7 +29,6 @@ INSTALLED_APPS = [
     # Third party apps
     'ckeditor',
     'ckeditor_uploader',
-    'mptt',
     'django_cleanup.apps.CleanupConfig',
     
     # Local apps
@@ -246,17 +245,50 @@ LOGIN_URL = '/membres/connexion/'
 LOGIN_REDIRECT_URL = '/membres/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Email (configuration pour vérification)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Dev
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Prod
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'noreply@cniah.ht'
-EMAIL_HOST_PASSWORD = 'votre-mot-de-passe'
+# Email
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend'
+)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', '1') == '1'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@cniah.ht')
 
-# URL du site pour génération de liens
-SITE_URL = 'http://localhost:8002'
+# URL du site pour génération de liens (emails, QR codes)
+SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8002')
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'apps': {
+            'handlers': ['console'],
+            'level': os.environ.get('LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
 
 # Requirements additionnels
 # pip install reportlab qrcode pillow
