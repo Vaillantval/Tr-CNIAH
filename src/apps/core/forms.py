@@ -7,12 +7,21 @@ from .validators import (
 
 
 class MultipleFileInput(forms.FileInput):
-    """FileInput qui accepte la sélection de plusieurs fichiers."""
-    def __init__(self, attrs=None):
-        super().__init__(attrs={'multiple': True, **(attrs or {})})
+    """FileInput qui accepte la sélection de plusieurs fichiers (Django 4.2+)."""
+    allow_multiple_selected = True
 
-    def value_from_datadict(self, data, files, name):
-        return files.getlist(name)
+
+class MultipleFileField(forms.FileField):
+    """FileField qui accepte et valide plusieurs fichiers."""
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('widget', MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            return [single_clean(d, initial) for d in data]
+        return single_clean(data, initial)
 
 _image_validators = [
     FileExtensionValidator(ALLOWED_IMAGE_EXTENSIONS),
@@ -104,10 +113,9 @@ class AdhesionForm(forms.ModelForm):
 
 
 class PlainteForm(forms.ModelForm):
-    documents = forms.FileField(
+    documents = MultipleFileField(
         required=False,
         validators=_any_validators,
-        widget=MultipleFileInput(attrs={'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png'}),
         label="Pièces jointes",
         help_text="Formats acceptés : PDF, Word, JPG, PNG. Taille max : 5 Mo par fichier.",
     )
