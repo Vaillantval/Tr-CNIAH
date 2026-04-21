@@ -5,6 +5,15 @@ from .validators import (
     ALLOWED_FILE_EXTENSIONS, ALLOWED_IMAGE_EXTENSIONS, ALLOWED_DOCUMENT_EXTENSIONS,
 )
 
+
+class MultipleFileInput(forms.FileInput):
+    """FileInput qui accepte la sélection de plusieurs fichiers."""
+    def __init__(self, attrs=None):
+        super().__init__(attrs={'multiple': True, **(attrs or {})})
+
+    def value_from_datadict(self, data, files, name):
+        return files.getlist(name)
+
 _image_validators = [
     FileExtensionValidator(ALLOWED_IMAGE_EXTENSIONS),
     FileSizeValidator(),
@@ -98,10 +107,7 @@ class PlainteForm(forms.ModelForm):
     documents = forms.FileField(
         required=False,
         validators=_any_validators,
-        widget=forms.ClearableFileInput(attrs={
-            'multiple': True,
-            'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png',
-        }),
+        widget=MultipleFileInput(attrs={'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png'}),
         label="Pièces jointes",
         help_text="Formats acceptés : PDF, Word, JPG, PNG. Taille max : 5 Mo par fichier.",
     )
