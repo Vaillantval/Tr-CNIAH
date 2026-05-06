@@ -3,7 +3,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.http import HttpResponse, FileResponse
@@ -44,18 +43,8 @@ def inscription(request):
             user.save()
 
             verify_url = f"{settings.SITE_URL}/membres/verify/{token}/"
-            send_mail(
-                subject="CNIAH — Vérification de votre adresse email",
-                message=(
-                    f"Bonjour {user.get_full_name()},\n\n"
-                    f"Cliquez sur le lien suivant pour activer votre compte :\n{verify_url}\n\n"
-                    f"Ce lien est personnel et ne doit pas être partagé.\n\n"
-                    f"Le secrétariat du CNIAH"
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=True,
-            )
+            from .tasks import envoyer_email_verification
+            envoyer_email_verification.delay(user.pk, verify_url)
             messages.success(request, "Compte créé ! Consultez votre email pour activer votre compte.")
             return redirect('members:connexion')
     else:

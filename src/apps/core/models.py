@@ -609,14 +609,6 @@ class Certification(models.Model):
 
     history = HistoricalRecords()
 
-    def save(self, *args, **kwargs):
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-        # Génère le QR code à la création ou si le numéro a changé et qu'il n'y en a pas encore
-        if is_new or not self.qr_code:
-            self.generate_qr_code()
-            Certification.objects.filter(pk=self.pk).update(qr_code=self.qr_code)
-
 
 # ============= PLAINTES =============
 class Plainte(models.Model):

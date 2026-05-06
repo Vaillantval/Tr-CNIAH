@@ -13,7 +13,28 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = os.environ.get('DEBUG') == '1'
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# Ajouter automatiquement les domaines Railway au démarrage
+_RAILWAY_SAFE_HOSTS = ['healthcheck.railway.app']
+for _h in _RAILWAY_SAFE_HOSTS:
+    if _h not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_h)
+
+for _var in ('RAILWAY_PUBLIC_DOMAIN', 'RAILWAY_PRIVATE_DOMAIN'):
+    _domain = os.environ.get(_var, '').strip()
+    if _domain and _domain not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_domain)
+
+# CSRF_TRUSTED_ORIGINS pour les domaines Railway (HTTPS requis en prod)
+CSRF_TRUSTED_ORIGINS = []
+for _h in ALLOWED_HOSTS:
+    if _h not in ('localhost', '127.0.0.1', '0.0.0.0', 'healthcheck.railway.app') and '.' in _h:
+        for _scheme in ('https://', 'http://'):
+            _origin = f'{_scheme}{_h}'
+            if _origin not in CSRF_TRUSTED_ORIGINS:
+                CSRF_TRUSTED_ORIGINS.append(_origin)
 
 
 # Application definition

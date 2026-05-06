@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, DetailView
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, JsonResponse
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
@@ -44,6 +44,13 @@ from .models import (
     CategoryNorme,
     Sponsor,
 )
+
+
+# ============= HEALTH CHECK ===========
+
+def health_check(request):
+    """GET /health/ — utilisé par Railway pour vérifier que l'app est vivante."""
+    return JsonResponse({'status': 'ok', 'service': 'CNIAH'})
 
 
 # ============= ACCUEIL =============
@@ -295,6 +302,8 @@ def adhesion_view(request):
         if form.is_valid():
             with transaction.atomic():
                 demande = form.save()
+            from apps.members.tasks import envoyer_confirmation_adhesion
+            envoyer_confirmation_adhesion.delay(demande.pk)
             messages.success(
                 request,
                 f"Votre demande d'adhésion a été soumise avec succès ! "
