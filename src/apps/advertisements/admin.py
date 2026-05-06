@@ -1,14 +1,6 @@
 # src/apps/advertisements/admin.py
 from django.contrib import admin
-from .models import Sponsor, Advertisement
-
-
-@admin.register(Sponsor)
-class SponsorAdmin(admin.ModelAdmin):
-    list_display = ['name', 'order', 'is_active', 'created_at']
-    list_filter = ['is_active', 'created_at']
-    search_fields = ['name', 'description']
-    list_editable = ['order', 'is_active']
+from .models import Advertisement
 
 
 @admin.register(Advertisement)

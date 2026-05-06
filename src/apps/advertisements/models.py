@@ -3,25 +3,6 @@ from django.db import models
 from django.utils import timezone
 
 
-class Sponsor(models.Model):
-    """Sponsors du CNIAH"""
-    name = models.CharField("Nom", max_length=200)
-    logo = models.ImageField("Logo", upload_to='sponsors/')
-    website = models.URLField("Site web", blank=True)
-    description = models.TextField("Description", blank=True)
-    order = models.PositiveIntegerField("Ordre d'affichage", default=0)
-    is_active = models.BooleanField("Actif", default=True)
-    created_at = models.DateTimeField("Créé le", auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Sponsor"
-        verbose_name_plural = "Sponsors"
-        ordering = ['order', 'name']
-
-    def __str__(self):
-        return self.name
-
-
 class Advertisement(models.Model):
     """Publicités sur le site"""
     POSITION_CHOICES = [
