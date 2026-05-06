@@ -5,6 +5,10 @@ from ckeditor.fields import RichTextField
 from django.utils.text import slugify
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
+from django.conf import settings
+from io import BytesIO
+from simple_history.models import HistoricalRecords
+import qrcode
 import random
 import string
 
@@ -542,6 +546,8 @@ class MembreActif(models.Model):
     def __str__(self):
         return f"{self.numero} - {self.prenom} {self.nom}"
     
+    history = HistoricalRecords()
+
     @property
     def nom_complet(self):
         return f"{self.prenom} {self.nom}"
@@ -587,6 +593,30 @@ class Certification(models.Model):
     def est_valide(self):
         return self.statut == 'valide' and self.date_expiration >= timezone.now().date()
 
+    def generate_qr_code(self):
+        """Génère et stocke le QR code pointant vers la page de vérification."""
+        site_url = getattr(settings, 'SITE_URL', 'http://localhost:8002')
+        qr_url = f"{site_url}/verifier-certification/?numero={self.numero_certificat}"
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(qr_url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        buf = BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        filename = f"qr_{self.numero_certificat}.png"
+        self.qr_code.save(filename, buf, save=False)
+
+    history = HistoricalRecords()
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        # Génère le QR code à la création ou si le numéro a changé et qu'il n'y en a pas encore
+        if is_new or not self.qr_code:
+            self.generate_qr_code()
+            Certification.objects.filter(pk=self.pk).update(qr_code=self.qr_code)
+
 
 # ============= PLAINTES =============
 class Plainte(models.Model):
@@ -625,6 +655,8 @@ class Plainte(models.Model):
     def __str__(self):
         return f"{self.numero_reference} - {self.nom_plaignant}"
     
+    history = HistoricalRecords()
+
     def save(self, *args, **kwargs):
         if not self.numero_reference:
             date_str = timezone.now().strftime('%Y%m%d')
@@ -923,6 +955,8 @@ class DemandeAdhesion(models.Model):
         verbose_name = "Demande d'Adhésion"
         verbose_name_plural = "Demandes d'Adhésion"
         ordering = ['-date_soumission']
+
+    history = HistoricalRecords()
 
     def __str__(self):
         date_str = self.date_soumission.strftime('%d/%m/%Y') if self.date_soumission else ''

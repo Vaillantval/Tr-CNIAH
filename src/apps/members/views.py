@@ -9,9 +9,7 @@ from django.conf import settings
 from django.http import HttpResponse, FileResponse
 from io import BytesIO
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.lib.units import inch
-import qrcode
+from reportlab.lib.pagesizes import A4
 from .models import User, Cotisation, Opportunite, DocumentMembre, ForumCategorie, ForumSujet, ForumReponse
 from .forms import InscriptionForm, ConnexionForm, ProfilForm, CotisationProofForm, NouveauSujetForm, ReponseForumForm
 from apps.core.models import MembreActif, Certification
@@ -103,6 +101,8 @@ def verify_email(request, token):
     user.email_verified = True
     user.email_verification_token = ''
     user.save(update_fields=['email_verified', 'email_verification_token'])
+    from .tasks import envoyer_email_bienvenue
+    envoyer_email_bienvenue.delay(user.pk)
     messages.success(request, "Email vérifié ! Vous pouvez maintenant vous connecter.")
     return redirect('members:connexion')
 
@@ -306,17 +306,14 @@ def generer_certificat_pdf(user, certification):
     
     p.setFillColorRGB(0, 0, 0)  # Reset noir
     
-    # Génération QR Code
-    qr_url = f"{settings.SITE_URL}/verifier-certification/?numero={certification.numero_certificat}"
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(qr_url)
-    qr.make(fit=True)
-    
-    qr_img = qr.make_image(fill_color="black", back_color="white")
-    qr_buffer = BytesIO()
-    qr_img.save(qr_buffer, format='PNG')
-    qr_buffer.seek(0)
-    
+    # QR Code — utilise l'image stockée, régénère si absente
+    if certification.qr_code:
+        qr_buffer = certification.qr_code.open('rb')
+    else:
+        certification.generate_qr_code()
+        certification.save(update_fields=['qr_code'])
+        qr_buffer = certification.qr_code.open('rb')
+
     # Ajouter QR code au PDF
     p.drawImage(qr_buffer, width - 200, 100, width=150, height=150)
     
