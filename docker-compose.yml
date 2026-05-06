@@ -31,16 +31,47 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - cniah_network
     stdin_open: true
     tty: true
 
+  redis:
+    image: redis:7-alpine
+    container_name: cniah_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - cniah_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build: .
+    container_name: cniah_worker
+    command: celery -A config worker -l info
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - cniah_network
+
   adminer:
     image: adminer
     container_name: cniah_adminer
     ports:
-      - "8081:8080" 
+      - "8081:8080"
     depends_on:
       - db
     networks:
