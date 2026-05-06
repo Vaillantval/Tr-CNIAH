@@ -9,13 +9,14 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
 from django.contrib import messages
+from django.core.cache import cache
+from django.conf import settings as django_settings
 
 from .forms import AdhesionForm, PlainteForm, NewsletterForm
 from .constants import COTISATION_DOCUMENT_TITRE
 
 from apps.news.models import NewsArticle
 from apps.advertisements.models import Advertisement
-from apps.advertisements.models import Sponsor as AdSponsor
 from .models import (
     DocumentCategory,
     ReferenceDocument,
@@ -52,48 +53,51 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         now = timezone.now()
         today = now.date()
 
-        # Actualités nationales (6 dernières publiées)
-        context['national_news'] = NewsArticle.objects.filter(
-            status='published',
-            news_type='national',
-            published_at__lte=now
-        ).order_by('-published_at')[:6]
+        ttl_news = getattr(django_settings, 'CACHE_TTL_NEWS', 300)
+        ttl_sponsors = getattr(django_settings, 'CACHE_TTL_SPONSORS', 3600)
 
-        # Actualités internationales (6 dernières publiées)
-        context['international_news'] = NewsArticle.objects.filter(
-            status='published',
-            news_type='international',
-            published_at__lte=now
-        ).order_by('-published_at')[:6]
-
-        # Articles récents (tous types, 6 derniers)
-        context['recent_articles'] = NewsArticle.objects.filter(
-            status='published',
-            published_at__lte=now
-        ).select_related('category').order_by('-published_at')[:6]
-
-        # Publicités bannière (haut de page)
-        context['banner_ads'] = Advertisement.objects.filter(
-            is_active=True,
-            position='banner',
-            start_date__lte=today,
-            end_date__gte=today
+        context['national_news'] = cache.get_or_set(
+            'home_national_news',
+            lambda: list(NewsArticle.objects.filter(
+                status='published', news_type='national', published_at__lte=now
+            ).order_by('-published_at')[:6]),
+            ttl_news,
         )
 
-        # Publicités sidebar
+        context['international_news'] = cache.get_or_set(
+            'home_international_news',
+            lambda: list(NewsArticle.objects.filter(
+                status='published', news_type='international', published_at__lte=now
+            ).order_by('-published_at')[:6]),
+            ttl_news,
+        )
+
+        context['recent_articles'] = cache.get_or_set(
+            'home_recent_articles',
+            lambda: list(NewsArticle.objects.filter(
+                status='published', published_at__lte=now
+            ).select_related('category').order_by('-published_at')[:6]),
+            ttl_news,
+        )
+
+        context['banner_ads'] = Advertisement.objects.filter(
+            is_active=True, position='banner',
+            start_date__lte=today, end_date__gte=today,
+        )
+
         context['sidebar_ads'] = Advertisement.objects.filter(
-            is_active=True,
-            position='sidebar',
-            start_date__lte=today,
-            end_date__gte=today
+            is_active=True, position='sidebar',
+            start_date__lte=today, end_date__gte=today,
         )[:4]
 
-        # Sponsors actifs — depuis apps.advertisements (is_active, order)
-        context['sponsors'] = AdSponsor.objects.filter(is_active=True).order_by('order')
+        context['sponsors'] = cache.get_or_set(
+            'home_sponsors',
+            lambda: list(Sponsor.objects.filter(actif=True).order_by('ordre')),
+            ttl_sponsors,
+        )
 
         return context
 
@@ -475,14 +479,23 @@ def deposer_plainte(request):
     if request.method == 'POST':
         form = PlainteForm(request.POST, request.FILES)
         if form.is_valid():
+            from .validators import validate_upload
+            fichiers = request.FILES.getlist('documents')
+            fichiers_invalides = []
+            for file in fichiers:
+                try:
+                    validate_upload(file)
+                except Exception as e:
+                    fichiers_invalides.append(f"{file.name} : {e}")
+
+            if fichiers_invalides:
+                for msg in fichiers_invalides:
+                    messages.error(request, msg)
+                return render(request, 'pages/cniah/deposer_plainte.html', {'form': form})
+
             with transaction.atomic():
                 plainte = form.save()
-                for file in request.FILES.getlist('documents'):
-                    from .validators import validate_upload
-                    try:
-                        validate_upload(file)
-                    except Exception:
-                        continue
+                for file in fichiers:
                     DocumentPlainte.objects.create(
                         plainte=plainte,
                         fichier=file,
