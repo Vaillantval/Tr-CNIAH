@@ -25,12 +25,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
     # Third party apps
     'ckeditor',
     'ckeditor_uploader',
     'django_cleanup.apps.CleanupConfig',
-    
+    'axes',
+    'simple_history',
+    'django_celery_results',
+
     # Local apps
     'apps.news',
     'apps.advertisements',
@@ -46,8 +50,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'axes.middleware.AxesMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -237,6 +243,17 @@ MAX_DOCUMENT_SIZE = 50 * 1024 * 1024  # 50 MB
 MAX_VIDEO_SIZE = 500 * 1024 * 1024    # 500 MB
 MAX_IMAGE_SIZE = 10 * 1024 * 1024     # 10 MB
 
+# ==================== DJANGO-AXES (brute-force protection) ====================
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 0.5  # 30 minutes
+AXES_LOCKOUT_TEMPLATE = None
+AXES_RESET_ON_SUCCESS = True
+
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 # Model User personnalisé
 AUTH_USER_MODEL = 'members.User'
 
@@ -290,5 +307,30 @@ LOGGING = {
     },
 }
 
-# Requirements additionnels
-# pip install reportlab qrcode pillow
+# ==================== SÉCURITÉ PRODUCTION ====================
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# ==================== CACHE ====================
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'cniah-cache',
+    }
+}
+
+CACHE_TTL_NEWS = 5 * 60       # 5 minutes pour les actualités
+CACHE_TTL_SPONSORS = 60 * 60  # 1 heure pour les sponsors
+
+# ==================== CELERY ====================
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
