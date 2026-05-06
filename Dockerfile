@@ -1,28 +1,25 @@
-# Dockerfile
 FROM python:3.11-slim
 
-# Variables d'environnement
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-# Répertoire de travail
 WORKDIR /app
 
-# Installer les dépendances système
 RUN apt-get update && apt-get install -y \
-    postgresql-client \
-    gettext \
     libpq-dev \
     gcc \
+    gettext \
     && rm -rf /var/lib/apt/lists/*
 
-# Copier et installer les requirements
 COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Le reste sera monté via volume
+# Copier le code source
+COPY src/ .
+
+# Collecter les fichiers statiques au build
+RUN python manage.py collectstatic --noinput
+
 EXPOSE 8000
 
-# Script d'entrée par défaut
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120

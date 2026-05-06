@@ -1,6 +1,7 @@
 #src\config\settings.py
 
 import os
+import dj_database_url
 from pathlib import Path
 import sys
 
@@ -82,16 +83,22 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'cniah_db'),
-        'USER': os.environ.get('POSTGRES_USER', 'cniah_user'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'cniah_password'),
-        'HOST': 'db',
-        'PORT': '5432',
+# Railway injecte DATABASE_URL automatiquement.
+# Fallback sur les variables individuelles pour le dev local (docker-compose).
+_DATABASE_URL = os.environ.get('DATABASE_URL')
+if _DATABASE_URL:
+    DATABASES = {'default': dj_database_url.parse(_DATABASE_URL, conn_max_age=600)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB', 'cniah_db'),
+            'USER': os.environ.get('POSTGRES_USER', 'cniah_user'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'cniah_password'),
+            'HOST': os.environ.get('DB_HOST', 'db'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
     }
-}
 
 
 # Password validation

@@ -19,6 +19,7 @@ qrcode[pil]==7.4.2
 # Production
 gunicorn==21.2.0
 whitenoise==6.6.0
+dj-database-url==2.1.0
 
 # Sécurité — brute-force protection
 django-axes==6.4.0
