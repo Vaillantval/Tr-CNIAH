@@ -4,8 +4,6 @@ psycopg2-binary==2.9.9
 pillow==10.1.0
 django-ckeditor==6.7.0
 django-cleanup==8.0.0
-python-decouple==3.8
-django-environ==0.11.2
 
 # Admin
 django-jazzmin==3.0.0
@@ -22,11 +20,19 @@ qrcode[pil]==7.4.2
 gunicorn==21.2.0
 whitenoise==6.6.0
 
-# Formulaires
-django-crispy-forms==2.1
-crispy-tailwind==0.5.0
+# Sécurité — brute-force protection
+django-axes==6.4.0
+
+# Audit logs
+django-simple-history==3.5.0
+
+# Tâches asynchrones
+celery==5.3.6
+redis==5.0.1
+django-celery-results==2.5.1
 
 # Tests
 pytest-django>=4.8
+pytest-cov>=4.1
 factory-boy>=3.3
 coverage>=7.4
