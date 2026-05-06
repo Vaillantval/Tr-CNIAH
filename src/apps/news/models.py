@@ -1,6 +1,8 @@
 # src/apps/news/models.py
 
 from django.db import models
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -80,10 +82,16 @@ class NewsArticle(models.Model):
     created_at = models.DateTimeField("Créé le", auto_now_add=True)
     updated_at = models.DateTimeField("Modifié le", auto_now=True)
 
+    # Champ vectoriel pour la recherche full-text (mis à jour via trigger ou signal)
+    search_vector = SearchVectorField(null=True, blank=True, editable=False)
+
     class Meta:
         verbose_name = "Article d'actualité"
         verbose_name_plural = "Articles d'actualité"
         ordering = ['-published_at']
+        indexes = [
+            GinIndex(fields=['search_vector'], name='news_article_search_idx'),
+        ]
 
     def __str__(self):
         return self.title
