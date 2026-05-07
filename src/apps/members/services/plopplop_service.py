@@ -10,7 +10,6 @@ class PlopplopService:
     """
 
     BASE_URL = 'https://plopplop.solutionip.app'
-    PREFIX = 'CNIAH'
 
     def __init__(self):
         self.client_id = getattr(settings, 'PLOPPLOP_CLIENT_ID', '')
@@ -19,7 +18,7 @@ class PlopplopService:
         return bool(self.client_id)
 
     def _ref(self, cotisation_ref: str) -> str:
-        return f"{self.PREFIX}-{cotisation_ref}"
+        return f"cniah-{cotisation_ref}"
 
     def initier_paiement(self, cotisation_ref: str, montant: float, methode: str) -> dict:
         """
