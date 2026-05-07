@@ -11,6 +11,7 @@ django-jazzmin==3.0.0
 # Utilitaires
 django-extensions==3.2.3
 python-slugify==8.0.1
+requests==2.32.3
 
 # PDF & QR
 reportlab==4.0.7
