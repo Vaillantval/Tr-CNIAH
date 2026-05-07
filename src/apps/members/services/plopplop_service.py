@@ -18,7 +18,7 @@ class PlopplopService:
         return bool(self.client_id)
 
     def _ref(self, cotisation_ref: str) -> str:
-        return f"cniah-{cotisation_ref}"
+        return cotisation_ref
 
     def initier_paiement(self, cotisation_ref: str, montant: float, methode: str) -> dict:
         """

@@ -351,8 +351,8 @@ def initier_paiement_cotisation(request, cotisation_id):
         messages.error(request, "Le paiement en ligne n'est pas encore configuré. Veuillez contacter le secrétariat.")
         return redirect('members:mes_cotisations')
 
-    ref = str(cotisation.pk)
-    CotisationService.initier_paiement_online(cotisation, methode)
+    # Génère une référence unique et la stocke dans cotisation.reference_plopplop
+    ref = CotisationService.initier_paiement_online(cotisation, methode)
 
     # Mémoriser la référence en session pour la page de retour
     request.session['cotisation_paiement_ref'] = ref
