@@ -94,6 +94,34 @@ def notifier_changement_statut_plainte(self, plainte_id: int):
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def notifier_cotisation_validee(self, cotisation_id: int):
+    """Email envoyé au membre quand sa cotisation est validée."""
+    from apps.members.models import Cotisation
+    try:
+        cotisation = Cotisation.objects.select_related('user').get(pk=cotisation_id)
+        user = cotisation.user
+        send_mail(
+            subject="CNIAH — Votre cotisation est confirmée",
+            message=(
+                f"Bonjour {user.get_full_name()},\n\n"
+                f"Votre cotisation pour la période "
+                f"{cotisation.date_debut.strftime('%d/%m/%Y')} – "
+                f"{cotisation.date_fin.strftime('%d/%m/%Y')} "
+                f"a été validée avec succès.\n\n"
+                f"Montant : {cotisation.montant} USD\n"
+                f"Référence : {cotisation.reference_paiement or 'N/A'}\n\n"
+                f"Merci de votre fidélité au CNIAH.\n\n"
+                f"Le secrétariat du CNIAH"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except Exception as exc:
+        raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def envoyer_rappel_cotisation(self, user_id: int):
     """Rappel envoyé aux membres dont la cotisation est échue."""
     from apps.members.models import User
@@ -103,8 +131,13 @@ def envoyer_rappel_cotisation(self, user_id: int):
             subject="CNIAH — Rappel de cotisation",
             message=(
                 f"Bonjour {user.get_full_name()},\n\n"
-                f"Nous vous rappelons que votre cotisation annuelle est arrivée à échéance. "
-                f"Connectez-vous sur {settings.SITE_URL}/membres/cotisations/ pour la régler.\n\n"
+                f"Votre cotisation annuelle au CNIAH est arrivée à échéance.\n\n"
+                f"Vous pouvez la régler directement en ligne via :\n"
+                f"  • MonCash ou NatCash (paiement immédiat)\n"
+                f"  • Virement bancaire (en joignant votre preuve de paiement)\n\n"
+                f"Accédez à votre espace de paiement ici :\n"
+                f"{settings.SITE_URL}/membres/cotisations/\n\n"
+                f"Pour toute question, contactez le secrétariat au (509) 2942-3015.\n\n"
                 f"Le secrétariat du CNIAH"
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,

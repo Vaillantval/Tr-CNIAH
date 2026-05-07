@@ -324,6 +324,92 @@ def generer_certificat_pdf(user, certification):
     return response
 
 
+# ==================== PAIEMENT EN LIGNE ====================
+
+@login_required
+def initier_paiement_cotisation(request, cotisation_id):
+    """Redirige le membre vers MonCash ou NatCash via Plopplop."""
+    from .services.plopplop_service import PlopplopService
+    from .services.cotisation_service import CotisationService
+
+    cotisation = get_object_or_404(Cotisation, pk=cotisation_id, user=request.user)
+
+    if cotisation.statut == 'payee':
+        messages.warning(request, "Cette cotisation est déjà payée.")
+        return redirect('members:mes_cotisations')
+
+    methode = request.POST.get('methode', '')
+    if methode not in ('moncash', 'natcash'):
+        messages.error(request, "Méthode de paiement invalide.")
+        return redirect('members:mes_cotisations')
+
+    plopplop = PlopplopService()
+    if not plopplop.is_configured():
+        messages.error(request, "Le paiement en ligne n'est pas encore configuré. Veuillez contacter le secrétariat.")
+        return redirect('members:mes_cotisations')
+
+    ref = str(cotisation.pk)
+    CotisationService.initier_paiement_online(cotisation, methode)
+
+    # Mémoriser la référence en session pour la page de retour
+    request.session['cotisation_paiement_ref'] = ref
+
+    try:
+        result = plopplop.initier_paiement(
+            cotisation_ref=ref,
+            montant=float(cotisation.montant),
+            methode=methode,
+        )
+    except Exception as e:
+        messages.error(request, f"Service de paiement indisponible : {e}")
+        return redirect('members:mes_cotisations')
+
+    return redirect(result['redirect_url'])
+
+
+@login_required
+def retour_paiement_cotisation(request):
+    """Page de retour après paiement Plopplop. Vérifie et valide la cotisation."""
+    from .services.plopplop_service import PlopplopService
+    from .services.cotisation_service import CotisationService
+    from .tasks import notifier_cotisation_validee
+
+    # Récupérer la référence depuis la session (stockée avant la redirection Plopplop)
+    cotisation_ref = request.session.pop('cotisation_paiement_ref', None)
+    if not cotisation_ref:
+        messages.error(request, "Session expirée ou référence de paiement manquante.")
+        return redirect('members:mes_cotisations')
+
+    try:
+        cotisation = Cotisation.objects.get(pk=int(cotisation_ref), user=request.user)
+    except (Cotisation.DoesNotExist, ValueError):
+        messages.error(request, "Cotisation introuvable.")
+        return redirect('members:mes_cotisations')
+
+    if cotisation.statut == 'payee':
+        return render(request, 'members/paiement_retour.html', {
+            'cotisation': cotisation,
+            'confirme': True,
+        })
+
+    plopplop = PlopplopService()
+    confirme = False
+    try:
+        result = plopplop.verifier_paiement(cotisation_ref)
+        if result.get('trans_status') == 'ok':
+            id_transaction = result.get('id_transaction', '')
+            CotisationService.confirmer_paiement(cotisation, id_transaction)
+            notifier_cotisation_validee.delay(cotisation.pk)
+            confirme = True
+    except Exception:
+        pass
+
+    return render(request, 'members/paiement_retour.html', {
+        'cotisation': cotisation,
+        'confirme': confirme,
+    })
+
+
 # ==================== FORUM ====================
 
 @login_required

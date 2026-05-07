@@ -305,6 +305,9 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@cniah.ht')
 # URL du site pour génération de liens (emails, QR codes)
 SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8002')
 
+# ==================== PLOPPLOP (MonCash / NatCash) ====================
+PLOPPLOP_CLIENT_ID = os.environ.get('PLOPPLOP_CLIENT_ID', '')
+
 # Logging
 LOGGING = {
     'version': 1,

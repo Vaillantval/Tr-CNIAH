@@ -52,22 +52,31 @@ class Cotisation(models.Model):
         ('payee', 'Payée'),
         ('expiree', 'Expirée'),
     ]
-    
+    METHODE_CHOICES = [
+        ('moncash',  'MonCash'),
+        ('natcash',  'NatCash'),
+        ('virement', 'Virement bancaire'),
+        ('cash',     'Espèces'),
+        ('',         'Non spécifiée'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cotisations')
     montant = models.DecimalField(max_digits=10, decimal_places=2)
     date_debut = models.DateField()
     date_fin = models.DateField()
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
+    methode_paiement = models.CharField(max_length=20, choices=METHODE_CHOICES, blank=True, default='')
     reference_paiement = models.CharField(max_length=100, blank=True)
+    reference_plopplop = models.CharField(max_length=100, blank=True, help_text="Référence interne Plopplop")
     preuve_paiement = models.FileField(upload_to='cotisations/preuves/', blank=True)
     date_paiement = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True)
-    
+
     class Meta:
         verbose_name = "Cotisation"
         verbose_name_plural = "Cotisations"
         ordering = ['-date_debut']
-    
+
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.date_debut} à {self.date_fin}"
 

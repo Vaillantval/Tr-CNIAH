@@ -18,6 +18,8 @@ urlpatterns = [
     path('opportunites/', views.opportunites, name='opportunites'),
     path('documents/', views.documents, name='documents'),
     path('certificat/', views.mon_certificat, name='mon_certificat'),
+    path('cotisations/<int:cotisation_id>/payer/', views.initier_paiement_cotisation, name='initier_paiement'),
+    path('cotisations/retour/', views.retour_paiement_cotisation, name='retour_paiement'),
     
     # Forum
     path('forum/', views.forum, name='forum'),

@@ -22,19 +22,26 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(Cotisation)
 class CotisationAdmin(admin.ModelAdmin):
-    list_display = ['user', 'montant', 'date_debut', 'date_fin', 'statut', 'date_paiement']
-    list_filter = ['statut', 'date_debut', 'date_fin']
-    search_fields = ['user__username', 'user__email', 'reference_paiement']
+    list_display = [
+        'user', 'montant', 'date_debut', 'date_fin',
+        'statut', 'methode_paiement', 'reference_paiement', 'date_paiement',
+    ]
+    list_filter = ['statut', 'methode_paiement', 'date_debut', 'date_fin']
+    search_fields = ['user__username', 'user__email', 'reference_paiement', 'reference_plopplop']
     date_hierarchy = 'date_debut'
-    readonly_fields = ['date_paiement']
+    readonly_fields = ['date_paiement', 'reference_plopplop', 'methode_paiement']
     
     actions = ['valider_paiement']
     
     @admin.action(description="Valider le paiement")
     def valider_paiement(self, request, queryset):
         from django.utils import timezone
+        from .tasks import notifier_cotisation_validee
+        ids = list(queryset.values_list('pk', flat=True))
         queryset.update(statut='payee', date_paiement=timezone.now())
-        self.message_user(request, f"{queryset.count()} cotisation(s) validée(s).")
+        for pk in ids:
+            notifier_cotisation_validee.delay(pk)
+        self.message_user(request, f"{len(ids)} cotisation(s) validée(s).")
 
 
 @admin.register(Opportunite)

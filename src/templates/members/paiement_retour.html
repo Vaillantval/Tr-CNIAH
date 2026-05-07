@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/members/paiement_retour.html {% endcomment %}
+
+{% block title %}Résultat du paiement - CNIAH{% endblock %}
+
+{% block content %}
+<div class="flex flex-1 min-h-screen">
+    {% include 'members/components/sidebar.html' %}
+
+    <main class="flex-1 p-6 lg:p-10 bg-background-light dark:bg-background-dark">
+        <div class="max-w-2xl mx-auto">
+
+            {% if confirme %}
+            <!-- Succès -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-green-200 dark:border-green-800 shadow-sm p-10 text-center">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-5xl text-green-600 dark:text-green-400">check_circle</span>
+                    </div>
+                </div>
+                <h1 class="text-3xl font-black text-gray-900 dark:text-white mb-3">
+                    Paiement confirmé !
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    Votre cotisation
+                    <span class="font-bold text-gray-900 dark:text-white">
+                        {{ cotisation.date_debut|date:"Y" }} – {{ cotisation.date_fin|date:"Y" }}
+                    </span>
+                    a bien été enregistrée.
+                </p>
+
+                <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-5 text-left mb-8 space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">Période</span>
+                        <span class="font-medium text-gray-900 dark:text-white">
+                            {{ cotisation.date_debut|date:"d/m/Y" }} → {{ cotisation.date_fin|date:"d/m/Y" }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">Montant</span>
+                        <span class="font-bold text-gray-900 dark:text-white">{{ cotisation.montant }} USD</span>
+                    </div>
+                    {% if cotisation.methode_paiement %}
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">Méthode</span>
+                        <span class="font-medium text-gray-900 dark:text-white">
+                            {{ cotisation.get_methode_paiement_display }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    {% if cotisation.reference_paiement %}
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">Référence</span>
+                        <span class="font-mono text-xs text-gray-900 dark:text-white">{{ cotisation.reference_paiement }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">
+                    Un email de confirmation a été envoyé à votre adresse.
+                </p>
+
+                <a href="{% url 'members:mes_cotisations' %}"
+                   class="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-colors">
+                    <span class="material-symbols-outlined text-base">receipt_long</span>
+                    Voir mes cotisations
+                </a>
+            </div>
+
+            {% else %}
+            <!-- Échec / En attente -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-amber-200 dark:border-amber-800 shadow-sm p-10 text-center">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="w-20 h-20 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-5xl text-amber-600 dark:text-amber-400">pending</span>
+                    </div>
+                </div>
+                <h1 class="text-3xl font-black text-gray-900 dark:text-white mb-3">
+                    Paiement non confirmé
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 mb-8">
+                    Votre paiement n'a pas pu être vérifié automatiquement.<br>
+                    Si vous avez bien effectué le paiement, le secrétariat le validera manuellement.
+                    Vous recevrez un email de confirmation.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <a href="{% url 'members:mes_cotisations' %}"
+                       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-colors">
+                        <span class="material-symbols-outlined text-base">receipt_long</span>
+                        Mes cotisations
+                    </a>
+                    <a href="{% url 'contact:contact' %}"
+                       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-bold rounded-xl transition-colors">
+                        <span class="material-symbols-outlined text-base">contact_support</span>
+                        Contacter le secrétariat
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+</div>
+{% endblock %}
