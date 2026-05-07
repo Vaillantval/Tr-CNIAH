@@ -340,7 +340,12 @@ LOGGING = {
 
 # ==================== SÉCURITÉ PRODUCTION ====================
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    # Railway termine TLS à la périphérie et transmet X-Forwarded-Proto: https
+    # Ce header permet à Django de savoir que la requête originale était HTTPS
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Ne pas forcer le redirect SSL ici — Railway le fait déjà au niveau edge.
+    # Activer ce redirect ferait échouer le health check interne de Railway (HTTP → 301).
+    SECURE_SSL_REDIRECT = False
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True

@@ -20,6 +20,9 @@ COPY src/ .
 # Collecter les fichiers statiques au build
 RUN python manage.py collectstatic --noinput
 
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
 EXPOSE 8000
 
-CMD gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120
+CMD ["/start.sh"]
