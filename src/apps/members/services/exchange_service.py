@@ -30,7 +30,9 @@ def get_usd_to_htg() -> float:
         resp = requests.get(url, timeout=10)
         resp.raise_for_status()
         data = resp.json()
-        rate = float(data['conversion_rates']['HTG'])
+        # open.er-api.com (free) uses "rates"; v6.exchangerate-api.com (paid) uses "conversion_rates"
+        rates = data.get('conversion_rates') or data.get('rates')
+        rate = float(rates['HTG'])
         cache.set(CACHE_KEY, rate, CACHE_TTL)
         logger.info(f"Taux USD/HTG mis à jour : {rate}")
         return rate
