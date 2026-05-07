@@ -384,8 +384,8 @@ def retour_paiement_cotisation(request):
         return redirect('members:mes_cotisations')
 
     try:
-        cotisation = Cotisation.objects.get(pk=int(cotisation_ref), user=request.user)
-    except (Cotisation.DoesNotExist, ValueError):
+        cotisation = Cotisation.objects.get(reference_plopplop=cotisation_ref, user=request.user)
+    except Cotisation.DoesNotExist:
         messages.error(request, "Cotisation introuvable.")
         return redirect('members:mes_cotisations')
 
