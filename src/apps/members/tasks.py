@@ -116,7 +116,7 @@ def notifier_admin_nouvelle_adhesion(self, demande_id: int):
                 f"Consultez le dossier dans l'administration CNIAH."
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[admin_email],
+            recipient_list=admin_email,
             fail_silently=False,
         )
     except Exception as exc:
@@ -146,7 +146,7 @@ def notifier_admin_nouvelle_plainte(self, plainte_id: int):
                 f"Consultez le dossier dans l'administration CNIAH."
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[admin_email],
+            recipient_list=admin_email,
             fail_silently=False,
         )
     except Exception as exc:
@@ -176,7 +176,7 @@ def notifier_admin_preuve_cotisation(self, cotisation_id: int):
                 f"Rendez-vous dans l'administration CNIAH pour valider ce paiement."
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[admin_email],
+            recipient_list=admin_email,
             fail_silently=False,
         )
     except Exception as exc:

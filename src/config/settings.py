@@ -308,8 +308,11 @@ SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8002')
 # ==================== PLOPPLOP (MonCash / NatCash) ====================
 PLOPPLOP_CLIENT_ID = os.environ.get('PLOPPLOP_CLIENT_ID', '')
 
-# Email de notification interne (secrétariat / admins)
-ADMIN_NOTIFY_EMAIL = os.environ.get('ADMIN_NOTIFY_EMAIL', '')
+# Emails de notification interne — accepte plusieurs adresses séparées par virgule
+# Ex: secretariat@cniah.ht,info@cniah.ht
+ADMIN_NOTIFY_EMAIL = [
+    e.strip() for e in os.environ.get('ADMIN_NOTIFY_EMAIL', '').split(',') if e.strip()
+]
 
 # Logging
 LOGGING = {
