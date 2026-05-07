@@ -308,6 +308,11 @@ SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8002')
 # ==================== PLOPPLOP (MonCash / NatCash) ====================
 PLOPPLOP_CLIENT_ID = os.environ.get('PLOPPLOP_CLIENT_ID', '')
 
+# ==================== TAUX DE CHANGE ====================
+EXCHANGERATE_API_KEY = os.environ.get('EXCHANGERATE_API_KEY', '')
+# Taux HTG/USD de secours si l'API est indisponible (mis à jour manuellement si besoin)
+EXCHANGERATE_HTG_FALLBACK = float(os.environ.get('EXCHANGERATE_HTG_FALLBACK', '132.0'))
+
 # Emails de notification interne — accepte plusieurs adresses séparées par virgule
 # Ex: secretariat@cniah.ht,info@cniah.ht
 ADMIN_NOTIFY_EMAIL = [

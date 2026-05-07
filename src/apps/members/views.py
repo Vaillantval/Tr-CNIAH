@@ -162,7 +162,21 @@ def mes_cotisations(request):
         form = CotisationProofForm()
 
     cotisations = request.user.cotisations.all()
-    return render(request, 'members/cotisations.html', {'cotisations': cotisations, 'form': form})
+
+    # Pré-calculer le montant HTG pour chaque cotisation en USD
+    from .services.exchange_service import convertir_usd_en_htg, get_usd_to_htg
+    taux_usd_htg = get_usd_to_htg()
+    for c in cotisations:
+        if c.devise == 'usd':
+            c.montant_htg = convertir_usd_en_htg(float(c.montant))
+        else:
+            c.montant_htg = float(c.montant)
+
+    return render(request, 'members/cotisations.html', {
+        'cotisations': cotisations,
+        'form': form,
+        'taux_usd_htg': taux_usd_htg,
+    })
 
 
 @login_required
@@ -357,10 +371,17 @@ def initier_paiement_cotisation(request, cotisation_id):
     # Mémoriser la référence en session pour la page de retour
     request.session['cotisation_paiement_ref'] = ref
 
+    # MonCash/NatCash traitent en HTG — convertir si la cotisation est en USD
+    from .services.exchange_service import convertir_usd_en_htg
+    if cotisation.devise == 'usd':
+        montant_htg = convertir_usd_en_htg(float(cotisation.montant))
+    else:
+        montant_htg = float(cotisation.montant)
+
     try:
         result = plopplop.initier_paiement(
             cotisation_ref=ref,
-            montant=float(cotisation.montant),
+            montant=montant_htg,
             methode=methode,
         )
     except Exception as e:

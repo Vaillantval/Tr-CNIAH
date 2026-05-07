@@ -59,9 +59,14 @@ class Cotisation(models.Model):
         ('cash',     'Espèces'),
         ('',         'Non spécifiée'),
     ]
+    DEVISE_CHOICES = [
+        ('usd', 'USD'),
+        ('htg', 'HTG'),
+    ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cotisations')
     montant = models.DecimalField(max_digits=10, decimal_places=2)
+    devise = models.CharField(max_length=3, choices=DEVISE_CHOICES, default='usd')
     date_debut = models.DateField()
     date_fin = models.DateField()
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
