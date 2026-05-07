@@ -1,4 +1,5 @@
 # src/apps/members/views.py
+import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -384,8 +385,20 @@ def initier_paiement_cotisation(request, cotisation_id):
             montant=montant_htg,
             methode=methode,
         )
+    except requests.exceptions.HTTPError as e:
+        status = e.response.status_code if e.response is not None else '?'
+        messages.error(request, f"Le service de paiement est temporairement indisponible (erreur {status}). Réessayez dans quelques minutes ou contactez le secrétariat.")
+        return redirect('members:mes_cotisations')
+    except requests.exceptions.ConnectionError:
+        messages.error(request, "Impossible de contacter le service de paiement. Vérifiez votre connexion ou réessayez plus tard.")
+        return redirect('members:mes_cotisations')
+    except ValueError as e:
+        messages.error(request, f"Paiement refusé : {e}")
+        return redirect('members:mes_cotisations')
     except Exception as e:
-        messages.error(request, f"Service de paiement indisponible : {e}")
+        import logging
+        logging.getLogger('apps').error(f"Plopplop erreur inattendue: {e}", exc_info=True)
+        messages.error(request, "Une erreur inattendue est survenue. Veuillez contacter le secrétariat.")
         return redirect('members:mes_cotisations')
 
     return redirect(result['redirect_url'])
