@@ -302,8 +302,9 @@ def adhesion_view(request):
         if form.is_valid():
             with transaction.atomic():
                 demande = form.save()
-            from apps.members.tasks import envoyer_confirmation_adhesion
+            from apps.members.tasks import envoyer_confirmation_adhesion, notifier_admin_nouvelle_adhesion
             envoyer_confirmation_adhesion.delay(demande.pk)
+            notifier_admin_nouvelle_adhesion.delay(demande.pk)
             messages.success(
                 request,
                 f"Votre demande d'adhésion a été soumise avec succès ! "

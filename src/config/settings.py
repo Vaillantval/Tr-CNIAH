@@ -308,6 +308,9 @@ SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8002')
 # ==================== PLOPPLOP (MonCash / NatCash) ====================
 PLOPPLOP_CLIENT_ID = os.environ.get('PLOPPLOP_CLIENT_ID', '')
 
+# Email de notification interne (secrétariat / admins)
+ADMIN_NOTIFY_EMAIL = os.environ.get('ADMIN_NOTIFY_EMAIL', '')
+
 # Logging
 LOGGING = {
     'version': 1,

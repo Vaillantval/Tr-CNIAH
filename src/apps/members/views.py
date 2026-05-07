@@ -152,7 +152,10 @@ def mes_cotisations(request):
             )
             cotisation.preuve_paiement = form.cleaned_data['preuve_paiement']
             cotisation.reference_paiement = form.cleaned_data.get('reference', '')
+            cotisation.methode_paiement = cotisation.methode_paiement or 'virement'
             cotisation.save()
+            from .tasks import notifier_admin_preuve_cotisation
+            notifier_admin_preuve_cotisation.delay(cotisation.pk)
             messages.success(request, "Preuve de paiement soumise.")
             return redirect('members:mes_cotisations')
     else:

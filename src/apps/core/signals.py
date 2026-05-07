@@ -3,7 +3,7 @@ from django.dispatch import receiver
 import qrcode
 from io import BytesIO
 from django.core.files import File
-from .models import Certification, Plainte
+from .models import Certification, Plainte, DemandeAdhesion
 
 
 @receiver(post_save, sender=Certification)
@@ -44,10 +44,34 @@ def memoriser_statut_plainte(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Plainte)
 def notifier_statut_plainte(sender, instance, created, **kwargs):
-    """Envoie une notification au plaignant quand le statut change."""
+    """Envoie une notification au plaignant quand le statut change, et alerte l'admin à la création."""
+    from apps.members.tasks import notifier_changement_statut_plainte, notifier_admin_nouvelle_plainte
     if created:
+        notifier_admin_nouvelle_plainte.delay(instance.pk)
         return
     ancien = getattr(instance, '_ancien_statut', None)
     if ancien and ancien != instance.statut:
-        from apps.members.tasks import notifier_changement_statut_plainte
         notifier_changement_statut_plainte.delay(instance.pk)
+
+
+@receiver(pre_save, sender=DemandeAdhesion)
+def memoriser_statut_demande(sender, instance, **kwargs):
+    """Sauvegarde le statut avant modification pour détecter les changements."""
+    if instance.pk:
+        try:
+            instance._ancien_statut_demande = DemandeAdhesion.objects.get(pk=instance.pk).statut_demande
+        except DemandeAdhesion.DoesNotExist:
+            instance._ancien_statut_demande = None
+    else:
+        instance._ancien_statut_demande = None
+
+
+@receiver(post_save, sender=DemandeAdhesion)
+def notifier_statut_demande(sender, instance, created, **kwargs):
+    """Envoie un email au candidat quand le statut de sa demande change."""
+    if created:
+        return
+    ancien = getattr(instance, '_ancien_statut_demande', None)
+    if ancien is not None and ancien != instance.statut_demande:
+        from apps.members.tasks import notifier_statut_demande_adhesion
+        notifier_statut_demande_adhesion.delay(instance.pk)
