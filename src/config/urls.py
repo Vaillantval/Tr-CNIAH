@@ -38,12 +38,10 @@ urlpatterns = [
          name='password_reset_complete'),
 ]
 
-# En développement uniquement : Django sert les médias uploadés.
-# En production, WhiteNoise gère les static et un serveur dédié (Nginx/S3) les médias.
-if settings.DEBUG:
-    urlpatterns += [
-        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-    ]
+# Toujours servir les médias (runserver sans Nginx dédié).
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
 
 admin.site.site_header = "Administration CNIAH"
 admin.site.site_title = "CNIAH Admin"

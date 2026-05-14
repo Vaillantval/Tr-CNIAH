@@ -714,7 +714,7 @@ class MembreComite(models.Model):
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
     poste = models.CharField(max_length=20, choices=POSTE_CHOICES)
-    photo = models.ImageField(upload_to='comite/')
+    photo = models.ImageField(upload_to='comite/', blank=True, null=True)
     biographie = models.TextField()
     ordre = models.IntegerField(default=0)
     
@@ -747,10 +747,10 @@ class MembreCommission(models.Model):
     commission = models.ForeignKey(CommissionApurement, on_delete=models.CASCADE, related_name='membres')
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
-    photo = models.ImageField(upload_to='commission/')
+    photo = models.ImageField(upload_to='commission/', blank=True, null=True)
     biographie = models.TextField()
     ordre = models.IntegerField(default=0)
-    
+
     class Meta:
         verbose_name = "Membre de la Commission"
         verbose_name_plural = "Membres de la Commission"
@@ -779,10 +779,10 @@ class MembreConseil(models.Model):
     conseil = models.ForeignKey(ConseilDiscipline, on_delete=models.CASCADE, related_name='membres')
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
-    photo = models.ImageField(upload_to='conseil/')
+    photo = models.ImageField(upload_to='conseil/', blank=True, null=True)
     biographie = models.TextField()
     ordre = models.IntegerField(default=0)
-    
+
     class Meta:
         verbose_name = "Membre du Conseil"
         verbose_name_plural = "Membres du Conseil"
