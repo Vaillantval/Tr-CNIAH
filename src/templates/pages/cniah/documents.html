@@ -43,11 +43,13 @@
                 {% for video in video_series %}
                 <a href="{% url 'core:video_detail' video.slug %}" class="group flex flex-col gap-3 cursor-pointer">
                     <div class="relative w-full aspect-video rounded-xl overflow-hidden shadow-md bg-gray-200">
-                        <img 
-                            src="{{ video.thumbnail.url }}" 
+                        {% with thumb=video.get_thumbnail_url %}
+                        <img
+                            src="{% if thumb %}{{ thumb }}{% else %}{% static 'img/video-placeholder.svg' %}{% endif %}"
                             alt="{{ video.title }}"
                             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
+                        {% endwith %}
                         <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                             <span class="material-symbols-outlined text-white text-4xl opacity-90 drop-shadow-lg group-hover:scale-110 transition-transform">play_circle</span>
                         </div>
@@ -94,38 +96,52 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for doc in documents %}
-            <article class="flex flex-col p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow group">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="p-3 rounded-lg {{ doc.get_icon_color }}">
-                        <span class="material-symbols-outlined">
-                            {% if doc.file_type == 'pdf' %}picture_as_pdf{% elif doc.file_type == 'doc' %}description{% elif doc.file_type == 'xls' %}table_chart{% elif doc.file_type == 'ppt' %}slideshow{% else %}folder_zip{% endif %}
+            <article class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow group overflow-hidden">
+                <!-- Thumbnail area -->
+                {% if doc.file_type == 'pdf' %}
+                <div class="relative w-full aspect-video bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                    <canvas id="pdf-thumb-{{ doc.id }}" data-pdf-url="{{ doc.file.url }}" class="w-full h-full object-cover hidden"></canvas>
+                    <div id="pdf-fallback-{{ doc.id }}" class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-red-500 text-5xl">picture_as_pdf</span>
+                        {% if doc.file_size %}<span class="text-xs text-gray-500 dark:text-gray-400">{{ doc.file_size }}</span>{% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="w-full aspect-video bg-gray-50 dark:bg-gray-700/50 flex flex-col items-center justify-center gap-2">
+                    <div class="p-4 rounded-xl {{ doc.get_icon_color }}">
+                        <span class="material-symbols-outlined text-4xl">
+                            {% if doc.file_type == 'doc' %}description{% elif doc.file_type == 'xls' %}table_chart{% elif doc.file_type == 'ppt' %}slideshow{% else %}folder_zip{% endif %}
                         </span>
                     </div>
-                    {% if doc.file_size %}
-                    <span class="text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                        {{ doc.file_type|upper }} • {{ doc.file_size }}
-                    </span>
+                    {% if doc.file_size %}<span class="text-xs text-gray-500 dark:text-gray-400">{{ doc.file_type|upper }} • {{ doc.file_size }}</span>{% endif %}
+                </div>
+                {% endif %}
+
+                <div class="flex flex-col p-5 flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ doc.file_type }}</span>
+                        {% if doc.file_size %}<span class="text-xs text-gray-400">{{ doc.file_size }}</span>{% endif %}
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
+                        {{ doc.title }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 flex-1">
+                        {{ doc.description|truncatewords:25 }}
+                    </p>
+                    {% if doc.category %}
+                    <span class="text-xs text-primary font-bold uppercase mb-3">{{ doc.category.name }}</span>
+                    {% endif %}
+                    <a href="{% url 'core:document_download' doc.slug %}"
+                       class="w-full mt-auto flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-primary text-primary hover:bg-primary hover:text-white font-bold text-sm transition-all">
+                        <span>Télécharger</span>
+                        <span class="material-symbols-outlined text-lg">download</span>
+                    </a>
+                    {% if doc.download_count > 0 %}
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-2 text-center">
+                        {{ doc.download_count }} téléchargement{{ doc.download_count|pluralize }}
+                    </p>
                     {% endif %}
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
-                    {{ doc.title }}
-                </h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 flex-1">
-                    {{ doc.description|truncatewords:25 }}
-                </p>
-                {% if doc.category %}
-                <span class="text-xs text-primary font-bold uppercase mb-4">{{ doc.category.name }}</span>
-                {% endif %}
-                <a href="{% url 'core:document_download' doc.slug %}" 
-                   class="w-full mt-auto flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-primary text-primary hover:bg-primary hover:text-white font-bold text-sm transition-all">
-                    <span>Télécharger</span>
-                    <span class="material-symbols-outlined text-lg">download</span>
-                </a>
-                {% if doc.download_count > 0 %}
-                <p class="text-xs text-gray-500 dark:text-gray-500 mt-2 text-center">
-                    {{ doc.download_count }} téléchargement{{ doc.download_count|pluralize }}
-                </p>
-                {% endif %}
             </article>
             {% empty %}
             <div class="col-span-full text-center py-12">
@@ -159,22 +175,44 @@
     </section>
 </main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 // Search functionality
 document.getElementById('searchInput').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
     const articles = document.querySelectorAll('article');
-    
     articles.forEach(article => {
         const title = article.querySelector('h3').textContent.toLowerCase();
         const description = article.querySelector('p').textContent.toLowerCase();
-        
-        if (title.includes(searchTerm) || description.includes(searchTerm)) {
-            article.style.display = '';
-        } else {
-            article.style.display = 'none';
-        }
+        article.style.display = (title.includes(searchTerm) || description.includes(searchTerm)) ? '' : 'none';
     });
 });
+
+// PDF thumbnail rendering
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    document.querySelectorAll('canvas[data-pdf-url]').forEach(function(canvas) {
+        var url = canvas.dataset.pdfUrl;
+        var fallback = document.getElementById(canvas.id.replace('pdf-thumb-', 'pdf-fallback-'));
+
+        pdfjsLib.getDocument(url).promise.then(function(pdf) {
+            return pdf.getPage(1);
+        }).then(function(page) {
+            var containerWidth = canvas.parentElement.offsetWidth;
+            var viewport = page.getViewport({ scale: 1 });
+            var scale = containerWidth / viewport.width;
+            var scaled = page.getViewport({ scale: scale });
+            canvas.width = scaled.width;
+            canvas.height = scaled.height;
+            return page.render({ canvasContext: canvas.getContext('2d'), viewport: scaled }).promise;
+        }).then(function() {
+            canvas.classList.remove('hidden');
+            if (fallback) fallback.style.display = 'none';
+        }).catch(function() {
+            // Keep fallback icon visible on error
+        });
+    });
+}
 </script>
 {% endblock %}

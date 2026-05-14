@@ -45,17 +45,15 @@
             {% if formation.type_contenu == 'video' %}
                 <!-- Vidéo YouTube/Vimeo -->
                 <div class="aspect-video bg-gray-900">
-                    {% if 'youtube.com' in formation.video_url or 'youtu.be' in formation.video_url %}
-                        {% with video_id=formation.video_url|slice:"-11:" %}
-                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/{{ video_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        {% endwith %}
-                    {% elif 'vimeo.com' in formation.video_url %}
-                        <iframe class="w-full h-full" src="{{ formation.video_url }}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                    {% with embed_url=formation.get_embed_url %}
+                    {% if embed_url %}
+                        <iframe class="w-full h-full" src="{{ embed_url }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     {% else %}
                         <div class="w-full h-full flex items-center justify-center">
                             <span class="material-symbols-outlined text-white text-6xl">play_circle</span>
                         </div>
                     {% endif %}
+                {% endwith %}
                 </div>
                 
             {% elif formation.type_contenu == 'pdf' %}

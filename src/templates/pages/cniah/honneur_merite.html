@@ -50,13 +50,15 @@
                 <!-- Contenu multimédia -->
                 {% if honneur.type_contenu == 'video' and honneur.video_url %}
                     <div class="aspect-video bg-gray-900 rounded-lg overflow-hidden">
-                        {% if 'youtube.com' in honneur.video_url or 'youtu.be' in honneur.video_url %}
-                            {% with video_id=honneur.video_url|slice:"-11:" %}
-                            <iframe class="w-full h-full" src="https://www.youtube.com/embed/{{ video_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                            {% endwith %}
-                        {% elif 'vimeo.com' in honneur.video_url %}
-                            <iframe class="w-full h-full" src="{{ honneur.video_url }}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-                        {% endif %}
+                        {% with embed_url=honneur.get_embed_url %}
+                            {% if embed_url %}
+                            <iframe class="w-full h-full" src="{{ embed_url }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            {% else %}
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-white text-6xl">videocam_off</span>
+                            </div>
+                            {% endif %}
+                        {% endwith %}
                     </div>
                     
                 {% elif honneur.type_contenu == 'images' and honneur.images.exists %}

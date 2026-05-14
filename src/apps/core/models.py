@@ -240,7 +240,7 @@ class VideoResource(models.Model):
                                help_text="Pour YouTube ou Vimeo")
     video_file = models.FileField("Fichier vidéo", upload_to='videos/%Y/%m/', blank=True,
                                  help_text="Pour upload direct")
-    thumbnail = models.ImageField("Miniature", upload_to='video_thumbnails/%Y/%m/')
+    thumbnail = models.ImageField("Miniature", upload_to='video_thumbnails/%Y/%m/', blank=True, null=True)
     duration = models.CharField("Durée", max_length=20, blank=True, help_text="Ex: 15:30")
     
     # Organisation
@@ -279,35 +279,38 @@ class VideoResource(models.Model):
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
     
-    def get_embed_url(self):
-        """Retourne l'URL d'embed selon le type"""
-        if self.video_type == 'youtube':
-            # Extraire l'ID de différents formats d'URL YouTube
-            import re
-            
-            # Patterns pour différents formats d'URL YouTube
-            patterns = [
-                r'(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)',
-                r'youtube\.com\/embed\/([^&\n?#]+)',
-                r'youtube\.com\/v\/([^&\n?#]+)',
-            ]
-            
-            video_id = None
-            for pattern in patterns:
-                match = re.search(pattern, self.video_url)
-                if match:
-                    video_id = match.group(1)
-                    break
-            
-            if video_id:
-                return f"https://www.youtube.com/embed/{video_id}"
-            
-        elif self.video_type == 'vimeo':
-            video_id = self.video_url.split('/')[-1].split('?')[0]
-            return f"https://player.vimeo.com/video/{video_id}"
-        
+    def _extract_youtube_id(self):
+        import re
+        patterns = [
+            r'(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)',
+            r'youtube\.com\/embed\/([^&\n?#]+)',
+            r'youtube\.com\/v\/([^&\n?#]+)',
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, self.video_url or '')
+            if match:
+                return match.group(1)
         return None
-    
+
+    def get_embed_url(self):
+        if self.video_type == 'youtube':
+            video_id = self._extract_youtube_id()
+            if video_id:
+                return f"https://www.youtube-nocookie.com/embed/{video_id}?rel=0"
+        elif self.video_type == 'vimeo':
+            video_id = (self.video_url or '').split('/')[-1].split('?')[0]
+            return f"https://player.vimeo.com/video/{video_id}"
+        return None
+
+    def get_thumbnail_url(self):
+        if self.thumbnail:
+            return self.thumbnail.url
+        if self.video_type == 'youtube':
+            video_id = self._extract_youtube_id()
+            if video_id:
+                return f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
+        return None
+
     def increment_view(self):
         """Incrémente le compteur de vues"""
         self.view_count += 1
@@ -463,6 +466,23 @@ class FormationContent(models.Model):
     def __str__(self):
         return f"{self.titre} ({self.date_formation})"
 
+    def get_embed_url(self):
+        import re
+        url = self.video_url or ''
+        if 'youtube.com' in url or 'youtu.be' in url:
+            patterns = [
+                r'(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)',
+                r'youtube\.com\/embed\/([^&\n?#]+)',
+            ]
+            for pattern in patterns:
+                match = re.search(pattern, url)
+                if match:
+                    return f"https://www.youtube-nocookie.com/embed/{match.group(1)}?rel=0"
+        elif 'vimeo.com' in url:
+            video_id = url.split('/')[-1].split('?')[0]
+            return f"https://player.vimeo.com/video/{video_id}"
+        return None
+
 
 class FormationImage(models.Model):
     formation = models.ForeignKey(FormationContent, on_delete=models.CASCADE, related_name='images')
@@ -500,6 +520,23 @@ class HonneurMerite(models.Model):
     
     def __str__(self):
         return f"{self.annee} - {self.titre}"
+
+    def get_embed_url(self):
+        import re
+        url = self.video_url or ''
+        if 'youtube.com' in url or 'youtu.be' in url:
+            patterns = [
+                r'(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)',
+                r'youtube\.com\/embed\/([^&\n?#]+)',
+            ]
+            for pattern in patterns:
+                match = re.search(pattern, url)
+                if match:
+                    return f"https://www.youtube-nocookie.com/embed/{match.group(1)}?rel=0"
+        elif 'vimeo.com' in url:
+            video_id = url.split('/')[-1].split('?')[0]
+            return f"https://player.vimeo.com/video/{video_id}"
+        return None
 
 
 class HonneurMeriteImage(models.Model):
