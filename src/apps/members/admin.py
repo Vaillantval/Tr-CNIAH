@@ -84,10 +84,20 @@ class UserAdmin(BaseUserAdmin):
     def changer_mdp_lien(self, obj):
         try:
             url = reverse('admin:members_user_password_change', args=[obj.pk])
+            return format_html('<a href="{}">Changer mdp</a>', url)
         except Exception:
-            url = reverse('admin:members_user_change', args=[obj.pk])
-        return format_html('<a href="{}">Changer mdp</a>', url)
+            return '—'
     changer_mdp_lien.short_description = "Mot de passe"
+
+    def user_change_password(self, request, id, form_url=''):
+        from django.contrib.auth import update_session_auth_hash
+        response = super().user_change_password(request, id, form_url)
+        # BaseUserAdmin calls update_session_auth_hash(request, form.user) where
+        # form.user is the member whose password changed — not the logged-in admin.
+        # This corrupts the admin's session hash and logs them out silently.
+        # Restore the admin's correct session hash.
+        update_session_auth_hash(request, request.user)
+        return response
 
     @admin.action(description="🔑 Définir un mot de passe temporaire et activer le compte")
     def definir_mot_de_passe_temporaire(self, request, queryset):
