@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/members/changer_mot_de_passe.html {% endcomment %}
+
+{% block title %}Changer le mot de passe - Espace Membre CNIAH{% endblock %}
+
+{% block content %}
+<div class="flex flex-1 min-h-screen">
+    {% include 'members/components/sidebar.html' %}
+
+    <main class="flex-1 p-6 lg:p-10 bg-background-light dark:bg-background-dark">
+        <div class="max-w-lg mx-auto">
+            <div class="mb-8">
+                <a href="{% url 'members:mon_profil' %}" class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary mb-4">
+                    <span class="material-symbols-outlined text-base">arrow_back</span>
+                    Retour au profil
+                </a>
+                <h1 class="text-3xl font-black text-gray-900 dark:text-white">Changer le mot de passe</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Entrez votre mot de passe actuel puis choisissez-en un nouveau.</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-8">
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Mot de passe actuel -->
+                    <div>
+                        <label for="id_old_password" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                            Mot de passe actuel
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <span class="material-symbols-outlined text-xl">lock</span>
+                            </span>
+                            <input type="password"
+                                   name="old_password"
+                                   id="id_old_password"
+                                   required
+                                   autocomplete="current-password"
+                                   class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        {% if form.old_password.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.old_password.errors|join:", " }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Nouveau mot de passe -->
+                    <div>
+                        <label for="id_new_password1" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                            Nouveau mot de passe
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <span class="material-symbols-outlined text-xl">lock_open</span>
+                            </span>
+                            <input type="password"
+                                   name="new_password1"
+                                   id="id_new_password1"
+                                   required
+                                   autocomplete="new-password"
+                                   class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        {% if form.new_password1.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.new_password1.errors|join:", " }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Minimum 8 caractères. Ne peut pas être uniquement numérique.
+                        </p>
+                    </div>
+
+                    <!-- Confirmation -->
+                    <div>
+                        <label for="id_new_password2" class="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                            Confirmer le nouveau mot de passe
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <span class="material-symbols-outlined text-xl">lock_open</span>
+                            </span>
+                            <input type="password"
+                                   name="new_password2"
+                                   id="id_new_password2"
+                                   required
+                                   autocomplete="new-password"
+                                   class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        {% if form.new_password2.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.new_password2.errors|join:", " }}</p>
+                        {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p class="text-sm text-red-800 dark:text-red-200">{{ form.non_field_errors|join:", " }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex gap-4 pt-2">
+                        <button type="submit"
+                                class="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold transition-colors">
+                            <span class="material-symbols-outlined">save</span>
+                            Enregistrer
+                        </button>
+                        <a href="{% url 'members:mon_profil' %}"
+                           class="flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-bold transition-colors">
+                            Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

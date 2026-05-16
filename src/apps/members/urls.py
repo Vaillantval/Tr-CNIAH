@@ -1,5 +1,6 @@
 # src/apps/members/urls.py
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 app_name = 'members'
@@ -21,6 +22,19 @@ urlpatterns = [
     path('cotisations/<int:cotisation_id>/payer/', views.initier_paiement_cotisation, name='initier_paiement'),
     path('cotisations/retour/', views.retour_paiement_cotisation, name='retour_paiement'),
     
+    # Changement de mot de passe (membres connectés, sans email)
+    path('changer-mot-de-passe/',
+         auth_views.PasswordChangeView.as_view(
+             template_name='members/changer_mot_de_passe.html',
+             success_url='/membres/changer-mot-de-passe/succes/',
+         ),
+         name='changer_mot_de_passe'),
+    path('changer-mot-de-passe/succes/',
+         auth_views.PasswordChangeDoneView.as_view(
+             template_name='members/changer_mot_de_passe_succes.html',
+         ),
+         name='changer_mot_de_passe_succes'),
+
     # Forum
     path('forum/', views.forum, name='forum'),
     path('forum/categorie/<int:categorie_id>/', views.forum_categorie, name='forum_categorie'),
