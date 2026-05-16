@@ -242,16 +242,23 @@
 </section>
 {% endif %}
 
-<!-- Sidebar Ads -->
+<!-- Sidebar Ads Carousel -->
 {% if sidebar_ads %}
 <section class="bg-gray-50 dark:bg-gray-900/30 py-8">
     <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {% for ad in sidebar_ads %}
-            <a href="{{ ad.link }}" {% if ad.open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %} class="block">
-                <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="w-full h-auto rounded-lg hover:shadow-lg transition-shadow">
-            </a>
-            {% endfor %}
+        <div class="swiper sidebarAdsSwiper">
+            <div class="swiper-wrapper">
+                {% for ad in sidebar_ads %}
+                <div class="swiper-slide">
+                    <a href="{{ ad.link }}" {% if ad.open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %} class="block">
+                        <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="w-full h-auto rounded-lg hover:shadow-lg transition-shadow">
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination mt-4"></div>
         </div>
     </div>
 </section>
@@ -366,6 +373,13 @@
         autoplay: { delay: 3000, disableOnInteraction: false },
         pagination: { el: '.sponsorsSwiper .swiper-pagination', clickable: true },
         breakpoints: { 640: { slidesPerView: 3 }, 768: { slidesPerView: 4 }, 1024: { slidesPerView: 6 } },
+    });
+    new Swiper('.sidebarAdsSwiper', {
+        slidesPerView: 1, spaceBetween: 20, loop: true,
+        autoplay: { delay: 4000, disableOnInteraction: false },
+        navigation: { nextEl: '.sidebarAdsSwiper .swiper-button-next', prevEl: '.sidebarAdsSwiper .swiper-button-prev' },
+        pagination: { el: '.sidebarAdsSwiper .swiper-pagination', clickable: true },
+        breakpoints: { 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3, spaceBetween: 30 } },
     });
 </script>
 {% endblock %}

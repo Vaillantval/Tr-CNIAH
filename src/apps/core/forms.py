@@ -1,5 +1,5 @@
 from django import forms
-from .models import DemandeAdhesion, Plainte, Newsletter
+from .models import DemandeAdhesion, Plainte, Newsletter, MembreActif
 from .validators import (
     FileExtensionValidator, FileSizeValidator,
     ALLOWED_FILE_EXTENSIONS, ALLOWED_IMAGE_EXTENSIONS, ALLOWED_DOCUMENT_EXTENSIONS,
@@ -113,6 +113,13 @@ class AdhesionForm(forms.ModelForm):
 
 
 class PlainteForm(forms.ModelForm):
+    membre_accuse = forms.ModelChoiceField(
+        queryset=MembreActif.objects.filter(actif=True).order_by('nom', 'prenom'),
+        label="Membre accusé",
+        help_text="Sélectionnez le membre actif du CNIAH visé par cette plainte.",
+        empty_label="— Sélectionner un membre —",
+        widget=forms.Select(attrs={'class': 'select2-membre'}),
+    )
     documents = MultipleFileField(
         required=False,
         validators=_any_validators,
@@ -124,7 +131,7 @@ class PlainteForm(forms.ModelForm):
         model = Plainte
         fields = [
             'nom_plaignant', 'email_plaignant', 'telephone',
-            'membre_concerne', 'type_plainte', 'description',
+            'membre_accuse', 'type_plainte', 'description',
         ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 5}),

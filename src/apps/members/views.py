@@ -7,12 +7,10 @@ from django.contrib import messages
 from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.http import HttpResponse, FileResponse
-from io import BytesIO
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
 from .models import User, Cotisation, Opportunite, DocumentMembre, ForumCategorie, ForumSujet, ForumReponse
 from .forms import InscriptionForm, ConnexionForm, ProfilForm, CotisationProofForm, NouveauSujetForm, ReponseForumForm
 from apps.core.models import MembreActif, Certification
+from apps.core.utils import generer_certificat_pdf as _generer_pdf
 
 # ==================== AUTHENTIFICATION ====================
 
@@ -221,125 +219,41 @@ def documents(request):
 
 @login_required
 def mon_certificat(request):
-    """Affiche le certificat du membre ou permet de le télécharger"""
+    """Affiche le certificat du membre ou permet de le télécharger / de le recevoir par email."""
     if not request.user.membre_actif:
         messages.error(request, "Aucun membre actif associé à votre compte.")
         return redirect('members:dashboard')
-    
+
     certification = request.user.latest_certification
-    
+
     if not certification:
         messages.error(request, "Vous n'avez pas de certification valide.")
         return redirect('members:dashboard')
-    
-    # Si demande de téléchargement
+
+    # Génère le QR code si absent
+    if not certification.qr_code:
+        certification.generate_qr_code()
+        certification.save(update_fields=['qr_code'])
+
+    # Téléchargement PDF
     if request.GET.get('download') == '1':
-        return generer_certificat_pdf(request.user, certification)
-    
-    # Sinon, afficher la page avec aperçu
+        pdf_bytes = _generer_pdf(certification)
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = (
+            f'attachment; filename="certificat_{certification.numero_certificat}.pdf"'
+        )
+        return response
+
+    # Envoi par email
+    if request.GET.get('send_email') == '1':
+        from .tasks import envoyer_certificat_par_email
+        envoyer_certificat_par_email.delay(certification.pk)
+        messages.success(request, "Votre certificat vous a été envoyé par email.")
+        return redirect('members:mon_certificat')
+
     return render(request, 'members/mon_certificat.html', {
         'certification': certification
     })
-
-
-def generer_certificat_pdf(user, certification):
-    """Génère le PDF du certificat avec QR code"""
-    buffer = BytesIO()
-    p = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-    
-    # Header - Logo et titre
-    p.setFont("Helvetica-Bold", 24)
-    p.drawCentredString(width/2, height - 100, "CNIAH")
-    
-    p.setFont("Helvetica", 14)
-    p.drawCentredString(width/2, height - 130, "Collège National des Ingénieurs et Architectes Haïtiens")
-    
-    # Ligne de séparation
-    p.line(50, height - 150, width - 50, height - 150)
-    
-    # Titre du certificat
-    p.setFont("Helvetica-Bold", 20)
-    p.drawCentredString(width/2, height - 200, "CERTIFICAT PROFESSIONNEL")
-    
-    # Informations du membre
-    y_position = height - 260
-    p.setFont("Helvetica-Bold", 12)
-    
-    p.drawString(100, y_position, "Numéro de certificat :")
-    p.setFont("Helvetica", 12)
-    p.drawString(280, y_position, certification.numero_certificat)
-    
-    y_position -= 30
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(100, y_position, "Nom complet :")
-    p.setFont("Helvetica", 12)
-    p.drawString(280, y_position, user.get_full_name())
-    
-    y_position -= 30
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(100, y_position, "Numéro de membre :")
-    p.setFont("Helvetica", 12)
-    p.drawString(280, y_position, user.membre_actif.numero)
-    
-    y_position -= 30
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(100, y_position, "Titre professionnel :")
-    p.setFont("Helvetica", 12)
-    p.drawString(280, y_position, str(user.membre_actif.titre))
-    
-    y_position -= 30
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(100, y_position, "Date de délivrance :")
-    p.setFont("Helvetica", 12)
-    p.drawString(280, y_position, certification.date_delivrance.strftime('%d/%m/%Y'))
-    
-    y_position -= 30
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(100, y_position, "Date d'expiration :")
-    p.setFont("Helvetica", 12)
-    p.drawString(280, y_position, certification.date_expiration.strftime('%d/%m/%Y'))
-    
-    # Statut
-    y_position -= 30
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(100, y_position, "Statut :")
-    if certification.est_valide:
-        p.setFillColorRGB(0, 0.5, 0)  # Vert
-        p.drawString(280, y_position, "VALIDE")
-    else:
-        p.setFillColorRGB(0.8, 0, 0)  # Rouge
-        p.drawString(280, y_position, "EXPIRÉ")
-    
-    p.setFillColorRGB(0, 0, 0)  # Reset noir
-    
-    # QR Code — utilise l'image stockée, régénère si absente
-    if certification.qr_code:
-        qr_buffer = certification.qr_code.open('rb')
-    else:
-        certification.generate_qr_code()
-        certification.save(update_fields=['qr_code'])
-        qr_buffer = certification.qr_code.open('rb')
-
-    # Ajouter QR code au PDF
-    p.drawImage(qr_buffer, width - 200, 100, width=150, height=150)
-    
-    # Note en bas
-    p.setFont("Helvetica", 9)
-    p.drawCentredString(width/2, 80, "Scanner le QR code pour vérifier l'authenticité de ce certificat")
-    
-    # Pied de page
-    p.setFont("Helvetica-Oblique", 8)
-    p.drawCentredString(width/2, 50, "14, Rue Capois, #3, Champs-de-Mars, Port-au-Prince, Haiti")
-    p.drawCentredString(width/2, 35, "(509) 2942-3015 / (509) 2942-3016 - cniah.secretariat@gmail.com")
-    
-    p.showPage()
-    p.save()
-    
-    buffer.seek(0)
-    
-    response = FileResponse(buffer, as_attachment=True, filename=f'certificat_{certification.numero_certificat}.pdf')
-    return response
 
 
 # ==================== PAIEMENT EN LIGNE ====================

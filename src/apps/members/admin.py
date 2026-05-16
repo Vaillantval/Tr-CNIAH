@@ -1,7 +1,11 @@
 # src/apps/members/admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import *
+from .models import (
+    User, Cotisation, PaiementCertificat, Don,
+    Opportunite, DocumentMembre,
+    ForumCategorie, ForumSujet, ForumReponse,
+)
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -82,3 +86,47 @@ class ForumReponseAdmin(admin.ModelAdmin):
     list_filter = ['date_creation']
     search_fields = ['contenu', 'auteur__username', 'sujet__titre']
     date_hierarchy = 'date_creation'
+
+@admin.register(PaiementCertificat)
+class PaiementCertificatAdmin(admin.ModelAdmin):
+    list_display = ['user', 'montant', 'devise', 'annees_payees', 'statut', 'methode_paiement', 'date_creation']
+    list_filter = ['statut', 'devise', 'methode_paiement', 'date_creation']
+    search_fields = ['user__username', 'user__email', 'reference_paiement']
+    readonly_fields = ['date_creation']
+    date_hierarchy = 'date_creation'
+
+    actions = ['valider_paiement']
+
+    @admin.action(description="Valider le paiement")
+    def valider_paiement(self, request, queryset):
+        from django.utils import timezone
+        from .tasks import confirmer_paiement_certificat
+        ids = list(queryset.values_list('pk', flat=True))
+        queryset.update(statut='valide', date_paiement=timezone.now())
+        for pk in ids:
+            confirmer_paiement_certificat.delay(pk)
+        self.message_user(request, f"{len(ids)} paiement(s) de certification validé(s).")
+
+
+@admin.register(Don)
+class DonAdmin(admin.ModelAdmin):
+    list_display = ['get_donateur', 'montant', 'devise', 'statut', 'methode_paiement', 'date_don']
+    list_filter = ['statut', 'devise', 'methode_paiement', 'date_don']
+    search_fields = ['nom_donateur', 'email_donateur', 'user__username', 'reference_paiement']
+    readonly_fields = ['date_don']
+    date_hierarchy = 'date_don'
+
+    actions = ['confirmer_don']
+
+    def get_donateur(self, obj):
+        return obj.nom_donateur or (obj.user.get_full_name() if obj.user else 'Anonyme')
+    get_donateur.short_description = "Donateur"
+
+    @admin.action(description="Confirmer le don reçu")
+    def confirmer_don(self, request, queryset):
+        from .tasks import confirmer_reception_don
+        ids = list(queryset.values_list('pk', flat=True))
+        queryset.update(statut='confirme')
+        for pk in ids:
+            confirmer_reception_don.delay(pk)
+        self.message_user(request, f"{len(ids)} don(s) confirmé(s).")

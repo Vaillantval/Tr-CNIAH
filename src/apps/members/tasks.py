@@ -1,5 +1,5 @@
 from celery import shared_task
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
 
 
@@ -268,26 +268,111 @@ def notifier_cotisation_validee(self, cotisation_id: int):
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def envoyer_rappel_cotisation(self, user_id: int):
-    """Rappel envoyé aux membres dont la cotisation est échue."""
-    from apps.members.models import User
+def envoyer_certificat_par_email(self, certification_id: int):
+    """Envoie le certificat PDF au membre par email."""
+    from apps.core.models import Certification
+    from apps.core.utils import generer_certificat_pdf
     try:
-        user = User.objects.get(pk=user_id)
+        certification = Certification.objects.select_related('membre__user_account').get(pk=certification_id)
+        user = getattr(certification.membre, 'user_account', None)
+        if not user or not user.email:
+            return
+        pdf_bytes = generer_certificat_pdf(certification)
+        email = EmailMessage(
+            subject=f"CNIAH — Votre certificat {certification.numero_certificat}",
+            body=(
+                f"Bonjour {certification.membre.nom_complet},\n\n"
+                f"Veuillez trouver ci-joint votre certificat CNIAH n° {certification.numero_certificat}.\n\n"
+                f"Ce certificat est valable jusqu'au {certification.date_expiration.strftime('%d/%m/%Y')}.\n\n"
+                f"Vous pouvez également le télécharger à tout moment depuis votre espace membre :\n"
+                f"{settings.SITE_URL}/membres/certificat/\n\n"
+                f"Le secrétariat du CNIAH"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.attach(
+            f"certificat_{certification.numero_certificat}.pdf",
+            pdf_bytes,
+            'application/pdf',
+        )
+        email.send(fail_silently=False)
+    except Exception as exc:
+        raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def rappel_renouvellement_certificat(self, certification_id: int):
+    """Rappel envoyé 30 jours avant l'expiration d'un certificat."""
+    from apps.core.models import Certification
+    try:
+        certification = Certification.objects.select_related('membre__user_account').get(pk=certification_id)
+        user = getattr(certification.membre, 'user_account', None)
+        if not user or not user.email:
+            return
         send_mail(
-            subject="CNIAH — Rappel de cotisation",
+            subject="CNIAH — Votre certificat expire bientôt",
             message=(
-                f"Bonjour {user.get_full_name()},\n\n"
-                f"Votre cotisation annuelle au CNIAH est arrivée à échéance.\n\n"
-                f"Vous pouvez la régler directement en ligne via :\n"
-                f"  • MonCash ou NatCash (paiement immédiat)\n"
-                f"  • Virement bancaire (en joignant votre preuve de paiement)\n\n"
-                f"Accédez à votre espace de paiement ici :\n"
-                f"{settings.SITE_URL}/membres/cotisations/\n\n"
-                f"Pour toute question, contactez le secrétariat au (509) 2942-3015.\n\n"
+                f"Bonjour {certification.membre.nom_complet},\n\n"
+                f"Votre certificat CNIAH n° {certification.numero_certificat} expire le "
+                f"{certification.date_expiration.strftime('%d/%m/%Y')} (dans 30 jours).\n\n"
+                f"Pour le renouveler, rendez-vous dans votre espace membre :\n"
+                f"{settings.SITE_URL}/membres/dashboard/\n\n"
+                f"Pour toute question, contactez le secrétariat.\n\n"
                 f"Le secrétariat du CNIAH"
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except Exception as exc:
+        raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def confirmer_paiement_certificat(self, paiement_id: int):
+    """Confirmation envoyée au membre après validation d'un paiement de certification."""
+    from apps.members.models import PaiementCertificat
+    try:
+        paiement = PaiementCertificat.objects.select_related('user').get(pk=paiement_id)
+        send_mail(
+            subject="CNIAH — Paiement de certification confirmé",
+            message=(
+                f"Bonjour {paiement.user.get_full_name()},\n\n"
+                f"Votre paiement pour l'obtention de votre certificat CNIAH a bien été reçu et validé.\n\n"
+                f"Accédez à votre certificat depuis votre espace membre :\n"
+                f"{settings.SITE_URL}/membres/certificat/\n\n"
+                f"Le secrétariat du CNIAH"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[paiement.user.email],
+            fail_silently=False,
+        )
+    except Exception as exc:
+        raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def confirmer_reception_don(self, don_id: int):
+    """Confirmation envoyée après réception d'un don."""
+    from apps.members.models import Don
+    try:
+        don = Don.objects.get(pk=don_id)
+        destinataire = don.email_donateur or (don.user.email if don.user else None)
+        if not destinataire:
+            return
+        nom = don.nom_donateur or (don.user.get_full_name() if don.user else 'Donateur')
+        send_mail(
+            subject="CNIAH — Merci pour votre don",
+            message=(
+                f"Bonjour {nom},\n\n"
+                f"Nous avons bien reçu votre don au CNIAH. Votre soutien est précieux pour notre institution.\n\n"
+                f"Pour tout renseignement, n'hésitez pas à contacter le secrétariat.\n\n"
+                f"Avec toute notre gratitude,\n"
+                f"Le secrétariat du CNIAH"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[destinataire],
             fail_silently=False,
         )
     except Exception as exc:

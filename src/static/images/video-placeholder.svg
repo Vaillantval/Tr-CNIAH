@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" fill="none">
+  <rect width="640" height="360" fill="#1f2937"/>
+  <rect x="1" y="1" width="638" height="358" rx="3" stroke="#374151" stroke-width="2"/>
+  <circle cx="320" cy="180" r="52" fill="#374151"/>
+  <polygon points="308,158 308,202 352,180" fill="#9ca3af"/>
+  <text x="320" y="268" font-family="system-ui,sans-serif" font-size="14" fill="#6b7280" text-anchor="middle">Vidéo non disponible</text>
+</svg>

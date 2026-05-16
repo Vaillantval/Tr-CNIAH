@@ -486,6 +486,8 @@ def verifier_certification(request):
 # ============= DÉPOSER PLAINTE =============
 
 def deposer_plainte(request):
+    membres_actifs = MembreActif.objects.filter(actif=True).select_related('titre').order_by('nom', 'prenom')
+
     if request.method == 'POST':
         form = PlainteForm(request.POST, request.FILES)
         if form.is_valid():
@@ -501,7 +503,9 @@ def deposer_plainte(request):
             if fichiers_invalides:
                 for msg in fichiers_invalides:
                     messages.error(request, msg)
-                return render(request, 'pages/cniah/deposer_plainte.html', {'form': form})
+                return render(request, 'pages/cniah/deposer_plainte.html', {
+                    'form': form, 'membres_actifs': membres_actifs
+                })
 
             with transaction.atomic():
                 plainte = form.save()
@@ -519,7 +523,10 @@ def deposer_plainte(request):
     else:
         form = PlainteForm()
 
-    return render(request, 'pages/cniah/deposer_plainte.html', {'form': form})
+    return render(request, 'pages/cniah/deposer_plainte.html', {
+        'form': form,
+        'membres_actifs': membres_actifs,
+    })
 
 
 def plainte_success(request, numero):

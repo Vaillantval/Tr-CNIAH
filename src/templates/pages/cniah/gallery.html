@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %} src/templates/pages/cniah/gallery.html {% endcomment %}
+
+{% block title %}Galerie - CNIAH{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 lg:px-10 py-8 flex flex-col gap-10">
+    <!-- Page Heading -->
+    <section class="border-b border-gray-200 dark:border-gray-700 pb-8">
+        <h1 class="text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white mb-3">
+            Galerie
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400 text-lg">
+            Photos et images des activités du CNIAH
+        </p>
+    </section>
+
+    <!-- Filtres catégories -->
+    {% if categories %}
+    <div class="flex flex-wrap gap-2">
+        <a href="{% url 'core:gallery' %}"
+           class="px-4 py-2 rounded-full text-sm font-semibold transition-colors {% if not current_category %}bg-primary text-white{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %}">
+            Toutes
+        </a>
+        {% for cat in categories %}
+        <a href="?category={{ cat.slug }}"
+           class="px-4 py-2 rounded-full text-sm font-semibold transition-colors {% if current_category == cat.slug %}bg-primary text-white{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %}">
+            {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Grille d'images -->
+    {% if images %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for image in images %}
+        <div class="group relative overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 aspect-square">
+            <img src="{{ image.image.url }}"
+                 alt="{{ image.title }}"
+                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                 loading="lazy">
+            {% if image.title %}
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-end">
+                <p class="text-white text-sm font-semibold p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {{ image.title }}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20">
+        <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-600 mb-4 block">photo_library</span>
+        <p class="text-gray-500 dark:text-gray-400 text-lg">Aucune image disponible pour le moment.</p>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}

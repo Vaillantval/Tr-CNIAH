@@ -86,6 +86,97 @@ class Cotisation(models.Model):
         return f"{self.user.get_full_name()} - {self.date_debut} à {self.date_fin}"
 
 
+class PaiementCertificat(models.Model):
+    """Paiement lié à l'obtention ou au renouvellement d'un certificat CNIAH."""
+    STATUT_CHOICES = [
+        ('en_attente', 'En attente'),
+        ('valide', 'Validé'),
+        ('refuse', 'Refusé'),
+    ]
+    METHODE_CHOICES = [
+        ('moncash',  'MonCash'),
+        ('natcash',  'NatCash'),
+        ('virement', 'Virement bancaire'),
+        ('cash',     'Espèces'),
+        ('',         'Non spécifiée'),
+    ]
+    DEVISE_CHOICES = [
+        ('usd', 'USD'),
+        ('htg', 'HTG'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='paiements_certificat')
+    certification = models.ForeignKey(
+        'core.Certification',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='paiements'
+    )
+    montant = models.DecimalField(max_digits=10, decimal_places=2)
+    devise = models.CharField(max_length=3, choices=DEVISE_CHOICES, default='usd')
+    annees_payees = models.PositiveIntegerField(default=1, help_text="Nombre d'années couvertes par ce paiement")
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
+    methode_paiement = models.CharField(max_length=20, choices=METHODE_CHOICES, blank=True, default='')
+    reference_paiement = models.CharField(max_length=100, blank=True)
+    reference_plopplop = models.CharField(max_length=100, blank=True)
+    preuve_paiement = models.FileField(upload_to='certificats/preuves/', blank=True)
+    date_paiement = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Paiement de Certification"
+        verbose_name_plural = "Paiements de Certification"
+        ordering = ['-date_creation']
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} — Certificat {self.date_creation.date()}"
+
+
+class Don(models.Model):
+    """Don volontaire au CNIAH (membre connecté ou visiteur anonyme)."""
+    STATUT_CHOICES = [
+        ('recu', 'Reçu'),
+        ('confirme', 'Confirmé'),
+    ]
+    METHODE_CHOICES = [
+        ('moncash',  'MonCash'),
+        ('natcash',  'NatCash'),
+        ('virement', 'Virement bancaire'),
+        ('cash',     'Espèces'),
+        ('',         'Non spécifiée'),
+    ]
+    DEVISE_CHOICES = [
+        ('usd', 'USD'),
+        ('htg', 'HTG'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='dons',
+        help_text="Membre connecté (optionnel — un visiteur peut aussi faire un don)"
+    )
+    nom_donateur = models.CharField(max_length=100, blank=True, help_text="Pour les dons anonymes")
+    email_donateur = models.EmailField(blank=True, help_text="Pour les dons anonymes")
+    montant = models.DecimalField(max_digits=10, decimal_places=2)
+    devise = models.CharField(max_length=3, choices=DEVISE_CHOICES, default='htg')
+    message = models.TextField(blank=True, help_text="Message accompagnant le don")
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='recu')
+    methode_paiement = models.CharField(max_length=20, choices=METHODE_CHOICES, blank=True, default='')
+    reference_paiement = models.CharField(max_length=100, blank=True)
+    date_don = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Don"
+        verbose_name_plural = "Dons"
+        ordering = ['-date_don']
+
+    def __str__(self):
+        donateur = self.nom_donateur or (self.user.get_full_name() if self.user else 'Anonyme')
+        return f"{donateur} — {self.montant} {self.devise} ({self.date_don.date()})"
+
+
 class Opportunite(models.Model):
     """Offres d'emploi et appels d'offres"""
     TYPE_CHOICES = [

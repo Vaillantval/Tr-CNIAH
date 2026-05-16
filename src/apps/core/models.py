@@ -1,7 +1,6 @@
 #src\apps\core\models.py
 
 from django.db import models
-from ckeditor.fields import RichTextField
 from django.utils.text import slugify
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
@@ -11,81 +10,6 @@ from simple_history.models import HistoricalRecords
 import qrcode
 import random
 import string
-
-class Banner(models.Model):
-    """Bannières hero pour la page d'accueil"""
-    title = models.CharField(max_length=200, verbose_name="Titre")
-    description = models.TextField(verbose_name="Description")
-    image = models.ImageField(upload_to='banners/', verbose_name="Image")
-    button_text = models.CharField(max_length=100, blank=True, verbose_name="Texte du bouton")
-    button_link = models.CharField(max_length=200, blank=True, verbose_name="Lien du bouton")
-    is_active = models.BooleanField(default=True, verbose_name="Actif")
-    order = models.IntegerField(default=0, verbose_name="Ordre")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "Bannière"
-        verbose_name_plural = "Bannières"
-        ordering = ['order', '-created_at']
-
-    def __str__(self):
-        return self.title
-
-
-class ServiceBlock(models.Model):
-    """Blocs de service sur la page d'accueil"""
-    title = models.CharField(max_length=200, verbose_name="Titre")
-    description = RichTextField(verbose_name="Description")
-    button_text = models.CharField(max_length=100, blank=True, verbose_name="Texte du bouton")
-    button_link = models.CharField(max_length=200, blank=True, verbose_name="Lien du bouton")
-    icon = models.CharField(max_length=50, blank=True, help_text="Nom de l'icône Material", verbose_name="Icône")
-    is_active = models.BooleanField(default=True, verbose_name="Actif")
-    order = models.IntegerField(default=0, verbose_name="Ordre")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Bloc de service"
-        verbose_name_plural = "Blocs de service"
-        ordering = ['order']
-
-    def __str__(self):
-        return self.title
-
-
-class Proposition(models.Model):
-    """Documents propositions du CNIAH"""
-    title = models.CharField(max_length=200, verbose_name="Titre")
-    description = models.TextField(blank=True, verbose_name="Description")
-    file = models.FileField(upload_to='propositions/', verbose_name="Fichier PDF")
-    is_active = models.BooleanField(default=True, verbose_name="Actif")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Proposition"
-        verbose_name_plural = "Propositions"
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return self.title
-
-
-class EngineeringBranch(models.Model):
-    """Branches d'ingénierie et d'architecture"""
-    name = models.CharField(max_length=200, verbose_name="Nom")
-    description = models.TextField(verbose_name="Description")
-    icon = models.CharField(max_length=50, default='engineering', verbose_name="Icône")
-    is_active = models.BooleanField(default=True, verbose_name="Actif")
-    order = models.IntegerField(default=0, verbose_name="Ordre")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Branche d'ingénierie"
-        verbose_name_plural = "Branches d'ingénierie"
-        ordering = ['order', 'name']
-
-    def __str__(self):
-        return self.name
 
 
 class Newsletter(models.Model):
@@ -574,15 +498,24 @@ class MembreActif(models.Model):
     photo = models.ImageField(upload_to='membres/', blank=True, null=True)
     actif = models.BooleanField(default=True)
     date_inscription = models.DateField(default=timezone.now)
-    
+    email_public = models.EmailField(
+        blank=True,
+        help_text="Email affiché publiquement sur la liste des membres (optionnel)"
+    )
+    telephone_public = models.CharField(
+        max_length=30,
+        blank=True,
+        help_text="Téléphone affiché publiquement sur la liste des membres (optionnel)"
+    )
+
     class Meta:
         verbose_name = "Membre Actif"
         verbose_name_plural = "Membres Actifs"
         ordering = ['nom', 'prenom']
-    
+
     def __str__(self):
         return f"{self.numero} - {self.prenom} {self.nom}"
-    
+
     history = HistoricalRecords()
 
     @property
@@ -603,6 +536,45 @@ class PageMembresActifs(models.Model):
         return "Configuration Page Membres Actifs"
 
 
+# ============= CONFIGURATION CERTIFICAT =============
+class ConfigurationCertificat(models.Model):
+    """Singleton — paramètres visuels du certificat PDF (signature, nom du Président)."""
+    nom_president = models.CharField(max_length=100, default="Président du CNIAH")
+    titre_president = models.CharField(max_length=100, default="Président")
+    signature_president = models.ImageField(
+        upload_to='config/signatures/',
+        blank=True,
+        null=True,
+        help_text="Image PNG transparente de la signature du Président"
+    )
+    logo_organisation = models.ImageField(
+        upload_to='config/',
+        blank=True,
+        null=True,
+        help_text="Logo alternatif pour le certificat (optionnel, utilise le logo principal sinon)"
+    )
+    texte_bas_page = models.TextField(
+        blank=True,
+        default="Ce certificat atteste de la qualité de membre actif en règle du Collège National des Ingénieurs et Architectes Haïtiens (CNIAH), créé par Décret-loi présidentiel du 25 mars 1974."
+    )
+
+    class Meta:
+        verbose_name = "Configuration Certificat"
+        verbose_name_plural = "Configuration Certificat"
+
+    def __str__(self):
+        return "Configuration du Certificat CNIAH"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+
 # ============= CERTIFICATION =============
 class Certification(models.Model):
     STATUT_CHOICES = [
@@ -610,22 +582,43 @@ class Certification(models.Model):
         ('expire', 'Expiré'),
         ('suspendu', 'Suspendu'),
     ]
-    
+
     numero_certificat = models.CharField(max_length=50, unique=True)
     membre = models.ForeignKey(MembreActif, on_delete=models.CASCADE, related_name='certifications')
     date_delivrance = models.DateField()
-    date_expiration = models.DateField()
+    date_expiration = models.DateField(
+        editable=False,
+        help_text="Calculé automatiquement : premier 30 septembre après la date de délivrance × années de validité"
+    )
+    annees_validite = models.PositiveIntegerField(
+        default=1,
+        help_text="Nombre d'années de validité. L'expiration sera au 30 sept de l'année de délivrance + (N-1) ans."
+    )
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='valide')
-    
+
     class Meta:
         verbose_name = "Certification"
         verbose_name_plural = "Certifications"
         ordering = ['-date_delivrance']
-    
+
     def __str__(self):
         return f"{self.numero_certificat} - {self.membre.nom_complet}"
-    
+
+    @staticmethod
+    def calculer_expiration(date_delivrance, annees: int = 1):
+        """Retourne le 30 septembre après N années de validité."""
+        from datetime import date as date_type
+        annee_base = date_delivrance.year
+        if date_delivrance > date_type(annee_base, 9, 30):
+            annee_base += 1
+        annee_expiration = annee_base + (annees - 1)
+        return date_type(annee_expiration, 9, 30)
+
+    def save(self, *args, **kwargs):
+        self.date_expiration = self.calculer_expiration(self.date_delivrance, self.annees_validite)
+        super().save(*args, **kwargs)
+
     @property
     def est_valide(self):
         return self.statut == 'valide' and self.date_expiration >= timezone.now().date()
@@ -668,7 +661,20 @@ class Plainte(models.Model):
     nom_plaignant = models.CharField(max_length=100)
     email_plaignant = models.EmailField()
     telephone = models.CharField(max_length=20)
-    membre_concerne = models.CharField(max_length=200, help_text="Nom du membre visé par la plainte")
+    membre_accuse = models.ForeignKey(
+        MembreActif,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='plaintes_contre',
+        verbose_name="Membre accusé",
+        help_text="Sélectionner le membre actif visé par la plainte"
+    )
+    membre_concerne = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Nom libre (héritage — utiliser 'membre_accuse' pour les nouvelles plaintes)"
+    )
     type_plainte = models.CharField(max_length=20, choices=TYPE_PLAINTE_CHOICES)
     description = models.TextField()
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='soumise')

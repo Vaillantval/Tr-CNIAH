@@ -2,7 +2,7 @@
 
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.contrib.postgres.search import SearchQuery, SearchRank
 from django.db.models import F
 from .models import NewsArticle, NewsCategory
 

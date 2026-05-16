@@ -1,6 +1,7 @@
+import datetime
 import factory
 from apps.core.models import (
-    TitreProfessionnel, MembreActif, Plainte, Newsletter,
+    TitreProfessionnel, MembreActif, Certification, Plainte, Newsletter,
     DocumentCategory, ReferenceDocument,
 )
 
@@ -25,6 +26,17 @@ class MembreActifFactory(factory.django.DjangoModelFactory):
     actif = True
 
 
+class CertificationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Certification
+
+    numero_certificat = factory.Sequence(lambda n: f"CNIAH-CERT-{n:04d}")
+    membre = factory.SubFactory(MembreActifFactory)
+    date_delivrance = factory.LazyFunction(lambda: datetime.date.today())
+    annees_validite = 1
+    statut = 'valide'
+
+
 class PlainteFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Plainte
@@ -32,7 +44,7 @@ class PlainteFactory(factory.django.DjangoModelFactory):
     nom_plaignant = "Jean Dupont"
     email_plaignant = "jean@test.com"
     telephone = "50912345678"
-    membre_concerne = "Pierre Martin"
+    membre_accuse = factory.SubFactory(MembreActifFactory)
     type_plainte = "ethique"
     description = "Description détaillée de la plainte pour test."
 

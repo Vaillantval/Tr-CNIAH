@@ -3,12 +3,12 @@
 from django.contrib import admin
 from django import forms
 from .models import (
-    Banner, ServiceBlock, Proposition, EngineeringBranch, Newsletter,
+    Newsletter,
     DocumentCategory, ReferenceDocument, VideoResource, ImageGallery,
     MembershipDocument, CotisationDocument, FormationContent, FormationImage,
     CategoryFormation, HonneurMerite, HonneurMeriteImage,
     PageMembresActifs, MembreActif, TitreProfessionnel,
-    Certification, Plainte, DocumentPlainte,
+    ConfigurationCertificat, Certification, Plainte, DocumentPlainte,
     DocumentHistorique,
     ComiteDirection, MembreComite,
     CommissionApurement, MembreCommission,
@@ -29,30 +29,6 @@ except ImportError:
 admin.site.site_header = "Administration CNIAH"
 admin.site.site_title = "CNIAH Admin"
 admin.site.index_title = "Bienvenue dans l'administration du CNIAH"
-
-@admin.register(Banner)
-class BannerAdmin(admin.ModelAdmin):
-    list_display = ['title', 'is_active', 'order', 'created_at']
-    list_filter = ['is_active']
-    list_editable = ['is_active', 'order']
-
-
-@admin.register(ServiceBlock)
-class ServiceBlockAdmin(admin.ModelAdmin):
-    list_display = ['title', 'is_active', 'order']
-    list_editable = ['is_active', 'order']
-
-
-@admin.register(Proposition)
-class PropositionAdmin(admin.ModelAdmin):
-    list_display = ['title', 'is_active', 'created_at']
-    list_editable = ['is_active']
-
-
-@admin.register(EngineeringBranch)
-class EngineeringBranchAdmin(admin.ModelAdmin):
-    list_display = ['name', 'icon', 'is_active', 'order']
-    list_editable = ['is_active', 'order']
 
 
 @admin.register(Newsletter)
@@ -279,19 +255,29 @@ class TitreProfessionnelAdmin(admin.ModelAdmin):
 
 @admin.register(MembreActif)
 class MembreActifAdmin(admin.ModelAdmin):
-    list_display = ['numero', 'nom', 'prenom', 'titre', 'actif', 'date_inscription']
+    list_display = ['numero', 'nom', 'prenom', 'titre', 'actif', 'email_public', 'telephone_public', 'date_inscription']
     list_filter = ['titre', 'actif', 'date_inscription']
-    search_fields = ['numero', 'nom', 'prenom']
+    search_fields = ['numero', 'nom', 'prenom', 'email_public']
     list_editable = ['actif']
     ordering = ['nom', 'prenom']
     date_hierarchy = 'date_inscription'
-    
+
+    fieldsets = (
+        ('Identité', {
+            'fields': ('numero', 'nom', 'prenom', 'titre', 'photo', 'date_inscription', 'actif')
+        }),
+        ('Contact public', {
+            'fields': ('email_public', 'telephone_public'),
+            'description': 'Ces informations seront affichées sur la liste publique des membres si renseignées.'
+        }),
+    )
+
     actions = ['activer_membres', 'desactiver_membres']
-    
+
     @admin.action(description="Activer les membres sélectionnés")
     def activer_membres(self, request, queryset):
         queryset.update(actif=True)
-    
+
     @admin.action(description="Désactiver les membres sélectionnés")
     def desactiver_membres(self, request, queryset):
         queryset.update(actif=False)
@@ -300,9 +286,30 @@ class MembreActifAdmin(admin.ModelAdmin):
 @admin.register(PageMembresActifs)
 class PageMembresActifsAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
-        # Limite à une seule instance
         return not PageMembresActifs.objects.exists()
-    
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(ConfigurationCertificat)
+class ConfigurationCertificatAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Signataire', {
+            'fields': ('nom_president', 'titre_president', 'signature_president'),
+            'description': 'Charger une image PNG transparente de la signature du Président.'
+        }),
+        ('Visuels', {
+            'fields': ('logo_organisation',)
+        }),
+        ('Texte de bas de page', {
+            'fields': ('texte_bas_page',)
+        }),
+    )
+
+    def has_add_permission(self, request):
+        return not ConfigurationCertificat.objects.exists()
+
     def has_delete_permission(self, request, obj=None):
         return False
 
@@ -310,24 +317,36 @@ class PageMembresActifsAdmin(admin.ModelAdmin):
 # ============= CERTIFICATION =============
 @admin.register(Certification)
 class CertificationAdmin(admin.ModelAdmin):
-    list_display = ['numero_certificat', 'membre', 'date_delivrance', 'date_expiration', 'statut', 'est_valide']
-    list_filter = ['statut', 'date_delivrance', 'date_expiration']
+    list_display = ['numero_certificat', 'membre', 'annees_validite', 'date_delivrance', 'date_expiration', 'statut', 'est_valide']
+    list_filter = ['statut', 'annees_validite', 'date_delivrance', 'date_expiration']
     search_fields = ['numero_certificat', 'membre__nom', 'membre__prenom']
     date_hierarchy = 'date_delivrance'
-    readonly_fields = ['qr_code']
-    
+    readonly_fields = ['qr_code', 'date_expiration']
+
     fieldsets = (
         ('Informations', {
             'fields': ('numero_certificat', 'membre', 'statut')
         }),
-        ('Dates', {
-            'fields': ('date_delivrance', 'date_expiration')
+        ('Validité', {
+            'fields': ('date_delivrance', 'annees_validite', 'date_expiration'),
+            'description': 'La date d\'expiration est calculée automatiquement (30 septembre, N années après délivrance).'
         }),
         ('QR Code', {
             'fields': ('qr_code',),
             'description': 'Le QR code est généré automatiquement'
         }),
     )
+
+    actions = ['envoyer_certificat_email']
+
+    @admin.action(description="Envoyer le certificat par email")
+    def envoyer_certificat_email(self, request, queryset):
+        from apps.members.tasks import envoyer_certificat_par_email
+        count = 0
+        for cert in queryset:
+            envoyer_certificat_par_email.delay(cert.pk)
+            count += 1
+        self.message_user(request, f"{count} certificat(s) envoyé(s) par email.")
 
 
 # ============= PLAINTES =============
@@ -339,13 +358,13 @@ class DocumentPlainteInline(admin.TabularInline):
 
 @admin.register(Plainte)
 class PlainteAdmin(admin.ModelAdmin):
-    list_display = ['numero_reference', 'nom_plaignant', 'membre_concerne', 'type_plainte', 'statut', 'date_soumission']
+    list_display = ['numero_reference', 'nom_plaignant', 'membre_accuse', 'type_plainte', 'statut', 'date_soumission']
     list_filter = ['statut', 'type_plainte', 'date_soumission']
-    search_fields = ['numero_reference', 'nom_plaignant', 'email_plaignant', 'membre_concerne']
+    search_fields = ['numero_reference', 'nom_plaignant', 'email_plaignant', 'membre_accuse__nom']
     readonly_fields = ['numero_reference', 'date_soumission']
     date_hierarchy = 'date_soumission'
     inlines = [DocumentPlainteInline]
-    
+
     fieldsets = (
         ('Référence', {
             'fields': ('numero_reference', 'date_soumission')
@@ -354,7 +373,8 @@ class PlainteAdmin(admin.ModelAdmin):
             'fields': ('nom_plaignant', 'email_plaignant', 'telephone')
         }),
         ('Plainte', {
-            'fields': ('membre_concerne', 'type_plainte', 'description')
+            'fields': ('membre_accuse', 'membre_concerne', 'type_plainte', 'description'),
+            'description': 'Utiliser "Membre accusé" pour les nouvelles plaintes. "Membre concerné" est conservé pour l\'historique.'
         }),
         ('Traitement', {
             'fields': ('statut', 'date_traitement', 'notes_internes')

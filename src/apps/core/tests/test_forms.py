@@ -1,57 +1,76 @@
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.core.forms import PlainteForm, NewsletterForm, AdhesionForm
-from apps.core.tests.factories import NewsletterFactory
+from apps.core.tests.factories import NewsletterFactory, MembreActifFactory
 
 
 # ---- PlainteForm ----
 
 @pytest.mark.django_db
 class TestPlainteForm:
-    def _valid_data(self):
+    def _valid_data(self, accuse_pk):
         return {
             'nom_plaignant': 'Jean Dupont',
             'email_plaignant': 'jean@test.com',
             'telephone': '50912345678',
-            'membre_concerne': 'Pierre Martin',
+            'membre_accuse': str(accuse_pk),
             'type_plainte': 'ethique',
             'description': 'Description suffisamment longue pour passer la validation.',
         }
 
     def test_form_valide(self):
-        form = PlainteForm(data=self._valid_data())
+        accuse = MembreActifFactory()
+        form = PlainteForm(data=self._valid_data(accuse.pk))
         assert form.is_valid(), form.errors
 
+    def test_membre_accuse_requis(self):
+        data = self._valid_data(1)
+        data['membre_accuse'] = ''
+        form = PlainteForm(data=data)
+        assert not form.is_valid()
+        assert 'membre_accuse' in form.errors
+
+    def test_membre_accuse_inactif_invalide(self):
+        inactif = MembreActifFactory(actif=False)
+        form = PlainteForm(data=self._valid_data(inactif.pk))
+        assert not form.is_valid()
+        assert 'membre_accuse' in form.errors
+
     def test_telephone_trop_court(self):
-        data = self._valid_data()
+        accuse = MembreActifFactory()
+        data = self._valid_data(accuse.pk)
         data['telephone'] = '123'
         form = PlainteForm(data=data)
         assert not form.is_valid()
         assert 'telephone' in form.errors
 
     def test_description_trop_courte(self):
-        data = self._valid_data()
+        accuse = MembreActifFactory()
+        data = self._valid_data(accuse.pk)
         data['description'] = 'Court.'
         form = PlainteForm(data=data)
         assert not form.is_valid()
         assert 'description' in form.errors
 
     def test_email_invalide(self):
-        data = self._valid_data()
+        accuse = MembreActifFactory()
+        data = self._valid_data(accuse.pk)
         data['email_plaignant'] = 'pas-un-email'
         form = PlainteForm(data=data)
         assert not form.is_valid()
         assert 'email_plaignant' in form.errors
 
     def test_fichier_extension_invalide(self):
+        accuse = MembreActifFactory()
         fichier = SimpleUploadedFile("malware.exe", b"contenu", content_type="application/octet-stream")
-        form = PlainteForm(data=self._valid_data(), files={'documents': fichier})
+        form = PlainteForm(data=self._valid_data(accuse.pk), files={'documents': fichier})
         assert not form.is_valid()
         assert 'documents' in form.errors
 
     def test_fichier_trop_volumineux(self):
+        accuse = MembreActifFactory()
         gros_fichier = SimpleUploadedFile("gros.pdf", b"x" * (6 * 1024 * 1024), content_type="application/pdf")
-        form = PlainteForm(data=self._valid_data(), files={'documents': gros_fichier})
+        form = PlainteForm(data=self._valid_data(accuse.pk), files={'documents': gros_fichier})
         assert not form.is_valid()
         assert 'documents' in form.errors
 

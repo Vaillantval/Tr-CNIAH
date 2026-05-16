@@ -1,6 +1,7 @@
 <!-- ========== deposer_plainte.html ========== -->
 {% extends 'base.html' %}
 {% load static %}
+{% comment %} src/templates/pages/cniah/deposer_plainte.html {% endcomment %}
 
 {% block title %}Déposer une Plainte - CNIAH{% endblock %}
 
@@ -59,25 +60,28 @@
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                             Nom complet <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" name="nom" required
+                        <input type="text" name="nom_plaignant" required
+                               value="{{ form.nom_plaignant.value|default:'' }}"
                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
                                placeholder="Votre nom complet">
                     </div>
-                    
+
                     <div>
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                             Adresse email <span class="text-red-500">*</span>
                         </label>
-                        <input type="email" name="email" required
+                        <input type="email" name="email_plaignant" required
+                               value="{{ form.email_plaignant.value|default:'' }}"
                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
                                placeholder="votre@email.com">
                     </div>
-                    
+
                     <div>
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                             Téléphone <span class="text-red-500">*</span>
                         </label>
                         <input type="tel" name="telephone" required
+                               value="{{ form.telephone.value|default:'' }}"
                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
                                placeholder="+509 XXXX XXXX">
                     </div>
@@ -92,28 +96,39 @@
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
-                            Membre concerné <span class="text-red-500">*</span>
+                        <label for="{{ form.membre_accuse.id_for_label }}" class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                            Membre accusé <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" name="membre_concerne" required
-                               class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                               placeholder="Nom complet du professionnel concerné">
-                        <p class="text-gray-600 dark:text-gray-400 text-xs mt-1">
-                            Si vous ne connaissez pas le nom exact, indiquez le maximum d'informations disponibles
-                        </p>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
-                            Type de plainte <span class="text-red-500">*</span>
-                        </label>
-                        <select name="type_plainte" required
+                        <select name="membre_accuse" id="{{ form.membre_accuse.id_for_label }}" required
                                 class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
-                            <option value="">-- Sélectionnez un type --</option>
-                            {% for value, label in types_plainte %}
-                            <option value="{{ value }}">{{ label }}</option>
+                            <option value="">— Sélectionner un membre actif du CNIAH —</option>
+                            {% for membre in membres_actifs %}
+                            <option value="{{ membre.pk }}" {% if form.membre_accuse.value == membre.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ membre.prenom }} {{ membre.nom }} (N° {{ membre.numero }}) — {{ membre.titre.nom }}
+                            </option>
                             {% endfor %}
                         </select>
+                        {% if form.membre_accuse.errors %}
+                        <p class="text-red-600 text-xs mt-1">{{ form.membre_accuse.errors|join:", " }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.type_plainte.id_for_label }}" class="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                            Type de plainte <span class="text-red-500">*</span>
+                        </label>
+                        <select name="type_plainte" id="{{ form.type_plainte.id_for_label }}" required
+                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="">-- Sélectionnez un type --</option>
+                            {% for value, label in form.type_plainte.field.choices %}
+                            {% if value %}
+                            <option value="{{ value }}" {% if form.type_plainte.value == value %}selected{% endif %}>{{ label }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                        {% if form.type_plainte.errors %}
+                        <p class="text-red-600 text-xs mt-1">{{ form.type_plainte.errors|join:", " }}</p>
+                        {% endif %}
                     </div>
                     
                     <div>

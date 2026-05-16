@@ -41,7 +41,8 @@
                 </p>
             </div>
 
-            <!-- Frais -->
+            <!-- Frais — visibles uniquement aux membres connectés -->
+            {% if user.is_authenticated %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div class="bg-primary/5 dark:bg-primary/10 rounded-lg p-4 border border-primary/20">
                     <div class="flex items-center justify-between">
@@ -62,6 +63,14 @@
                     </div>
                 </div>
             </div>
+            {% else %}
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-6 flex items-center gap-3">
+                <span class="material-symbols-outlined text-blue-500 flex-shrink-0">lock</span>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Les montants sont réservés aux membres. <a href="{% url 'members:connexion' %}?next={{ request.path }}" class="font-semibold text-primary hover:underline">Connectez-vous</a> pour les consulter.
+                </p>
+            </div>
+            {% endif %}
 
             <!-- Comptes Bancaires -->
             <h3 class="text-gray-900 dark:text-white text-xl font-bold mb-4">Liste des Comptes Bancaires du C.N.I.A.H.</h3>
@@ -148,7 +157,8 @@
                 </p>
             </div>
 
-            <!-- Montant contribution -->
+            <!-- Montant contribution — visible uniquement aux membres connectés -->
+            {% if user.is_authenticated %}
             <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-6 border border-green-200 dark:border-green-800 mb-6">
                 <div class="flex items-center justify-between">
                     <div>
@@ -159,6 +169,14 @@
                     <span class="material-symbols-outlined text-green-600 dark:text-green-500 text-6xl">paid</span>
                 </div>
             </div>
+            {% else %}
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-6 flex items-center gap-3">
+                <span class="material-symbols-outlined text-blue-500 flex-shrink-0">lock</span>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Le montant de la contribution est réservé aux membres. <a href="{% url 'members:connexion' %}?next={{ request.path }}" class="font-semibold text-primary hover:underline">Connectez-vous</a> pour le consulter.
+                </p>
+            </div>
+            {% endif %}
 
             <!-- Même tableau de comptes -->
             <p class="text-gray-700 dark:text-gray-300 mb-4">Utilisez les mêmes comptes bancaires mentionnés ci-dessus pour effectuer votre contribution.</p>

@@ -125,6 +125,22 @@
                 <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">
                     {{ membre.titre.nom }}
                 </span>
+                {% if membre.email_public or membre.telephone_public %}
+                <div class="mt-3 space-y-1 border-t border-gray-100 dark:border-gray-700 pt-3">
+                    {% if membre.email_public %}
+                    <a href="mailto:{{ membre.email_public }}" class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-primary transition-colors truncate">
+                        <span class="material-symbols-outlined text-sm flex-shrink-0">email</span>
+                        <span class="truncate">{{ membre.email_public }}</span>
+                    </a>
+                    {% endif %}
+                    {% if membre.telephone_public %}
+                    <a href="tel:{{ membre.telephone_public }}" class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-sm flex-shrink-0">phone</span>
+                        <span>{{ membre.telephone_public }}</span>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </div>
         {% empty %}
@@ -147,6 +163,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nom</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Prénom</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Titre</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Contact</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -176,10 +193,25 @@
                                 {{ membre.titre.nom }}
                             </span>
                         </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                            {% if membre.email_public %}
+                            <a href="mailto:{{ membre.email_public }}" class="flex items-center gap-1 hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-sm">email</span>{{ membre.email_public }}
+                            </a>
+                            {% endif %}
+                            {% if membre.telephone_public %}
+                            <a href="tel:{{ membre.telephone_public }}" class="flex items-center gap-1 hover:text-primary transition-colors mt-1">
+                                <span class="material-symbols-outlined text-sm">phone</span>{{ membre.telephone_public }}
+                            </a>
+                            {% endif %}
+                            {% if not membre.email_public and not membre.telephone_public %}
+                            <span class="text-gray-400">—</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
+                        <td colspan="6" class="px-6 py-12 text-center">
                             <span class="material-symbols-outlined text-gray-400 text-6xl mb-4 block">person_search</span>
                             <p class="text-gray-600 dark:text-gray-400">Aucun membre trouvé avec ces critères.</p>
                         </td>

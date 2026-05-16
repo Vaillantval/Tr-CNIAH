@@ -45,9 +45,11 @@
                     <div class="relative w-full aspect-video rounded-xl overflow-hidden shadow-md bg-gray-200">
                         {% with thumb=video.get_thumbnail_url %}
                         <img
-                            src="{% if thumb %}{{ thumb }}{% else %}{% static 'img/video-placeholder.svg' %}{% endif %}"
+                            src="{% if thumb %}{{ thumb }}{% else %}{% static 'images/video-placeholder.svg' %}{% endif %}"
                             alt="{{ video.title }}"
                             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            referrerpolicy="no-referrer"
+                            onerror="this.onerror=null;this.src='{% static 'images/video-placeholder.svg' %}'"
                         />
                         {% endwith %}
                         <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">

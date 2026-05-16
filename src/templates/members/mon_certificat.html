@@ -44,11 +44,18 @@
                                 </p>
                             </div>
                         </div>
-                        <a href="{% url 'members:mon_certificat' %}?download=1" 
-                           class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-sm transition-colors">
-                            <span class="material-symbols-outlined">download</span>
-                            <span>Télécharger PDF</span>
-                        </a>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{% url 'members:mon_certificat' %}?download=1"
+                               class="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-sm transition-colors">
+                                <span class="material-symbols-outlined text-sm">download</span>
+                                <span>PDF</span>
+                            </a>
+                            <a href="{% url 'members:mon_certificat' %}?send_email=1"
+                               class="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-sm transition-colors">
+                                <span class="material-symbols-outlined text-sm">email</span>
+                                <span>Email</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -168,24 +175,40 @@
 
             <!-- Actions -->
             <div class="mt-8 flex flex-wrap gap-4 justify-center">
-                <a href="{% url 'members:mon_certificat' %}?download=1" 
+                <a href="{% url 'members:mon_certificat' %}?download=1"
                    class="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold transition-colors shadow-lg">
                     <span class="material-symbols-outlined">download</span>
                     <span>Télécharger en PDF</span>
                 </a>
-                
-                <button onclick="window.print()" 
+
+                <a href="{% url 'members:mon_certificat' %}?send_email=1"
+                   class="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold transition-colors shadow-lg">
+                    <span class="material-symbols-outlined">email</span>
+                    <span>Recevoir par email</span>
+                </a>
+
+                <button onclick="window.print()"
                         class="flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-bold transition-colors">
                     <span class="material-symbols-outlined">print</span>
                     <span>Imprimer</span>
                 </button>
-                
-                <a href="{% url 'core:verifier_certification' %}" 
+
+                <a href="{% url 'core:verifier_certification' %}"
                    class="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg font-bold transition-colors">
                     <span class="material-symbols-outlined">verified</span>
                     <span>Vérifier en ligne</span>
                 </a>
             </div>
+
+            <!-- Infos validité multi-année -->
+            {% if certification.annees_validite > 1 %}
+            <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 text-center">
+                <p class="text-sm text-blue-800 dark:text-blue-300">
+                    <span class="material-symbols-outlined align-middle text-sm">info</span>
+                    Ce certificat couvre <strong>{{ certification.annees_validite }} années</strong> de validité.
+                </p>
+            </div>
+            {% endif %}
         </div>
     </main>
 </div>

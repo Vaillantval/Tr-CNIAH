@@ -44,25 +44,33 @@ class TestFluxAdhesion:
 class TestFluxPlainte:
     """Test de l'atomicité et du flux de dépôt de plainte."""
 
-    def _valid_data(self):
+    def _valid_data(self, accuse_pk):
         return {
             'nom_plaignant': 'Marie Pierre',
             'email_plaignant': 'marie@test.com',
             'telephone': '50911223344',
-            'membre_concerne': 'Robert Jean',
+            'membre_accuse': str(accuse_pk),
             'type_plainte': 'qualite',
             'description': 'Description très détaillée de la plainte pour validation de la longueur.',
         }
 
     def test_plainte_creee_avec_reference(self, client):
-        response = client.post(reverse('core:deposer_plainte'), data=self._valid_data())
+        accuse = MembreActifFactory()
+        response = client.post(reverse('core:deposer_plainte'), data=self._valid_data(accuse.pk))
         assert response.status_code == 302
         assert Plainte.objects.count() == 1
         plainte = Plainte.objects.first()
         assert plainte.numero_reference.startswith('PL-')
 
+    def test_plainte_lie_membre_accuse(self, client):
+        accuse = MembreActifFactory()
+        client.post(reverse('core:deposer_plainte'), data=self._valid_data(accuse.pk))
+        plainte = Plainte.objects.first()
+        assert plainte.membre_accuse == accuse
+
     def test_page_succes_accessible(self, client):
-        client.post(reverse('core:deposer_plainte'), data=self._valid_data())
+        accuse = MembreActifFactory()
+        client.post(reverse('core:deposer_plainte'), data=self._valid_data(accuse.pk))
         plainte = Plainte.objects.first()
         response = client.get(reverse('core:plainte_success', kwargs={'numero': plainte.numero_reference}))
         assert response.status_code == 200

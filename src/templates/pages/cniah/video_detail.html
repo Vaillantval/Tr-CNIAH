@@ -132,17 +132,13 @@
                     <a href="{% url 'core:video_detail' related.slug %}" class="group flex gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
                         <div class="relative w-32 aspect-video rounded overflow-hidden flex-shrink-0 bg-gray-200">
                             {% with thumb=related.get_thumbnail_url %}
-                            {% if thumb %}
                             <img
-                                src="{{ thumb }}"
+                                src="{% if thumb %}{{ thumb }}{% else %}{% static 'images/video-placeholder.svg' %}{% endif %}"
                                 alt="{{ related.title }}"
                                 class="w-full h-full object-cover"
+                                referrerpolicy="no-referrer"
+                                onerror="this.onerror=null;this.src='{% static 'images/video-placeholder.svg' %}'"
                             />
-                            {% else %}
-                            <div class="w-full h-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-gray-400">videocam</span>
-                            </div>
-                            {% endif %}
                             {% endwith %}
                             <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
                                 <span class="material-symbols-outlined text-white text-2xl">play_circle</span>

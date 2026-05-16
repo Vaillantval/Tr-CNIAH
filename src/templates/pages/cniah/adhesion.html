@@ -179,6 +179,7 @@
                 <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">4</span>
                 Cotisations et frais
             </h2>
+            {% if user.is_authenticated %}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Frais d'inscription</p>
@@ -204,6 +205,14 @@
                     </div>
                 </div>
             </div>
+            {% else %}
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-4 flex items-center gap-3">
+                <span class="material-symbols-outlined text-blue-500 flex-shrink-0">lock</span>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    Les montants des frais sont réservés aux membres. <a href="{% url 'members:connexion' %}?next={{ request.path }}" class="font-semibold text-primary hover:underline">Connectez-vous</a> pour les consulter. Pour toute question sur les frais d'adhésion, veuillez contacter le secrétariat.
+                </p>
+            </div>
+            {% endif %}
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-4 italic">
                 * Les paiements sont effectués au secrétariat du CNIAH. Veuillez conserver votre reçu.
             </p>
