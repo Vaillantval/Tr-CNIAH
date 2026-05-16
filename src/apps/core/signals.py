@@ -3,7 +3,7 @@ from django.dispatch import receiver
 import qrcode
 from io import BytesIO
 from django.core.files import File
-from .models import Certification, Plainte, DemandeAdhesion
+from .models import Certification, Plainte, DemandeAdhesion, MembreActif
 
 
 @receiver(post_save, sender=Certification)
@@ -40,6 +40,33 @@ def memoriser_statut_plainte(sender, instance, **kwargs):
             instance._ancien_statut = None
     else:
         instance._ancien_statut = None
+
+
+@receiver(post_save, sender=MembreActif)
+def auto_assigner_certification(sender, instance, **kwargs):
+    """Crée automatiquement une certification pour tout membre actif qui n'en a pas de valide."""
+    if not instance.actif:
+        return
+    from django.utils import timezone
+    today = timezone.now().date()
+    has_valid = instance.certifications.filter(
+        statut='valide',
+        date_expiration__gte=today,
+    ).exists()
+    if has_valid:
+        return
+    # Generate unique numero_certificat: CERT-YYYY-<membre.numero>
+    numero = f"CERT-{today.year}-{instance.numero}"
+    if Certification.objects.filter(numero_certificat=numero).exists():
+        import uuid
+        numero = f"CERT-{today.year}-{instance.numero}-{uuid.uuid4().hex[:4].upper()}"
+    Certification.objects.create(
+        membre=instance,
+        numero_certificat=numero,
+        date_delivrance=today,
+        annees_validite=1,
+        statut='valide',
+    )
 
 
 @receiver(post_save, sender=Plainte)

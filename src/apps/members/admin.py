@@ -12,16 +12,54 @@ class UserAdmin(BaseUserAdmin):
     list_display = ['username', 'email', 'get_full_name', 'membre_actif', 'email_verified', 'is_active']
     list_filter = ['email_verified', 'is_active', 'is_staff']
     search_fields = ['username', 'email', 'first_name', 'last_name']
-    
+    actions = ['activer_compte', 'desactiver_compte', 'envoyer_email_init_password']
+
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Informations CNIAH', {
             'fields': ('membre_actif', 'email_verified', 'phone')
         }),
     )
-    
+
     def get_full_name(self, obj):
         return obj.get_full_name()
     get_full_name.short_description = "Nom complet"
+
+    @admin.action(description="Activer le compte (email vérifié + compte actif)")
+    def activer_compte(self, request, queryset):
+        updated = queryset.update(email_verified=True, is_active=True)
+        self.message_user(request, f"{updated} compte(s) activé(s).")
+
+    @admin.action(description="Désactiver le compte")
+    def desactiver_compte(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} compte(s) désactivé(s).")
+
+    @admin.action(description="Envoyer email d'initialisation du mot de passe")
+    def envoyer_email_init_password(self, request, queryset):
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
+        from django.conf import settings
+        from .tasks import envoyer_email_initialisation_mot_de_passe
+        sent = 0
+        skipped = 0
+        for user in queryset:
+            if not user.email:
+                skipped += 1
+                continue
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            reset_url = f"{settings.SITE_URL}/membres/password-reset/{uid}/{token}/"
+            # Activate the account so the reset link works
+            user.is_active = True
+            user.email_verified = True
+            user.save(update_fields=['is_active', 'email_verified'])
+            envoyer_email_initialisation_mot_de_passe.delay(user.pk, reset_url)
+            sent += 1
+        msg = f"Email d'initialisation envoyé à {sent} utilisateur(s)."
+        if skipped:
+            msg += f" {skipped} ignoré(s) (pas d'email)."
+        self.message_user(request, msg)
 
 
 @admin.register(Cotisation)

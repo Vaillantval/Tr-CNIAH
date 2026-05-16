@@ -75,13 +75,26 @@
                             <span>{{ doc.date_ajout|date:"d M Y" }}</span>
                         </div>
 
-                        <!-- Download Button -->
-                        <a href="{{ doc.fichier.url }}" 
-                           download
-                           class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-sm transition-colors">
-                            <span class="material-symbols-outlined">download</span>
-                            <span>Télécharger</span>
-                        </a>
+                        <!-- Actions -->
+                        <div class="flex gap-2">
+                            {% with ext=doc.fichier.name|lower %}
+                            {% if ".pdf" in ext or ".jpg" in ext or ".jpeg" in ext or ".png" in ext %}
+                            <a href="{{ doc.fichier.url }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="flex items-center justify-center gap-1.5 flex-1 px-3 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg font-bold text-sm transition-colors">
+                                <span class="material-symbols-outlined text-base">visibility</span>
+                                <span>Voir</span>
+                            </a>
+                            {% endif %}
+                            {% endwith %}
+                            <a href="{{ doc.fichier.url }}"
+                               download
+                               class="flex items-center justify-center gap-1.5 flex-1 px-3 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-sm transition-colors">
+                                <span class="material-symbols-outlined text-base">download</span>
+                                <span>Télécharger</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% empty %}

@@ -25,12 +25,11 @@
                 {% if video.video_type == 'youtube' or video.video_type == 'vimeo' %}
                     {% with embed_url=video.get_embed_url %}
                         {% if embed_url %}
-                        <iframe 
+                        <iframe
                             src="{{ embed_url }}"
                             class="w-full h-full"
                             frameborder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            referrerpolicy="strict-origin-when-cross-origin"
                             allowfullscreen
                         ></iframe>
                         {% else %}

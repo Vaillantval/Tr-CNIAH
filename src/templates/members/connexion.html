@@ -89,7 +89,7 @@
                             Se souvenir de moi
                         </label>
                     </div>
-                    <a href="#" class="text-sm text-primary hover:underline">
+                    <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">
                         Mot de passe oublié ?
                     </a>
                 </div>
@@ -102,23 +102,6 @@
                 </button>
             </form>
 
-            <!-- Separator -->
-            <div class="relative my-6">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                        Pas encore de compte ?
-                    </span>
-                </div>
-            </div>
-
-            <!-- Register Link -->
-            <a href="{% url 'members:inscription' %}" 
-               class="block w-full text-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-bold transition-colors">
-                Créer un compte
-            </a>
         </div>
 
         <!-- Info Box -->
@@ -127,11 +110,11 @@
                 <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">info</span>
                 <div>
                     <h3 class="text-sm font-bold text-blue-900 dark:text-blue-200 mb-1">
-                        Membre actif CNIAH ?
+                        Accès réservé aux membres
                     </h3>
                     <p class="text-xs text-blue-700 dark:text-blue-300">
-                        Vous devez avoir un numéro de membre actif pour créer un compte. 
-                        Contactez-nous si vous avez des questions.
+                        Vos identifiants vous ont été communiqués par le secrétariat du CNIAH.
+                        Contactez-nous si vous n'avez pas encore reçu vos accès.
                     </p>
                 </div>
             </div>

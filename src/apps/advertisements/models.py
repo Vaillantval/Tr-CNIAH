@@ -4,15 +4,33 @@ from django.utils import timezone
 
 
 class Advertisement(models.Model):
-    """Publicités sur le site"""
+    """
+    Espaces publicitaires payants affichés sur le site (bannière, barre latérale, pied de page).
+    Différent des Sponsors : une publicité est achetée pour une période définie et s'affiche
+    dans un emplacement précis du site. Elle peut être pour n'importe quelle organisation,
+    pas forcément un partenaire du CNIAH.
+
+    Tailles d'image recommandées :
+      - Bannière (haut de page) : 1200 × 300 px
+      - Barre latérale          :  300 × 250 px
+      - Pied de page            :  728 ×  90 px
+    Format : JPG ou PNG, moins de 500 Ko.
+    """
     POSITION_CHOICES = [
-        ('banner', 'Bannière (haut de page)'),
-        ('sidebar', 'Barre latérale'),
-        ('footer', 'Pied de page'),
+        ('banner', 'Bannière (haut de page) — 1200 × 300 px'),
+        ('sidebar', 'Barre latérale — 300 × 250 px'),
+        ('footer', 'Pied de page — 728 × 90 px'),
     ]
 
     title = models.CharField("Titre", max_length=200)
-    image = models.ImageField("Image", upload_to='ads/')
+    image = models.ImageField(
+        "Image",
+        upload_to='ads/',
+        help_text=(
+            "Bannière : 1200 × 300 px | Barre latérale : 300 × 250 px | "
+            "Pied de page : 728 × 90 px. Format JPG/PNG, max 500 Ko."
+        )
+    )
     link = models.URLField("Lien", blank=True)
     position = models.CharField("Position", max_length=20, choices=POSITION_CHOICES)
     

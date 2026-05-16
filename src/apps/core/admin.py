@@ -553,6 +553,19 @@ class SponsorAdmin(admin.ModelAdmin):
     list_editable = ['actif', 'ordre']
     ordering = ['niveau', 'ordre']
 
+    fieldsets = (
+        ('Partenaire institutionnel du CNIAH', {
+            'description': (
+                "Les sponsors sont des organisations partenaires qui soutiennent le CNIAH "
+                "sur la durée, classées par niveau (Platine → Bronze). "
+                "Leur logo s'affiche dans la section partenaires du site.\n\n"
+                "⚠️ Taille du logo recommandée : 400 × 200 px, fond transparent (PNG).\n"
+                "À distinguer des Publicités (espace pub payant avec dates de diffusion)."
+            ),
+            'fields': ('nom', 'niveau', 'logo', 'description', 'url_site', 'ordre', 'actif')
+        }),
+    )
+
 # ============= DEMANDE D'ADHÉSION =============
 
 @admin.register(DemandeAdhesion)

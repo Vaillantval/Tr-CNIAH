@@ -48,6 +48,30 @@ def envoyer_email_bienvenue(self, user_id: int):
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def envoyer_email_initialisation_mot_de_passe(self, user_id: int, reset_url: str):
+    """Email envoyé par l'admin pour inviter un utilisateur à définir son mot de passe."""
+    from apps.members.models import User
+    try:
+        user = User.objects.get(pk=user_id)
+        send_mail(
+            subject="CNIAH — Initialisez votre mot de passe",
+            message=(
+                f"Bonjour {user.get_full_name()},\n\n"
+                f"Le secrétariat du CNIAH a créé un compte pour vous.\n\n"
+                f"Cliquez sur le lien suivant pour définir votre mot de passe et activer votre compte :\n"
+                f"{reset_url}\n\n"
+                f"Ce lien expire dans 24 heures et est personnel.\n\n"
+                f"Le secrétariat du CNIAH"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except Exception as exc:
+        raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def envoyer_confirmation_adhesion(self, demande_id: int):
     """Confirmation de réception envoyée après soumission d'une demande d'adhésion."""
     from apps.core.models import DemandeAdhesion
