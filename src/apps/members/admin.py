@@ -1,6 +1,8 @@
 # src/apps/members/admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.html import format_html
+from django.urls import reverse
 from .models import (
     User, Cotisation, PaiementCertificat, Don,
     Opportunite, DocumentMembre,
@@ -9,18 +11,13 @@ from .models import (
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ['username', 'email', 'get_full_name', 'membre_actif', 'email_verified', 'is_active']
+    list_display = ['username', 'email', 'get_full_name', 'membre_actif', 'email_verified', 'is_active', 'changer_mdp_lien']
     list_filter = ['email_verified', 'is_active', 'is_staff']
     search_fields = ['username', 'email', 'first_name', 'last_name']
     actions = ['definir_mot_de_passe_temporaire', 'activer_compte', 'desactiver_compte', 'envoyer_email_init_password']
 
     fieldsets = (
         (None, {
-            'description': (
-                "💡 Pour définir ou changer le mot de passe d'un membre sans email, "
-                "utilisez l'action « Définir un mot de passe temporaire » dans la liste, "
-                "ou cliquez sur le lien « changer le mot de passe » dans le champ Mot de passe ci-dessous."
-            ),
             'fields': ('username', 'password'),
         }),
     ) + BaseUserAdmin.fieldsets[1:] + (
@@ -32,6 +29,11 @@ class UserAdmin(BaseUserAdmin):
     def get_full_name(self, obj):
         return obj.get_full_name()
     get_full_name.short_description = "Nom complet"
+
+    def changer_mdp_lien(self, obj):
+        url = reverse('admin:members_user_password_change', args=[obj.pk])
+        return format_html('<a href="{}" class="button">Changer mdp</a>', url)
+    changer_mdp_lien.short_description = "Mot de passe"
 
     @admin.action(description="🔑 Définir un mot de passe temporaire et activer le compte")
     def definir_mot_de_passe_temporaire(self, request, queryset):
