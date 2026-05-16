@@ -225,39 +225,16 @@
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             Sécurité
                         </h2>
-                        <div class="space-y-4">
-                            <a href="#" 
-                               class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                <div class="flex items-center gap-3">
-                                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">lock</span>
-                                    <div>
-                                        <p class="text-sm font-bold text-gray-900 dark:text-white">
-                                            Changer le mot de passe
-                                        </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            Dernière modification: jamais
-                                        </p>
-                                    </div>
-                                </div>
-                                <span class="material-symbols-outlined text-gray-400">chevron_right</span>
-                            </a>
-
-                            <a href="#" 
-                               class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                <div class="flex items-center gap-3">
-                                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">security</span>
-                                    <div>
-                                        <p class="text-sm font-bold text-gray-900 dark:text-white">
-                                            Authentification à deux facteurs
-                                        </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            Non activée
-                                        </p>
-                                    </div>
-                                </div>
-                                <span class="material-symbols-outlined text-gray-400">chevron_right</span>
-                            </a>
-                        </div>
+                        <a href="{% url 'password_reset' %}"
+                           class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">lock</span>
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">
+                                    Changer le mot de passe
+                                </p>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-400">chevron_right</span>
+                        </a>
                     </div>
                 </div>
             </div>
