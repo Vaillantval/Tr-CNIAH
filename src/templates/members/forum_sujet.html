@@ -93,11 +93,7 @@
                                 {{ sujet.auteur.get_full_name }}
                             </h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {% if sujet.auteur.membre_actif %}
-                                    {{ sujet.auteur.membre_actif.titre }}
-                                {% else %}
-                                    Membre CNIAH
-                                {% endif %}
+                                {{ sujet.auteur.titre|default:"Membre CNIAH" }}
                             </p>
                         </div>
                         <div class="text-right text-sm text-gray-500 dark:text-gray-400">
@@ -147,11 +143,7 @@
                                     {{ reponse.auteur.get_full_name }}
                                 </h4>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {% if reponse.auteur.membre_actif %}
-                                        {{ reponse.auteur.membre_actif.titre }}
-                                    {% else %}
-                                        Membre CNIAH
-                                    {% endif %}
+                                    {{ reponse.auteur.titre|default:"Membre CNIAH" }}
                                 </p>
                             </div>
                             <div class="text-right text-xs text-gray-500 dark:text-gray-400">

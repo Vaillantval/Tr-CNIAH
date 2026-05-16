@@ -255,32 +255,23 @@ class TitreProfessionnelAdmin(admin.ModelAdmin):
 
 @admin.register(MembreActif)
 class MembreActifAdmin(admin.ModelAdmin):
-    list_display = ['numero', 'nom', 'prenom', 'titre', 'actif', 'email_public', 'telephone_public', 'date_inscription']
-    list_filter = ['titre', 'actif', 'date_inscription']
-    search_fields = ['numero', 'nom', 'prenom', 'email_public']
-    list_editable = ['actif']
+    """
+    Lecture seule — géré automatiquement via Utilisateurs Membres.
+    Ne pas modifier directement : les changements seraient écrasés par la synchronisation.
+    """
+    list_display = ['numero', 'nom', 'prenom', 'titre', 'actif', 'date_inscription']
+    list_filter = ['titre', 'actif']
+    search_fields = ['numero', 'nom', 'prenom']
     ordering = ['nom', 'prenom']
-    date_hierarchy = 'date_inscription'
 
-    fieldsets = (
-        ('Identité', {
-            'fields': ('numero', 'nom', 'prenom', 'titre', 'photo', 'date_inscription', 'actif')
-        }),
-        ('Contact public', {
-            'fields': ('email_public', 'telephone_public'),
-            'description': 'Ces informations seront affichées sur la liste publique des membres si renseignées.'
-        }),
-    )
+    def has_add_permission(self, request):
+        return False
 
-    actions = ['activer_membres', 'desactiver_membres']
+    def has_change_permission(self, request, obj=None):
+        return False
 
-    @admin.action(description="Activer les membres sélectionnés")
-    def activer_membres(self, request, queryset):
-        queryset.update(actif=True)
-
-    @admin.action(description="Désactiver les membres sélectionnés")
-    def desactiver_membres(self, request, queryset):
-        queryset.update(actif=False)
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(PageMembresActifs)

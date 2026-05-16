@@ -11,28 +11,72 @@ from .models import (
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ['username', 'email', 'get_full_name', 'membre_actif', 'email_verified', 'is_active', 'changer_mdp_lien']
-    list_filter = ['email_verified', 'is_active', 'is_staff']
-    search_fields = ['username', 'email', 'first_name', 'last_name']
+    list_display = [
+        'numero_membre', 'get_full_name', 'titre', 'username', 'email',
+        'is_active', 'email_verified', 'changer_mdp_lien',
+    ]
+    list_display_links = ['numero_membre', 'get_full_name']
+    list_filter = ['is_active', 'email_verified', 'is_staff', 'titre', 'groups']
+    search_fields = ['numero_membre', 'username', 'email', 'first_name', 'last_name']
+    ordering = ['last_name', 'first_name']
     actions = ['definir_mot_de_passe_temporaire', 'activer_compte', 'desactiver_compte', 'envoyer_email_init_password']
 
     fieldsets = (
-        (None, {
+        ('Identifiants de connexion', {
             'fields': ('username', 'password'),
         }),
-    ) + BaseUserAdmin.fieldsets[1:] + (
-        ('Informations CNIAH', {
-            'fields': ('membre_actif', 'email_verified', 'phone')
+        ('Informations personnelles', {
+            'fields': ('first_name', 'last_name', 'email', 'phone'),
+        }),
+        ('Profil CNIAH', {
+            'description': (
+                "Ces champs définissent le membre CNIAH. Dès qu'un Numéro de membre est "
+                "renseigné et le compte activé, le profil de Membre Actif correspondant "
+                "est créé et synchronisé automatiquement."
+            ),
+            'fields': (
+                'numero_membre', 'titre', 'photo',
+                'date_inscription', 'email_public', 'telephone_public',
+            ),
+        }),
+        ('Accès et permissions', {
+            'fields': ('is_active', 'email_verified', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+        }),
+        ('Dates', {
+            'fields': ('last_login', 'date_joined'),
+            'classes': ('collapse',),
         }),
     )
 
+    add_fieldsets = (
+        ('Identifiants de connexion', {
+            'classes': ('wide',),
+            'fields': ('username', 'password1', 'password2'),
+        }),
+        ('Informations personnelles', {
+            'fields': ('first_name', 'last_name', 'email', 'phone'),
+        }),
+        ('Profil CNIAH', {
+            'fields': (
+                'numero_membre', 'titre', 'photo',
+                'date_inscription', 'email_public', 'telephone_public',
+            ),
+        }),
+        ('Accès', {
+            'fields': ('is_active', 'email_verified'),
+        }),
+    )
+
+    readonly_fields = ['last_login', 'date_joined']
+
     def get_full_name(self, obj):
-        return obj.get_full_name()
+        return obj.get_full_name() or obj.username
     get_full_name.short_description = "Nom complet"
+    get_full_name.admin_order_field = 'last_name'
 
     def changer_mdp_lien(self, obj):
         url = reverse('admin:members_user_password_change', args=[obj.pk])
-        return format_html('<a href="{}" class="button">Changer mdp</a>', url)
+        return format_html('<a href="{}">Changer mdp</a>', url)
     changer_mdp_lien.short_description = "Mot de passe"
 
     @admin.action(description="🔑 Définir un mot de passe temporaire et activer le compte")

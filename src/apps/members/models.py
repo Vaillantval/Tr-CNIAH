@@ -2,46 +2,84 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-from apps.core.models import MembreActif
+
 
 class User(AbstractUser):
-    """Utilisateur personnalisé lié aux membres actifs"""
+    """
+    Utilisateur Membre du CNIAH.
+    Contient toutes les informations du membre actif directement.
+    Le champ membre_actif est géré automatiquement par signal pour
+    maintenir la compatibilité avec Certification et Plainte.
+    """
+    # ---- Lien auto-géré vers MembreActif (ne pas modifier manuellement) ----
     membre_actif = models.OneToOneField(
-        MembreActif,
-        on_delete=models.CASCADE,
+        'core.MembreActif',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='user_account'
+        related_name='user_account',
+        editable=False,
     )
-    email_verified = models.BooleanField(default=False)
+
+    # ---- Champs d'authentification ----
+    email_verified = models.BooleanField(default=False, verbose_name="Email vérifié")
     email_verification_token = models.CharField(max_length=100, blank=True)
-    phone = models.CharField(max_length=20, blank=True)
-    
+    phone = models.CharField(max_length=20, blank=True, verbose_name="Téléphone personnel")
+
+    # ---- Champs membre CNIAH ----
+    numero_membre = models.CharField(
+        max_length=20, unique=True, null=True, blank=True,
+        verbose_name="Numéro de membre",
+        help_text="Numéro d'identification unique au CNIAH",
+    )
+    titre = models.ForeignKey(
+        'core.TitreProfessionnel',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='users',
+        verbose_name="Titre professionnel",
+    )
+    photo = models.ImageField(
+        upload_to='membres/', blank=True, null=True,
+        verbose_name="Photo",
+    )
+    date_inscription = models.DateField(
+        null=True, blank=True,
+        verbose_name="Date d'inscription",
+    )
+    email_public = models.EmailField(
+        blank=True,
+        verbose_name="Email public",
+        help_text="Affiché sur la liste des membres actifs (optionnel)",
+    )
+    telephone_public = models.CharField(
+        max_length=30, blank=True,
+        verbose_name="Téléphone public",
+        help_text="Affiché sur la liste des membres actifs (optionnel)",
+    )
+
     class Meta:
         verbose_name = "Utilisateur Membre"
         verbose_name_plural = "Utilisateurs Membres"
-    
+
     def __str__(self):
         return f"{self.get_full_name()} ({self.username})"
-    
+
     @property
     def has_valid_certification(self):
-        """Vérifie si le membre a une certification valide"""
-        if not self.membre_actif:
+        if not self.membre_actif_id:
             return False
-        cert = self.membre_actif.certifications.filter(
+        return self.membre_actif.certifications.filter(
             statut='valide',
-            date_expiration__gte=timezone.now().date()
-        ).first()
-        return cert is not None
-    
+            date_expiration__gte=timezone.now().date(),
+        ).exists()
+
     @property
     def latest_certification(self):
-        """Retourne la certification la plus récente"""
-        if not self.membre_actif:
+        if not self.membre_actif_id:
             return None
         return self.membre_actif.certifications.filter(
-            statut='valide'
+            statut='valide',
         ).order_by('-date_delivrance').first()
 
 

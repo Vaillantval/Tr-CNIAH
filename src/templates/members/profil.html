@@ -43,7 +43,7 @@
                         <div class="flex flex-col items-center">
                             <div class="relative mb-4">
                                 <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-32 border-4 border-gray-200 dark:border-gray-700"
-                                     style='background-image: url("{% if request.user.membre_actif.photo %}{{ request.user.membre_actif.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.get_full_name|urlencode }}&size=200&background=d0bb95&color=121117{% endif %}");'>
+                                     style='background-image: url("{% if request.user.photo %}{{ request.user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.get_full_name|urlencode }}&size=200&background=d0bb95&color=121117{% endif %}");'>
                                 </div>
                                 <button class="absolute bottom-0 right-0 size-10 bg-primary hover:bg-primary/90 text-white rounded-full flex items-center justify-center shadow-lg">
                                     <span class="material-symbols-outlined text-xl">photo_camera</span>
@@ -53,7 +53,7 @@
                                 {{ request.user.get_full_name }}
                             </h3>
                             <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
-                                {{ request.user.membre_actif.titre }}
+                                {{ request.user.titre }}
                             </p>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">Numéro</span>
                                 <span class="text-sm font-bold text-gray-900 dark:text-white">
-                                    {{ request.user.membre_actif.numero }}
+                                    {{ request.user.numero_membre }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between">
@@ -198,7 +198,7 @@
                                         <span class="material-symbols-outlined text-xl">workspace_premium</span>
                                     </span>
                                     <input type="text" 
-                                           value="{{ request.user.membre_actif.titre }}" 
+                                           value="{{ request.user.titre }}"
                                            readonly
                                            class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400">
                                 </div>

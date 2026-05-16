@@ -7,14 +7,14 @@
             <!-- User Info -->
             <div class="flex gap-3">
                 <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                     style='background-image: url("{% if request.user.membre_actif.photo %}{{ request.user.membre_actif.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.get_full_name|urlencode }}&background=d0bb95&color=121117{% endif %}");'>
+                     style='background-image: url("{% if request.user.photo %}{{ request.user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.get_full_name|urlencode }}&background=d0bb95&color=121117{% endif %}");'>
                 </div>
                 <div class="flex flex-col">
                     <h1 class="text-[#121117] dark:text-white text-base font-medium leading-normal">
                         {{ request.user.get_full_name }}
                     </h1>
                     <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
-                        {{ request.user.membre_actif.titre }}
+                        {{ request.user.titre }}
                     </p>
                 </div>
             </div>
