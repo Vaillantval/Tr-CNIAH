@@ -50,11 +50,11 @@
                                 <span class="material-symbols-outlined text-sm">download</span>
                                 <span>PDF</span>
                             </a>
-                            <a href="{% url 'members:mon_certificat' %}?send_email=1"
-                               class="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-sm transition-colors">
+                            <span title="L'envoi par email n'est pas encore activé"
+                                  class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 rounded-lg font-bold text-sm cursor-not-allowed select-none">
                                 <span class="material-symbols-outlined text-sm">email</span>
                                 <span>Email</span>
-                            </a>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -181,11 +181,11 @@
                     <span>Télécharger en PDF</span>
                 </a>
 
-                <a href="{% url 'members:mon_certificat' %}?send_email=1"
-                   class="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold transition-colors shadow-lg">
+                <span title="L'envoi par email n'est pas encore activé"
+                      class="flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 rounded-lg font-bold cursor-not-allowed select-none">
                     <span class="material-symbols-outlined">email</span>
                     <span>Recevoir par email</span>
-                </a>
+                </span>
 
                 <button onclick="window.print()"
                         class="flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-bold transition-colors">

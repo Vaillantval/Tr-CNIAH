@@ -1,15 +1,13 @@
 # src/apps/core/utils.py
-"""Génération PDF des certificats CNIAH via reportlab."""
+"""Génération PDF des certificats CNIAH via reportlab — format paysage A4."""
 
 import io
 import os
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape as _landscape
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 
 
 # Couleurs CNIAH
@@ -19,179 +17,207 @@ _LIGHT_GOLD = colors.HexColor('#f0e6c8')
 _LIGHT_GRAY = colors.HexColor('#f8f8f8')
 
 
-def _draw_certificate_border(c, w, h):
-    """Cadre décoratif à double trait et coins ornementaux."""
-    margin = 12 * mm
-    inner = 17 * mm
-
-    # Trait extérieur
-    c.setStrokeColor(_NAVY)
-    c.setLineWidth(2.5)
-    c.rect(margin, margin, w - 2 * margin, h - 2 * margin)
-
-    # Trait intérieur doré
-    c.setStrokeColor(_GOLD)
-    c.setLineWidth(1)
-    c.rect(inner, inner, w - 2 * inner, h - 2 * inner)
-
-    # Coins ornementaux (carrés aux 4 coins)
-    corner = 6 * mm
-    c.setFillColor(_GOLD)
-    for x in [margin - 1.5, w - margin - corner + 1.5]:
-        for y in [margin - 1.5, h - margin - corner + 1.5]:
-            c.rect(x, y, corner, corner, fill=1, stroke=0)
-
-
-def _center_text(c, text, y, font, size, color=_NAVY):
+def _draw_text_centered(c, text, y, font, size, color, page_w):
     c.setFont(font, size)
     c.setFillColor(color)
     tw = c.stringWidth(text, font, size)
-    c.drawString((A4[0] - tw) / 2, y, text)
+    c.drawString((page_w - tw) / 2, y, text)
 
 
-def generer_certificat_pdf(certification) -> bytes:
-    """Génère le PDF d'un certificat CNIAH et retourne les bytes."""
-    from apps.core.models import ConfigurationCertificat
-    from django.conf import settings
-
-    config = ConfigurationCertificat.get()
-
-    buffer = io.BytesIO()
-    w, h = A4
-    c = canvas.Canvas(buffer, pagesize=A4)
-
-    # ── Fond légèrement crème ──────────────────────────────────────────
-    c.setFillColor(_LIGHT_GRAY)
-    c.rect(0, 0, w, h, fill=1, stroke=0)
-
-    # ── Bande décorative haut (navy) ──────────────────────────────────
-    c.setFillColor(_NAVY)
-    c.rect(0, h - 28 * mm, w, 28 * mm, fill=1, stroke=0)
-
-    # ── Bande décorative bas (navy) ───────────────────────────────────
-    c.setFillColor(_NAVY)
-    c.rect(0, 0, w, 22 * mm, fill=1, stroke=0)
-
-    # ── Filet doré sous la bande haute ───────────────────────────────
-    c.setFillColor(_GOLD)
-    c.rect(0, h - 30 * mm, w, 2 * mm, fill=1, stroke=0)
-
-    # ── Filet doré au-dessus de la bande basse ───────────────────────
-    c.setFillColor(_GOLD)
-    c.rect(0, 22 * mm, w, 2 * mm, fill=1, stroke=0)
-
-    # ── Logo CNIAH (en-tête) ─────────────────────────────────────────
+def _load_logo(config, settings):
+    """Retourne le chemin du logo CNIAH (config ou static par défaut)."""
     logo_path = None
-    if config.logo_organisation and hasattr(config.logo_organisation, 'path') and config.logo_organisation.path:
+    if config.logo_organisation and hasattr(config.logo_organisation, 'path'):
         try:
-            logo_path = config.logo_organisation.path
+            if os.path.exists(config.logo_organisation.path):
+                logo_path = config.logo_organisation.path
         except Exception:
             pass
     if not logo_path:
         default = os.path.join(settings.BASE_DIR, 'static', 'images', 'logo_cniah.png')
         if os.path.exists(default):
             logo_path = default
+    return logo_path
 
-    logo_y = h - 27 * mm
+
+def generer_certificat_pdf(certification) -> bytes:
+    """Génère le PDF d'un certificat CNIAH en format paysage et retourne les bytes."""
+    from apps.core.models import ConfigurationCertificat
+    from django.conf import settings
+
+    config = ConfigurationCertificat.get()
+
+    buffer = io.BytesIO()
+    page = _landscape(A4)   # 841.89 × 595.28 pt  ≈  297 × 210 mm
+    w, h = page
+    c = canvas.Canvas(buffer, pagesize=page)
+
+    MARGIN = 15 * mm
+
+    # ── Fond légèrement crème ──────────────────────────────────────────
+    c.setFillColor(_LIGHT_GRAY)
+    c.rect(0, 0, w, h, fill=1, stroke=0)
+
+    # ── Bande navy en haut ─────────────────────────────────────────────
+    HEADER_H = 32 * mm
+    c.setFillColor(_NAVY)
+    c.rect(0, h - HEADER_H, w, HEADER_H, fill=1, stroke=0)
+
+    # ── Filet doré sous l'en-tête ──────────────────────────────────────
+    GOLD_BAR = 2 * mm
+    c.setFillColor(_GOLD)
+    c.rect(0, h - HEADER_H - GOLD_BAR, w, GOLD_BAR, fill=1, stroke=0)
+
+    # ── Bande navy en bas ──────────────────────────────────────────────
+    FOOTER_H = 18 * mm
+    c.setFillColor(_NAVY)
+    c.rect(0, 0, w, FOOTER_H, fill=1, stroke=0)
+
+    # ── Filet doré au-dessus du pied ───────────────────────────────────
+    c.setFillColor(_GOLD)
+    c.rect(0, FOOTER_H, w, GOLD_BAR, fill=1, stroke=0)
+
+    # ── LOGO — en haut à gauche dans la bande navy ─────────────────────
+    logo_path = _load_logo(config, settings)
     if logo_path:
         try:
             img = ImageReader(logo_path)
             iw, ih = img.getSize()
-            logo_h = 20 * mm
+            logo_h = 24 * mm
             logo_w = logo_h * iw / ih
-            c.drawImage(logo_path, (w - logo_w) / 2, logo_y + 2 * mm,
-                        width=logo_w, height=logo_h, preserveAspectRatio=True, mask='auto')
+            logo_x = MARGIN
+            logo_y = h - HEADER_H + (HEADER_H - logo_h) / 2
+            c.drawImage(logo_path, logo_x, logo_y,
+                        width=logo_w, height=logo_h,
+                        preserveAspectRatio=True, mask='auto')
         except Exception:
             pass
 
-    # ── Nom de l'organisation (bande blanche sur navy) ────────────────
-    c.setFont('Helvetica-Bold', 10)
-    c.setFillColor(colors.white)
+    # ── Nom de l'organisation (centré, blanc) ─────────────────────────
     org = "COLLÈGE NATIONAL DES INGÉNIEURS ET ARCHITECTES HAÏTIENS"
-    tw = c.stringWidth(org, 'Helvetica-Bold', 10)
-    c.drawString((w - tw) / 2, h - 9 * mm, org)
+    c.setFont('Helvetica-Bold', 9)
+    c.setFillColor(colors.white)
+    org_tw = c.stringWidth(org, 'Helvetica-Bold', 9)
+    c.drawString((w - org_tw) / 2, h - HEADER_H + (HEADER_H - 9) / 2, org)
 
-    # ── CERTIFICAT D'EXERCICE ─────────────────────────────────────────
-    _center_text(c, "CERTIFICAT D'EXERCICE PROFESSIONNEL",
-                 h - 45 * mm, 'Helvetica-Bold', 16, _NAVY)
+    # ── Zone de contenu ────────────────────────────────────────────────
+    # Entre le filet doré d'en-tête et le filet doré de pied de page.
+    content_top = h - HEADER_H - GOLD_BAR
 
-    # ── Filet doré sous le titre ──────────────────────────────────────
+    # Titre du certificat
+    y = content_top - 12 * mm
+    _draw_text_centered(c, "CERTIFICAT D'EXERCICE PROFESSIONNEL",
+                        y, 'Helvetica-Bold', 15, _NAVY, w)
+
+    # Filet doré sous le titre
+    y -= 9 * mm
     c.setStrokeColor(_GOLD)
     c.setLineWidth(1.5)
-    c.line(30 * mm, h - 49 * mm, w - 30 * mm, h - 49 * mm)
+    c.line(MARGIN + 20 * mm, y, w - MARGIN - 20 * mm, y)
 
-    # ── Corps du certificat ───────────────────────────────────────────
-    c.setFont('Helvetica', 11)
-    c.setFillColor(_NAVY)
-    _center_text(c, "Le Collège National des Ingénieurs et Architectes Haïtiens certifie que",
-                 h - 60 * mm, 'Helvetica', 11, _NAVY)
+    # Texte d'introduction
+    y -= 12 * mm
+    _draw_text_centered(c,
+        "Le Collège National des Ingénieurs et Architectes Haïtiens certifie que",
+        y, 'Helvetica', 10, _NAVY, w)
 
-    # ── Nom du membre ─────────────────────────────────────────────────
+    # Nom du membre (grand, gras)
     membre = certification.membre
     nom_complet = f"{membre.prenom.upper()} {membre.nom.upper()}"
-    _center_text(c, nom_complet, h - 76 * mm, 'Helvetica-Bold', 24, _NAVY)
+    y -= 17 * mm
+    _draw_text_centered(c, nom_complet, y, 'Helvetica-Bold', 22, _NAVY, w)
 
-    # ── Trait sous le nom ─────────────────────────────────────────────
+    # Filet doré sous le nom
+    y -= 10 * mm
     c.setStrokeColor(_GOLD)
     c.setLineWidth(0.8)
-    c.line(40 * mm, h - 80 * mm, w - 40 * mm, h - 80 * mm)
+    c.line(MARGIN + 40 * mm, y, w - MARGIN - 40 * mm, y)
 
-    # ── Titre professionnel ───────────────────────────────────────────
-    _center_text(c, membre.titre.nom, h - 88 * mm, 'Helvetica-Oblique', 13, _GOLD)
+    # Titre professionnel
+    y -= 9 * mm
+    _draw_text_centered(c, membre.titre.nom, y, 'Helvetica-Oblique', 12, _GOLD, w)
 
-    # ── Texte de certification ────────────────────────────────────────
+    # Corps du texte de certification
+    y -= 14 * mm
     body_lines = [
         "est membre actif en règle du CNIAH et est autorisé(e) à exercer sa profession",
         "conformément aux dispositions du Décret-loi présidentiel du 25 mars 1974.",
     ]
-    y_body = h - 102 * mm
     for line in body_lines:
-        _center_text(c, line, y_body, 'Helvetica', 10.5, _NAVY)
-        y_body -= 6 * mm
+        _draw_text_centered(c, line, y, 'Helvetica', 9, _NAVY, w)
+        y -= 6 * mm
 
-    # ── Encadré infos certificat ──────────────────────────────────────
-    box_y = h - 130 * mm
-    box_h = 28 * mm
+    # ── Section basse : encadré infos | QR code | Signature ──────────
+    content_bottom = FOOTER_H + GOLD_BAR   # y du haut du filet doré au-dessus du pied
+    BOX_Y = content_bottom + 3 * mm
+    BOX_H = 44 * mm
+    BOX_X = MARGIN
+    BOX_W = 155 * mm
+
+    # Encadré avec fond doré clair
     c.setFillColor(_LIGHT_GOLD)
     c.setStrokeColor(_GOLD)
     c.setLineWidth(1)
-    c.roundRect(30 * mm, box_y, w - 60 * mm, box_h, 4 * mm, fill=1, stroke=1)
+    c.roundRect(BOX_X, BOX_Y, BOX_W, BOX_H, 3 * mm, fill=1, stroke=1)
 
-    c.setFont('Helvetica-Bold', 9)
+    box_top = BOX_Y + BOX_H
+    col1_x = BOX_X + 10 * mm
+    col2_x = BOX_X + BOX_W / 2 + 5 * mm
+
+    # Ligne 1 : N° certificat + Date de délivrance
+    lbl_y1 = box_top - 9 * mm
+    val_y1 = box_top - 16 * mm
+    c.setFont('Helvetica-Bold', 8)
     c.setFillColor(_NAVY)
-    col1_x = 40 * mm
-    col2_x = w / 2 + 10 * mm
-
-    # Ligne 1
-    c.drawString(col1_x, box_y + box_h - 9 * mm, "N° DE CERTIFICAT")
-    c.drawString(col2_x, box_y + box_h - 9 * mm, "DÉLIVRÉ LE")
+    c.drawString(col1_x, lbl_y1, "N° DE CERTIFICAT")
+    c.drawString(col2_x, lbl_y1, "DÉLIVRÉ LE")
     c.setFont('Helvetica', 9)
-    c.drawString(col1_x, box_y + box_h - 15 * mm, certification.numero_certificat)
-    c.drawString(col2_x, box_y + box_h - 15 * mm,
+    c.drawString(col1_x, val_y1, certification.numero_certificat)
+    c.drawString(col2_x, val_y1,
                  certification.date_delivrance.strftime('%d %B %Y'))
 
-    # Ligne 2
-    c.setFont('Helvetica-Bold', 9)
-    c.drawString(col1_x, box_y + box_h - 21 * mm, "N° DE MEMBRE")
-    c.drawString(col2_x, box_y + box_h - 21 * mm, "VALIDE JUSQU'AU")
+    # Ligne 2 : N° membre + Valide jusqu'au
+    lbl_y2 = box_top - 27 * mm
+    val_y2 = box_top - 34 * mm
+    c.setFont('Helvetica-Bold', 8)
+    c.setFillColor(_NAVY)
+    c.drawString(col1_x, lbl_y2, "N° DE MEMBRE")
+    c.drawString(col2_x, lbl_y2, "VALIDE JUSQU'AU")
     c.setFont('Helvetica', 9)
-    c.drawString(col1_x, box_y + box_h - 27 * mm, membre.numero)
-    c.drawString(col2_x, box_y + box_h - 27 * mm,
+    c.drawString(col1_x, val_y2, membre.numero)
+    c.drawString(col2_x, val_y2,
                  certification.date_expiration.strftime('%d %B %Y'))
 
-    # ── Zone signature ────────────────────────────────────────────────
-    sig_y_base = 30 * mm
-    sig_x = 35 * mm
+    # ── QR Code ────────────────────────────────────────────────────────
+    qr_x = BOX_X + BOX_W + 12 * mm
+    qr_size = BOX_H - 8 * mm   # 36 mm, aligné sur la hauteur de l'encadré
+    qr_y = BOX_Y + 4 * mm
+    if certification.qr_code and hasattr(certification.qr_code, 'path'):
+        try:
+            c.drawImage(certification.qr_code.path,
+                        qr_x, qr_y, width=qr_size, height=qr_size,
+                        preserveAspectRatio=True, mask='auto')
+            c.setFont('Helvetica', 6)
+            c.setFillColor(_NAVY)
+            lbl = "Vérifier l'authenticité"
+            lbl_w = c.stringWidth(lbl, 'Helvetica', 6)
+            c.drawString(qr_x + (qr_size - lbl_w) / 2, BOX_Y + 1 * mm, lbl)
+        except Exception:
+            pass
 
-    # Signature du président
+    # ── Signature ──────────────────────────────────────────────────────
+    sig_x = qr_x + qr_size + 8 * mm
+    sig_line_y = BOX_Y + 14 * mm
+    sig_max_w = w - MARGIN - sig_x
+
     if config.signature_president and hasattr(config.signature_president, 'path'):
         try:
-            sig_img = ImageReader(config.signature_president.path)
-            siw, sih = sig_img.getSize()
+            si = ImageReader(config.signature_president.path)
+            siw, sih = si.getSize()
             sig_h = 18 * mm
-            sig_w = sig_h * siw / sih
+            sig_w = min(sig_h * siw / sih, sig_max_w)
             c.drawImage(config.signature_president.path,
-                        sig_x, sig_y_base + 2 * mm,
+                        sig_x, sig_line_y + 2 * mm,
                         width=sig_w, height=sig_h,
                         preserveAspectRatio=True, mask='auto')
         except Exception:
@@ -200,50 +226,38 @@ def generer_certificat_pdf(certification) -> bytes:
     # Ligne de signature
     c.setStrokeColor(_NAVY)
     c.setLineWidth(0.5)
-    c.line(sig_x, sig_y_base + 1 * mm, sig_x + 55 * mm, sig_y_base + 1 * mm)
+    c.line(sig_x, sig_line_y, sig_x + min(sig_max_w, 52 * mm), sig_line_y)
 
-    # Nom et titre du président
+    # Nom et titre du président (sous la ligne)
     c.setFont('Helvetica-Bold', 8)
-    c.setFillColor(colors.white)
-    c.drawString(sig_x, sig_y_base - 4 * mm, config.nom_president)
-    c.setFont('Helvetica', 7.5)
-    c.drawString(sig_x, sig_y_base - 8.5 * mm, config.titre_president)
+    c.setFillColor(_NAVY)
+    c.drawString(sig_x, sig_line_y - 5 * mm, config.nom_president)
+    c.setFont('Helvetica', 7)
+    c.drawString(sig_x, sig_line_y - 10 * mm, config.titre_president)
 
-    # ── QR Code ───────────────────────────────────────────────────────
-    if certification.qr_code and hasattr(certification.qr_code, 'path'):
-        try:
-            qr_size = 22 * mm
-            qr_x = w - qr_size - 30 * mm
-            qr_y = 25 * mm
-            c.drawImage(certification.qr_code.path, qr_x, qr_y,
-                        width=qr_size, height=qr_size, preserveAspectRatio=True, mask='auto')
-            c.setFont('Helvetica', 5.5)
-            c.setFillColor(colors.white)
-            c.drawString(qr_x, qr_y - 3.5 * mm, "Vérifier l'authenticité")
-        except Exception:
-            pass
+    # ── Texte de bas de page (centré, blanc) ──────────────────────────
+    footer_text = config.texte_bas_page or ""
+    if footer_text:
+        c.setFont('Helvetica-Oblique', 6.5)
+        c.setFillColor(colors.white)
+        max_footer_w = w - 2 * MARGIN
+        words = footer_text.split()
+        lines_out, current = [], []
+        for word in words:
+            test = ' '.join(current + [word])
+            if c.stringWidth(test, 'Helvetica-Oblique', 6.5) > max_footer_w:
+                lines_out.append(' '.join(current))
+                current = [word]
+            else:
+                current.append(word)
+        if current:
+            lines_out.append(' '.join(current))
 
-    # ── Texte de bas de page ──────────────────────────────────────────
-    c.setFont('Helvetica-Oblique', 7)
-    c.setFillColor(colors.white)
-    footer = config.texte_bas_page or ""
-    # Wrap simple à 100 chars
-    words = footer.split()
-    lines, line = [], []
-    for w_txt in words:
-        if sum(len(x) + 1 for x in line) + len(w_txt) > 100:
-            lines.append(' '.join(line))
-            line = [w_txt]
-        else:
-            line.append(w_txt)
-    if line:
-        lines.append(' '.join(line))
-
-    footer_y = 11 * mm
-    for fl in lines[:2]:
-        ftw = c.stringWidth(fl, 'Helvetica-Oblique', 7)
-        c.drawString((A4[0] - ftw) / 2, footer_y, fl)
-        footer_y -= 4 * mm
+        fy = FOOTER_H / 2 + 3
+        for fl in lines_out[:2]:
+            fw = c.stringWidth(fl, 'Helvetica-Oblique', 6.5)
+            c.drawString((w - fw) / 2, fy, fl)
+            fy -= 4 * mm
 
     c.save()
     return buffer.getvalue()

@@ -181,7 +181,7 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Administration CNIAH",
     "welcome_sign": "Bienvenue sur l'administration du CNIAH",
     "copyright": "CNIAH",
-    "search_model": "auth.User",
+    "search_model": "members.User",
     "topmenu_links": [
         {"name": "Accueil", "url": "admin:index", "permissions": ["auth.view_user"]},
         {"name": "Voir le site", "url": "/", "new_window": True},
