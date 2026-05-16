@@ -12,9 +12,18 @@ class UserAdmin(BaseUserAdmin):
     list_display = ['username', 'email', 'get_full_name', 'membre_actif', 'email_verified', 'is_active']
     list_filter = ['email_verified', 'is_active', 'is_staff']
     search_fields = ['username', 'email', 'first_name', 'last_name']
-    actions = ['activer_compte', 'desactiver_compte', 'envoyer_email_init_password']
+    actions = ['definir_mot_de_passe_temporaire', 'activer_compte', 'desactiver_compte', 'envoyer_email_init_password']
 
-    fieldsets = BaseUserAdmin.fieldsets + (
+    fieldsets = (
+        (None, {
+            'description': (
+                "💡 Pour définir ou changer le mot de passe d'un membre sans email, "
+                "utilisez l'action « Définir un mot de passe temporaire » dans la liste, "
+                "ou cliquez sur le lien « changer le mot de passe » dans le champ Mot de passe ci-dessous."
+            ),
+            'fields': ('username', 'password'),
+        }),
+    ) + BaseUserAdmin.fieldsets[1:] + (
         ('Informations CNIAH', {
             'fields': ('membre_actif', 'email_verified', 'phone')
         }),
@@ -23,6 +32,27 @@ class UserAdmin(BaseUserAdmin):
     def get_full_name(self, obj):
         return obj.get_full_name()
     get_full_name.short_description = "Nom complet"
+
+    @admin.action(description="🔑 Définir un mot de passe temporaire et activer le compte")
+    def definir_mot_de_passe_temporaire(self, request, queryset):
+        import secrets
+        from django.contrib import messages as django_messages
+        lines = []
+        for user in queryset:
+            # Build a readable temporary password
+            suffix = secrets.token_hex(3).upper()  # 6 hex chars, e.g. A3F9C1
+            temp_pwd = f"Cniah@{suffix}"
+            user.set_password(temp_pwd)
+            user.is_active = True
+            user.email_verified = True
+            user.save()
+            lines.append(f"{user.get_full_name()} ({user.username})  →  {temp_pwd}")
+        summary = "  |  ".join(lines)
+        self.message_user(
+            request,
+            f"Mots de passe temporaires définis — communiquez-les aux membres : {summary}",
+            level=django_messages.WARNING,
+        )
 
     @admin.action(description="Activer le compte (email vérifié + compte actif)")
     def activer_compte(self, request, queryset):
