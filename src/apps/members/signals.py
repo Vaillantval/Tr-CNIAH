@@ -1,12 +1,8 @@
 # src/apps/members/signals.py
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
 # Guard against re-entrant saves triggered by this signal itself
 _syncing_users = set()
 
 
-@receiver(post_save, sender='members.User')
 def sync_membre_actif(sender, instance, **kwargs):
     """
     Maintain MembreActif in sync with User.
