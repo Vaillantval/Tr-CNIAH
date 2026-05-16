@@ -192,6 +192,7 @@ JAZZMIN_SETTINGS = {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
+        "members.user": "fas fa-user-tie",
         "core.banner": "fas fa-image",
         "core.serviceblock": "fas fa-th-large",
         "core.proposition": "fas fa-file-pdf",
@@ -219,7 +220,7 @@ JAZZMIN_SETTINGS = {
     "show_ui_builder": False,
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {
-        "auth.user": "collapsible",
+        "members.user": "collapsible",
         "auth.group": "vertical_tabs"
     },
 }

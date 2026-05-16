@@ -9,6 +9,12 @@ from .models import (
     ForumCategorie, ForumSujet, ForumReponse,
 )
 
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+
+
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = [
@@ -17,6 +23,7 @@ class UserAdmin(BaseUserAdmin):
     ]
     list_display_links = ['numero_membre', 'get_full_name']
     list_filter = ['is_active', 'email_verified', 'is_staff', 'titre', 'groups']
+    list_select_related = ['titre']
     search_fields = ['numero_membre', 'username', 'email', 'first_name', 'last_name']
     ordering = ['last_name', 'first_name']
     actions = ['definir_mot_de_passe_temporaire', 'activer_compte', 'desactiver_compte', 'envoyer_email_init_password']
@@ -75,7 +82,10 @@ class UserAdmin(BaseUserAdmin):
     get_full_name.admin_order_field = 'last_name'
 
     def changer_mdp_lien(self, obj):
-        url = reverse('admin:members_user_password_change', args=[obj.pk])
+        try:
+            url = reverse('admin:members_user_password_change', args=[obj.pk])
+        except Exception:
+            url = reverse('admin:members_user_change', args=[obj.pk])
         return format_html('<a href="{}">Changer mdp</a>', url)
     changer_mdp_lien.short_description = "Mot de passe"
 
